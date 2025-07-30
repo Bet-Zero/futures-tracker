@@ -37,8 +37,7 @@ const FuturesModal = () => {
   });
 
   return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-[600px] bg-neutral-900 border border-white/10 rounded-2xl shadow-xl p-6">
+    <div className="w-full max-w-[600px] text-white bg-neutral-900 border border-white/10 rounded-2xl shadow-xl p-6">
         {/* Tabs */}
         <div className="flex justify-center mb-4 flex-wrap gap-2">
           {typeOptions.map((type) => (
@@ -89,7 +88,6 @@ const FuturesModal = () => {
           ))}
         </div>
       </div>
-    </div>
   );
 };
 
