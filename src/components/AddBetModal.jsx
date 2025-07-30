@@ -1,10 +1,7 @@
 import React, { useState } from "react";
 
 const AddBetModal = ({ onClose }) => {
-  const today = new Date().toISOString().split("T")[0];
-
   const [form, setForm] = useState({
-    date: today,
     site: "FD",
     sport: "NBA",
     name: "",
@@ -24,14 +21,14 @@ const AddBetModal = ({ onClose }) => {
     e.preventDefault();
     setMessage("");
     try {
+      const submitDate = new Date().toISOString().split("T")[0];
       const res = await fetch("/api/bets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, date: submitDate }),
       });
       if (!res.ok) throw new Error("Request failed");
       setForm({
-        date: today,
         site: "FD",
         sport: "NBA",
         name: "",
@@ -57,22 +54,13 @@ const AddBetModal = ({ onClose }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Date */}
-          <input
-            type="date"
-            name="date"
-            value={form.date}
-            onChange={handleChange}
-            className="w-full p-2 bg-neutral-800 rounded"
-          />
-
-          {/* Site + Sport */}
+          {/* Site + Sport + Name */}
           <div className="flex gap-2">
             <select
               name="site"
               value={form.site}
               onChange={handleChange}
-              className="w-1/2 p-2 bg-neutral-800 rounded"
+              className="w-20 p-2 bg-neutral-800 rounded"
             >
               {["FD", "DK", "MG", "CAESARS"].map((s) => (
                 <option key={s} value={s}>
@@ -85,7 +73,7 @@ const AddBetModal = ({ onClose }) => {
               name="sport"
               value={form.sport}
               onChange={handleChange}
-              className="w-1/2 p-2 bg-neutral-800 rounded"
+              className="w-20 p-2 bg-neutral-800 rounded"
             >
               {["NBA", "NFL", "MLB", "PGA", "CFL"].map((sport) => (
                 <option key={sport} value={sport}>
@@ -93,37 +81,35 @@ const AddBetModal = ({ onClose }) => {
                 </option>
               ))}
             </select>
-          </div>
 
-          {/* Player/Team + Type */}
-          <div className="flex gap-2">
             <input
               type="text"
               name="name"
               placeholder="Player or Team"
               value={form.name}
               onChange={handleChange}
-              className="w-1/2 p-2 bg-neutral-800 rounded"
+              className="flex-grow p-2 bg-neutral-800 rounded"
               required
             />
+          </div>
+
+          {/* Type + O/U + Line + Odds */}
+          <div className="flex gap-2">
             <input
               type="text"
               name="type"
               placeholder="Type (e.g. 3pt, Assists)"
               value={form.type}
               onChange={handleChange}
-              className="w-1/2 p-2 bg-neutral-800 rounded"
+              className="flex-grow p-2 bg-neutral-800 rounded"
               required
             />
-          </div>
 
-          {/* O/U + Line + Odds */}
-          <div className="flex gap-2">
             <select
               name="ou"
               value={form.ou}
               onChange={handleChange}
-              className="w-1/3 p-2 bg-neutral-800 rounded"
+              className="w-20 p-2 bg-neutral-800 rounded"
             >
               {["Over", "Under"].map((val) => (
                 <option key={val} value={val}>
@@ -138,7 +124,7 @@ const AddBetModal = ({ onClose }) => {
               placeholder="Line (e.g. 5.5 or 10+)"
               value={form.line}
               onChange={handleChange}
-              className="w-1/3 p-2 bg-neutral-800 rounded"
+              className="w-20 p-2 bg-neutral-800 rounded"
             />
 
             <input
@@ -147,7 +133,7 @@ const AddBetModal = ({ onClose }) => {
               placeholder="Odds (e.g. +270)"
               value={form.odds}
               onChange={handleChange}
-              className="w-1/3 p-2 bg-neutral-800 rounded"
+              className="w-20 p-2 bg-neutral-800 rounded"
               required
             />
           </div>
