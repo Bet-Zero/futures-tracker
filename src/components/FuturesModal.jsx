@@ -78,14 +78,20 @@ const FuturesModal = () => {
 
         {/* Bets */}
         <div className="divide-y divide-white/5 rounded overflow-hidden">
-          {filtered.map((bet, i) => (
-            <BetRow
-              key={`${bet.label}-${bet.rightText}-${i}`}
-              label={bet.label}
-              rightText={bet.rightText}
-              starred={bet.starred}
-            />
-          ))}
+          {filtered.map((bet, i) => {
+            const text =
+              bet.type === "Props" && bet.line && bet.odds
+                ? `${bet.ou}${bet.line} ${bet.odds}`
+                : bet.rightText;
+            return (
+              <BetRow
+                key={`${bet.label}-${bet.rightText}-${i}`}
+                label={bet.label}
+                rightText={text}
+                starred={bet.starred}
+              />
+            );
+          })}
         </div>
       </div>
   );
