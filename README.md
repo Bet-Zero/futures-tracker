@@ -1,12 +1,52 @@
-# React + Vite
+# 🧠 Futures Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A clean, centered, screenshot-ready React + Tailwind web app for tracking sports futures bets.
 
-Currently, two official plugins are available:
+Built for sharing plays on Discord, Instagram, etc.  
+Designed with modal-style layout, filterable tabs, and clean exportable views.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+## 💻 Tech Stack
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- [Vite](https://vitejs.dev/)
+- [React](https://reactjs.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- Local JSON data (no backend yet)
+
+---
+
+## 🚀 Usage
+
+```bash
+npm install
+npm run dev
+```
+
+````
+
+Then visit: [http://localhost:5173/futures](http://localhost:5173/futures)
+
+---
+
+## 🗂️ Project Structure
+
+```
+src/
+├── components/
+│   └── FuturesModal.jsx     // Main UI with tabs and dropdown
+├── pages/
+│   └── FuturesPage.jsx      // Mountable route page
+├── data/
+│   └── futuresData.js       // Refactored flat array of bet data
+```
+
+---
+
+## 📌 Next Features
+
+- [ ] Add bet form input UI
+- [ ] LocalStorage or Firebase save
+- [ ] Export to image (for sharing)
+- [ ] Discord bot integration (`/bzero` commands)
+````
