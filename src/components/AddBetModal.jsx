@@ -2,9 +2,11 @@ import React, { useState } from "react";
 
 const AddBetModal = ({ onClose }) => {
   const [form, setForm] = useState({
-    league: "",
+    league: "NBA",
+    subjectType: "Team",
     subject: "",
-    info: "",
+    bet: "",
+    line: "",
     odds: "",
   });
   const [message, setMessage] = useState("");
@@ -23,7 +25,14 @@ const AddBetModal = ({ onClose }) => {
         body: JSON.stringify(form),
       });
       if (!res.ok) throw new Error("Request failed");
-      setForm({ league: "", subject: "", info: "", odds: "" });
+      setForm({
+        league: "NBA",
+        subjectType: "Team",
+        subject: "",
+        bet: "",
+        line: "",
+        odds: "",
+      });
       setMessage("Bet saved!");
     } catch {
       setMessage("Error saving bet.");
@@ -38,14 +47,30 @@ const AddBetModal = ({ onClose }) => {
           <button onClick={onClose} className="text-xl leading-none">✕</button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-3">
-          <input
+          <select
             className="w-full p-2 bg-neutral-800 rounded"
-            placeholder="League"
             name="league"
             value={form.league}
             onChange={handleChange}
-            required
-          />
+          >
+            {['NBA', 'NFL', 'MLB', 'PGA', 'CFL'].map((lg) => (
+              <option key={lg} value={lg}>
+                {lg}
+              </option>
+            ))}
+          </select>
+          <select
+            className="w-full p-2 bg-neutral-800 rounded"
+            name="subjectType"
+            value={form.subjectType}
+            onChange={handleChange}
+          >
+            {['Team', 'Player'].map((st) => (
+              <option key={st} value={st}>
+                {st}
+              </option>
+            ))}
+          </select>
           <input
             className="w-full p-2 bg-neutral-800 rounded"
             placeholder="Subject"
@@ -56,11 +81,18 @@ const AddBetModal = ({ onClose }) => {
           />
           <input
             className="w-full p-2 bg-neutral-800 rounded"
-            placeholder="Bet info"
-            name="info"
-            value={form.info}
+            placeholder="Bet description"
+            name="bet"
+            value={form.bet}
             onChange={handleChange}
             required
+          />
+          <input
+            className="w-full p-2 bg-neutral-800 rounded"
+            placeholder="Line (optional)"
+            name="line"
+            value={form.line}
+            onChange={handleChange}
           />
           <input
             className="w-full p-2 bg-neutral-800 rounded"

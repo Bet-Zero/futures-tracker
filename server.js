@@ -32,12 +32,20 @@ app.get('/api/bets', (req, res) => {
 });
 
 app.post('/api/bets', (req, res) => {
-  const { league, subject, info, odds } = req.body;
-  if (!league || !subject || !info || !odds) {
+  const { league, subjectType, subject, bet, line, odds } = req.body;
+  if (!league || !subjectType || !subject || !bet || !odds) {
     return res.status(400).json({ error: 'Missing fields' });
   }
   const bets = loadBets();
-  const newBet = { league, subject, info, odds, date: new Date().toISOString() };
+  const newBet = {
+    league,
+    subjectType,
+    subject,
+    bet,
+    line: line || null,
+    odds,
+    date: new Date().toISOString(),
+  };
   bets.push(newBet);
   saveBets(bets);
   res.status(201).json(newBet);
