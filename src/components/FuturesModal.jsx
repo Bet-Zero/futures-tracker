@@ -22,13 +22,17 @@ const getGroupsForFutures = (data) => {
 
 const BetRow = ({ label, lineText, oddsText, rightText, tag }) => (
   <div className="flex items-center justify-between px-3 py-2 rounded bg-neutral-800/30 hover:bg-neutral-800/50 transition-colors">
+<<<<<<< HEAD
     <div className="flex-1">
+=======
+    <div className="flex-1 flex items-center">
+>>>>>>> codex/align-bet-tags-and-update-button-colors
       <span className="text-white text-sm font-medium">{label}</span>
     </div>
 
     <div className="flex items-center gap-3">
       {tag && (
-        <span className="bg-neutral-700 px-2 py-0.5 rounded text-xs font-medium text-neutral-200">
+        <span className="ml-auto bg-neutral-700 px-2 py-0.5 rounded text-xs font-medium text-neutral-200">
           {tag}
         </span>
       )}
@@ -88,7 +92,7 @@ const FuturesModal = ({ sport }) => {
               }}
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                 selectedType === type
-                  ? "bg-blue-600 text-white shadow-lg"
+                  ? "bg-neutral-200 text-neutral-900 shadow-lg"
                   : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white"
               }`}
             >

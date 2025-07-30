@@ -16,13 +16,17 @@ const SubsectionTitle = ({ title }) => (
 
 const BetRow = ({ label, lineText, oddsText, rightText, tag }) => (
   <div className="flex items-center justify-between px-3 py-2 rounded bg-neutral-800/30 hover:bg-neutral-800/50 transition-colors">
+<<<<<<< HEAD
     <div className="flex-1">
+=======
+    <div className="flex-1 flex items-center">
+>>>>>>> codex/align-bet-tags-and-update-button-colors
       <span className="text-white text-sm font-medium">{label}</span>
     </div>
 
     <div className="flex items-center gap-3">
       {tag && (
-        <span className="bg-neutral-700 px-2 py-0.5 rounded text-xs font-medium text-neutral-200">
+        <span className="ml-auto bg-neutral-700 px-2 py-0.5 rounded text-xs font-medium text-neutral-200">
           {tag}
         </span>
       )}
