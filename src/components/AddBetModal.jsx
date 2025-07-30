@@ -1,10 +1,21 @@
 import React, { useState } from "react";
 
+import { nflLogoMap, nbaLogoMap, mlbLogoMap } from "../utils/logoMap";
+
+const teamsByLeague = {
+  NBA: Object.keys(nbaLogoMap).filter((t) => t !== "NBA"),
+  NFL: Object.keys(nflLogoMap).filter((t) => t !== "NFL"),
+  MLB: Object.keys(mlbLogoMap).filter((t) => t !== "MLB"),
+  PGA: [],
+  CFL: [],
+};
+
 const AddBetModal = ({ onClose }) => {
   const [form, setForm] = useState({
     site: "FD",
-    sport: "NBA",
-    name: "",
+    league: "NBA",
+    team: "",
+    player: "",
     type: "",
     ou: "Over",
     line: "",
@@ -14,7 +25,12 @@ const AddBetModal = ({ onClose }) => {
   const [message, setMessage] = useState("");
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === "league") {
+      setForm({ ...form, league: value, team: "" });
+    } else {
+      setForm({ ...form, [name]: value });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -30,8 +46,9 @@ const AddBetModal = ({ onClose }) => {
       if (!res.ok) throw new Error("Request failed");
       setForm({
         site: "FD",
-        sport: "NBA",
-        name: "",
+        league: "NBA",
+        team: "",
+        player: "",
         type: "",
         ou: "Over",
         line: "",
@@ -45,22 +62,15 @@ const AddBetModal = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-      <div className="bg-neutral-900 w-full max-w-md p-6 rounded-xl space-y-4 text-white">
+      <div className="bg-neutral-900 w-full max-w-[560px] p-6 rounded-xl space-y-4 text-white">
         <div className="flex justify-between items-center mb-2">
-          <h2 className="text-lg font-semibold">Add Bet</h2>
-          <button onClick={onClose} className="text-xl leading-none">
-            ✕
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Site + Sport + Name */}
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold">Add Bet</h2>
             <select
               name="site"
               value={form.site}
               onChange={handleChange}
-              className="w-20 p-2 bg-neutral-800 rounded"
+              className="p-1 bg-neutral-800 rounded"
             >
               {["FD", "DK", "MG", "CAESARS"].map((s) => (
                 <option key={s} value={s}>
@@ -68,28 +78,48 @@ const AddBetModal = ({ onClose }) => {
                 </option>
               ))}
             </select>
-
             <select
-              name="sport"
-              value={form.sport}
+              name="league"
+              value={form.league}
               onChange={handleChange}
-              className="w-20 p-2 bg-neutral-800 rounded"
+              className="p-1 bg-neutral-800 rounded"
             >
-              {["NBA", "NFL", "MLB", "PGA", "CFL"].map((sport) => (
-                <option key={sport} value={sport}>
-                  {sport}
+              {["NBA", "NFL", "MLB", "PGA", "CFL"].map((lg) => (
+                <option key={lg} value={lg}>
+                  {lg}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button onClick={onClose} className="text-xl leading-none">
+            ✕
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Team + Player */}
+          <div className="flex gap-2">
+            <select
+              name="team"
+              value={form.team}
+              onChange={handleChange}
+              className="flex-1 p-2 bg-neutral-800 rounded"
+            >
+              <option value="">Team</option>
+              {(teamsByLeague[form.league] || []).map((team) => (
+                <option key={team} value={team}>
+                  {team}
                 </option>
               ))}
             </select>
 
             <input
               type="text"
-              name="name"
-              placeholder="Player or Team"
-              value={form.name}
+              name="player"
+              placeholder="Player"
+              value={form.player}
               onChange={handleChange}
-              className="flex-grow p-2 bg-neutral-800 rounded"
-              required
+              className="flex-1 p-2 bg-neutral-800 rounded"
             />
           </div>
 
