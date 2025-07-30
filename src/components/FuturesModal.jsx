@@ -4,16 +4,31 @@ import React, { useState } from "react";
 import { futuresByLeague } from "../data/futuresData";
 
 const typeOptions = ["All", "Futures", "Awards", "Props", "Leaders"];
-const getCategoriesForType = (type, data) => {
-  const filtered = type === "All" ? data : data.filter((b) => b.type === type);
+const getCategoriesForType = (type, data, group) => {
+  let filtered = type === "All" ? data : data.filter((b) => b.type === type);
+  if (type === "Futures" && group && group !== "All") {
+    filtered = filtered.filter((b) => b.group === group);
+  }
   const categories = [...new Set(filtered.map((b) => b.category))];
   return categories;
 };
 
-const BetRow = ({ label, lineText, oddsText, rightText }) => (
+const getGroupsForFutures = (data) => {
+  const groups = data
+    .filter((b) => b.type === "Futures" && b.group)
+    .map((b) => b.group);
+  return [...new Set(groups)];
+};
+
+const BetRow = ({ label, lineText, oddsText, rightText, tag }) => (
   <div className="flex items-center justify-between px-3 py-2 rounded bg-neutral-800/30 hover:bg-neutral-800/50 transition-colors">
-    <div className="flex-1">
+    <div className="flex-1 flex items-center gap-2">
       <span className="text-white text-sm font-medium">{label}</span>
+      {tag && (
+        <span className="bg-neutral-700 px-2 py-0.5 rounded text-xs font-medium text-neutral-200">
+          {tag}
+        </span>
+      )}
     </div>
 
     <div className="flex items-center gap-3">
@@ -40,13 +55,19 @@ const FuturesModal = ({ sport }) => {
 
   const [selectedType, setSelectedType] = useState("All");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedGroup, setSelectedGroup] = useState("All");
 
-  const categories = getCategoriesForType(selectedType, data);
+  const groups = getGroupsForFutures(data);
+  const categories = getCategoriesForType(selectedType, data, selectedGroup);
   const filtered = data.filter((b) => {
     const matchType = selectedType === "All" || b.type === selectedType;
+    const matchGroup =
+      selectedType !== "Futures" ||
+      selectedGroup === "All" ||
+      b.group === selectedGroup;
     const matchCat =
       selectedCategory === "All" || b.category === selectedCategory;
-    return matchType && matchCat;
+    return matchType && matchGroup && matchCat;
   });
 
   return (
@@ -63,6 +84,7 @@ const FuturesModal = ({ sport }) => {
               onClick={() => {
                 setSelectedType(type);
                 setSelectedCategory("All");
+                setSelectedGroup("All");
               }}
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                 selectedType === type
@@ -74,6 +96,27 @@ const FuturesModal = ({ sport }) => {
             </button>
           ))}
         </div>
+
+        {/* Group Dropdown for Futures */}
+        {selectedType === "Futures" && groups.length > 1 && (
+          <div className="mb-4">
+            <select
+              className="w-full bg-neutral-800 text-white rounded-lg border border-neutral-600 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={selectedGroup}
+              onChange={(e) => {
+                setSelectedGroup(e.target.value);
+                setSelectedCategory("All");
+              }}
+            >
+              <option value="All">All Futures</option>
+              {groups.map((g) => (
+                <option key={g} value={g}>
+                  {g}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Category Dropdown */}
         {categories.length > 1 && (
@@ -101,6 +144,7 @@ const FuturesModal = ({ sport }) => {
             const hasProps = bet.type === "Props" && bet.line && bet.odds;
             const lineText = hasProps ? `${bet.ou || "o"}${bet.line}` : null;
             const oddsText = hasProps ? bet.odds : null;
+            const tag = !hasProps ? bet.category : null;
             return (
               <BetRow
                 key={`${bet.label}-${bet.rightText}-${i}`}
@@ -108,6 +152,7 @@ const FuturesModal = ({ sport }) => {
                 lineText={lineText}
                 oddsText={oddsText}
                 rightText={bet.rightText}
+                tag={tag}
               />
             );
           })

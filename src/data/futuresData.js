@@ -8,12 +8,46 @@ const nflData = [
     category: "Super Bowl",
     label: "Chiefs",
     rightText: "+550",
+    group: "To Win",
   },
   {
     type: "Futures",
     category: "Super Bowl",
     label: "Lions",
     rightText: "+1200",
+    group: "To Win",
+  },
+
+  {
+    type: "Futures",
+    category: "NFC",
+    label: "49ers",
+    rightText: "+350",
+    group: "To Win",
+  },
+  {
+    type: "Futures",
+    category: "AFC East",
+    label: "Bills",
+    rightText: "+120",
+    group: "To Win",
+  },
+
+  {
+    type: "Futures",
+    category: "Win Total",
+    label: "Chiefs",
+    line: 11.5,
+    odds: "-110",
+    ou: "o",
+    group: "Win Totals",
+  },
+  {
+    type: "Futures",
+    category: "Make Playoffs",
+    label: "Lions",
+    rightText: "-180",
+    group: "Playoffs",
   },
 
   // AWARDS
@@ -153,7 +187,13 @@ const nflData = [
 
 // Minimal sample data for other leagues
 const nbaData = [
-  { type: "Futures", category: "Championship", label: "Lakers", rightText: "+850" },
+  {
+    type: "Futures",
+    category: "Championship",
+    label: "Lakers",
+    rightText: "+850",
+    group: "To Win",
+  },
   { type: "Awards", category: "MVP", label: "Luka Doncic", rightText: "+450" },
   {
     type: "Props",
@@ -167,7 +207,13 @@ const nbaData = [
 ];
 
 const mlbData = [
-  { type: "Futures", category: "World Series", label: "Braves", rightText: "+350" },
+  {
+    type: "Futures",
+    category: "World Series",
+    label: "Braves",
+    rightText: "+350",
+    group: "To Win",
+  },
   { type: "Awards", category: "MVP", label: "Shohei Ohtani", rightText: "+150" },
   {
     type: "Props",

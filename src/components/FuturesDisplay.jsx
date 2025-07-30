@@ -14,10 +14,15 @@ const SubsectionTitle = ({ title }) => (
   </h3>
 );
 
-const BetRow = ({ label, lineText, oddsText, rightText }) => (
+const BetRow = ({ label, lineText, oddsText, rightText, tag }) => (
   <div className="flex items-center justify-between px-3 py-2 rounded bg-neutral-800/30 hover:bg-neutral-800/50 transition-colors">
-    <div className="flex-1">
+    <div className="flex-1 flex items-center gap-2">
       <span className="text-white text-sm font-medium">{label}</span>
+      {tag && (
+        <span className="bg-neutral-700 px-2 py-0.5 rounded text-xs font-medium text-neutral-200">
+          {tag}
+        </span>
+      )}
     </div>
 
     <div className="flex items-center gap-3">
@@ -55,13 +60,15 @@ const FuturesDisplay = ({ data }) => {
                   : null;
                 const oddsText = hasProps ? item.odds : null;
                 const rightText = hasProps ? null : item.odds || item.bet;
+                const tag = !hasProps ? item.category : null;
                 return (
                   <BetRow
                     key={idx}
-                    label={item.player || item.team}
+                    label={item.label || item.player || item.team}
                     lineText={lineText}
                     oddsText={oddsText}
                     rightText={rightText}
+                    tag={tag}
                   />
                 );
               })}
@@ -78,13 +85,15 @@ const FuturesDisplay = ({ data }) => {
                       : null;
                     const oddsText = hasProps ? item.odds : null;
                     const rightText = hasProps ? null : item.odds || item.bet;
+                    const tag = !hasProps ? item.category : null;
                     return (
                       <BetRow
                         key={idx}
-                        label={item.player || item.team}
+                        label={item.label || item.player || item.team}
                         lineText={lineText}
                         oddsText={oddsText}
                         rightText={rightText}
+                        tag={tag}
                       />
                     );
                   })}
