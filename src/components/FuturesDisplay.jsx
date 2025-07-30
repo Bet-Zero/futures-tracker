@@ -16,11 +16,7 @@ const SubsectionTitle = ({ title }) => (
 
 const BetRow = ({ label, lineText, oddsText, rightText, tag }) => (
   <div className="flex items-center justify-between px-3 py-2 rounded bg-neutral-800/30 hover:bg-neutral-800/50 transition-colors">
-<<<<<<< HEAD
-    <div className="flex-1">
-=======
     <div className="flex-1 flex items-center">
->>>>>>> codex/align-bet-tags-and-update-button-colors
       <span className="text-white text-sm font-medium">{label}</span>
     </div>
 

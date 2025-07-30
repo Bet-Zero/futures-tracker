@@ -20,39 +20,37 @@ const getGroupsForFutures = (data) => {
   return [...new Set(groups)];
 };
 
-const BetRow = ({ label, lineText, oddsText, rightText, tag }) => (
-  <div className="flex items-center justify-between px-3 py-2 rounded bg-neutral-800/30 hover:bg-neutral-800/50 transition-colors">
-<<<<<<< HEAD
-    <div className="flex-1">
-=======
-    <div className="flex-1 flex items-center">
->>>>>>> codex/align-bet-tags-and-update-button-colors
-      <span className="text-white text-sm font-medium">{label}</span>
-    </div>
+const BetRow = ({ label, lineText, oddsText, rightText, tag }) => {
+  const displayTag = lineText || tag;
 
-    <div className="flex items-center gap-3">
-      {tag && (
-        <span className="ml-auto bg-neutral-700 px-2 py-0.5 rounded text-xs font-medium text-neutral-200">
-          {tag}
-        </span>
-      )}
-      {lineText && oddsText ? (
-        <>
-          <span className="bg-neutral-700 px-2 py-0.5 rounded text-xs font-medium text-neutral-200">
-            {lineText}
+  return (
+    <div className="flex items-center justify-between px-3 py-2 rounded bg-neutral-800/30 hover:bg-neutral-800/50 transition-colors">
+      {/* Left: Bet Label */}
+      <div className="flex-1 pr-4 text-white text-sm font-medium truncate">
+        {label}
+      </div>
+
+      {/* Right: Tag and Odds */}
+      <div className="flex items-center justify-end gap-2 min-w-[180px] text-right">
+        {/* Tag container (fixed width), tag span (auto width, aligned right) */}
+        <div className="w-[110px] flex justify-end">
+          {displayTag && (
+            <span className="bg-neutral-700 px-2 py-0.5 rounded text-xs font-medium text-neutral-200 whitespace-nowrap">
+              {displayTag}
+            </span>
+          )}
+        </div>
+
+        {/* Odds */}
+        <div className="w-[60px] text-right">
+          <span className="text-green-400 font-semibold text-sm whitespace-nowrap">
+            {oddsText || rightText}
           </span>
-          <span className="text-green-400 font-semibold text-sm min-w-[50px] text-right">
-            {oddsText}
-          </span>
-        </>
-      ) : (
-        <span className="text-green-400 font-semibold text-sm">
-          {rightText}
-        </span>
-      )}
+        </div>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const FuturesModal = ({ sport }) => {
   const data = futuresByLeague[sport] || [];
