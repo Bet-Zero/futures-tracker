@@ -12,16 +12,27 @@ const getCategoriesForType = (type) => {
 };
 
 const BetRow = ({ label, lineText, oddsText, rightText }) => (
-  <div className="flex justify-between items-center px-4 py-1 rounded hover:bg-white/5">
-    <span className="text-sm text-white">{label}</span>
-    {lineText && oddsText ? (
-      <span className="text-sm">
-        <span className="text-gray-200 mr-2">{lineText}</span>
-        <span className="text-gray-400">{oddsText}</span>
-      </span>
-    ) : (
-      <span className="text-sm text-gray-400">{rightText}</span>
-    )}
+  <div className="flex items-center justify-between px-3 py-2 rounded bg-neutral-800/30 hover:bg-neutral-800/50 transition-colors">
+    <div className="flex-1">
+      <span className="text-white text-sm font-medium">{label}</span>
+    </div>
+
+    <div className="flex items-center gap-3">
+      {lineText && oddsText ? (
+        <>
+          <span className="bg-neutral-700 px-2 py-0.5 rounded text-xs font-medium text-neutral-200">
+            {lineText}
+          </span>
+          <span className="text-green-400 font-semibold text-sm min-w-[50px] text-right">
+            {oddsText}
+          </span>
+        </>
+      ) : (
+        <span className="text-green-400 font-semibold text-sm">
+          {rightText}
+        </span>
+      )}
+    </div>
   </div>
 );
 
@@ -38,9 +49,13 @@ const FuturesModal = () => {
   });
 
   return (
-    <div className="w-full max-w-[600px] text-white bg-neutral-900 border border-white/10 rounded-2xl shadow-xl p-6">
+    <div className="w-full max-w-2xl mx-auto text-white bg-neutral-900 border border-neutral-700 rounded-xl shadow-2xl p-6">
+      {/* Header */}
+      <div className="mb-6">
+        <h2 className="text-xl font-bold text-white mb-4">Futures & Props</h2>
+
         {/* Tabs */}
-        <div className="flex justify-center mb-4 flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 mb-4">
           {typeOptions.map((type) => (
             <button
               key={type}
@@ -48,10 +63,10 @@ const FuturesModal = () => {
                 setSelectedType(type);
                 setSelectedCategory("All");
               }}
-              className={`px-3 py-1 text-sm rounded-full border ${
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                 selectedType === type
-                  ? "bg-white text-black border-white"
-                  : "border-white/20 text-white hover:border-white/40"
+                  ? "bg-blue-600 text-white shadow-lg"
+                  : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white"
               }`}
             >
               {type}
@@ -59,11 +74,11 @@ const FuturesModal = () => {
           ))}
         </div>
 
-        {/* Dropdown for category */}
+        {/* Category Dropdown */}
         {categories.length > 1 && (
           <div className="mb-4">
             <select
-              className="w-full bg-neutral-800 text-white text-sm rounded border border-white/10 px-3 py-2"
+              className="w-full bg-neutral-800 text-white rounded-lg border border-neutral-600 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
             >
@@ -76,10 +91,12 @@ const FuturesModal = () => {
             </select>
           </div>
         )}
+      </div>
 
-        {/* Bets */}
-        <div className="divide-y divide-white/5 rounded overflow-hidden">
-          {filtered.map((bet, i) => {
+      {/* Bets List */}
+      <div className="space-y-1.5 max-h-96 overflow-y-auto">
+        {filtered.length > 0 ? (
+          filtered.map((bet, i) => {
             const hasProps = bet.type === "Props" && bet.line && bet.odds;
             const lineText = hasProps ? `${bet.ou || "o"}${bet.line}` : null;
             const oddsText = hasProps ? bet.odds : null;
@@ -92,9 +109,14 @@ const FuturesModal = () => {
                 rightText={bet.rightText}
               />
             );
-          })}
-        </div>
+          })
+        ) : (
+          <div className="text-center py-8 text-neutral-400">
+            No bets found for the selected filters.
+          </div>
+        )}
       </div>
+    </div>
   );
 };
 
