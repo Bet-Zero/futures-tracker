@@ -45,7 +45,7 @@ src/
 
 ## 📌 Next Features
 
-- [ ] Add bet form input UI
+- [x] Add bet form input UI via + button modal
 - [ ] LocalStorage or Firebase save
 - [ ] Export to image (for sharing)
 - [ ] Discord bot integration (`/bzero` commands)
