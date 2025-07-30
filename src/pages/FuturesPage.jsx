@@ -15,7 +15,7 @@ const FuturesPage = () => {
           <button
             key={lg}
             onClick={() => setSport(lg)}
-            className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${sport === lg ? 'bg-blue-600 text-white' : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white'}`}
+            className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${sport === lg ? 'bg-neutral-200 text-neutral-900' : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white'}`}
           >
             {lg}
           </button>
