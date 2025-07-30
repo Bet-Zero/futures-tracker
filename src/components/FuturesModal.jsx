@@ -22,16 +22,16 @@ const getGroupsForFutures = (data) => {
 
 const BetRow = ({ label, lineText, oddsText, rightText, tag }) => (
   <div className="flex items-center justify-between px-3 py-2 rounded bg-neutral-800/30 hover:bg-neutral-800/50 transition-colors">
-    <div className="flex-1 flex items-center gap-2">
+    <div className="flex-1">
       <span className="text-white text-sm font-medium">{label}</span>
+    </div>
+
+    <div className="flex items-center gap-3">
       {tag && (
         <span className="bg-neutral-700 px-2 py-0.5 rounded text-xs font-medium text-neutral-200">
           {tag}
         </span>
       )}
-    </div>
-
-    <div className="flex items-center gap-3">
       {lineText && oddsText ? (
         <>
           <span className="bg-neutral-700 px-2 py-0.5 rounded text-xs font-medium text-neutral-200">
