@@ -34,28 +34,40 @@ const FuturesDisplay = ({ data }) => {
 
           {Array.isArray(sectionValue) ? (
             <div className="space-y-1">
-              {sectionValue.map((item, idx) => (
-                <BetRow
-                  key={idx}
-                  label={item.player || item.team}
-                  rightText={item.odds || item.bet}
-                  starred={item.starred}
-                />
-              ))}
+              {sectionValue.map((item, idx) => {
+                const text =
+                  item.line && item.odds
+                    ? `${item.ou || "o"}${item.line} ${item.odds}`
+                    : item.odds || item.bet;
+                return (
+                  <BetRow
+                    key={idx}
+                    label={item.player || item.team}
+                    rightText={text}
+                    starred={item.starred}
+                  />
+                );
+              })}
             </div>
           ) : (
             Object.entries(sectionValue).map(([subKey, subList]) => (
               <div key={subKey} className="mb-4">
                 <SubsectionTitle title={subKey} />
                 <div className="space-y-1">
-                  {subList.map((item, idx) => (
-                    <BetRow
-                      key={idx}
-                      label={item.player || item.team}
-                      rightText={item.odds || item.bet}
-                      starred={item.starred}
-                    />
-                  ))}
+                  {subList.map((item, idx) => {
+                    const text =
+                      item.line && item.odds
+                        ? `${item.ou || "o"}${item.line} ${item.odds}`
+                        : item.odds || item.bet;
+                    return (
+                      <BetRow
+                        key={idx}
+                        label={item.player || item.team}
+                        rightText={text}
+                        starred={item.starred}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             ))
