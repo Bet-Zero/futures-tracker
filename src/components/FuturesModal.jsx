@@ -11,16 +11,17 @@ const getCategoriesForType = (type) => {
   return categories;
 };
 
-const BetRow = ({ label, rightText, starred }) => (
+const BetRow = ({ label, lineText, oddsText, rightText }) => (
   <div className="flex justify-between items-center px-4 py-1 rounded hover:bg-white/5">
-    <span
-      className={`text-sm ${
-        starred ? "font-bold italic text-yellow-300" : "text-white"
-      }`}
-    >
-      {starred && "⭐"} {label}
-    </span>
-    <span className="text-sm text-gray-400">{rightText}</span>
+    <span className="text-sm text-white">{label}</span>
+    {lineText && oddsText ? (
+      <span className="text-sm">
+        <span className="text-gray-200 mr-2">{lineText}</span>
+        <span className="text-gray-400">{oddsText}</span>
+      </span>
+    ) : (
+      <span className="text-sm text-gray-400">{rightText}</span>
+    )}
   </div>
 );
 
@@ -79,16 +80,16 @@ const FuturesModal = () => {
         {/* Bets */}
         <div className="divide-y divide-white/5 rounded overflow-hidden">
           {filtered.map((bet, i) => {
-            const text =
-              bet.type === "Props" && bet.line && bet.odds
-                ? `${bet.ou}${bet.line} ${bet.odds}`
-                : bet.rightText;
+            const hasProps = bet.type === "Props" && bet.line && bet.odds;
+            const lineText = hasProps ? `${bet.ou || "o"}${bet.line}` : null;
+            const oddsText = hasProps ? bet.odds : null;
             return (
               <BetRow
                 key={`${bet.label}-${bet.rightText}-${i}`}
                 label={bet.label}
-                rightText={text}
-                starred={bet.starred}
+                lineText={lineText}
+                oddsText={oddsText}
+                rightText={bet.rightText}
               />
             );
           })}
