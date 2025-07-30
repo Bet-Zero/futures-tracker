@@ -1,6 +1,7 @@
 // src/data/futuresData.js
 
-export const futures = [
+// Base NFL data used for demonstration
+const nflData = [
   // FUTURES
   {
     type: "Futures",
@@ -149,3 +150,38 @@ export const futures = [
     starred: true,
   },
 ];
+
+// Minimal sample data for other leagues
+const nbaData = [
+  { type: "Futures", category: "Championship", label: "Lakers", rightText: "+850" },
+  { type: "Awards", category: "MVP", label: "Luka Doncic", rightText: "+450" },
+  {
+    type: "Props",
+    category: "Points",
+    label: "Shai Gilgeous-Alexander",
+    rightText: "o30.5",
+    line: 30.5,
+    odds: "-110",
+    ou: "o",
+  },
+];
+
+const mlbData = [
+  { type: "Futures", category: "World Series", label: "Braves", rightText: "+350" },
+  { type: "Awards", category: "MVP", label: "Shohei Ohtani", rightText: "+150" },
+  {
+    type: "Props",
+    category: "Home Runs",
+    label: "Aaron Judge",
+    rightText: "o45.5",
+    line: 45.5,
+    odds: "-110",
+    ou: "o",
+  },
+];
+
+export const futuresByLeague = {
+  NFL: nflData,
+  NBA: nbaData,
+  MLB: mlbData,
+};

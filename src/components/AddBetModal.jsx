@@ -52,7 +52,6 @@ const AddBetModal = ({ onClose }) => {
     e.preventDefault();
     setMessage("");
     try {
-      const submitDate = new Date().toISOString().split("T")[0];
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 500));
       setForm({

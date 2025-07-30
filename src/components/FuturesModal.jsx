@@ -1,12 +1,11 @@
 // src/components/FuturesModal.jsx
 
 import React, { useState } from "react";
-import { futures } from "../data/futuresData";
+import { futuresByLeague } from "../data/futuresData";
 
 const typeOptions = ["All", "Futures", "Awards", "Props", "Leaders"];
-const getCategoriesForType = (type) => {
-  const filtered =
-    type === "All" ? futures : futures.filter((b) => b.type === type);
+const getCategoriesForType = (type, data) => {
+  const filtered = type === "All" ? data : data.filter((b) => b.type === type);
   const categories = [...new Set(filtered.map((b) => b.category))];
   return categories;
 };
@@ -36,12 +35,14 @@ const BetRow = ({ label, lineText, oddsText, rightText }) => (
   </div>
 );
 
-const FuturesModal = () => {
+const FuturesModal = ({ sport }) => {
+  const data = futuresByLeague[sport] || [];
+
   const [selectedType, setSelectedType] = useState("All");
   const [selectedCategory, setSelectedCategory] = useState("All");
 
-  const categories = getCategoriesForType(selectedType);
-  const filtered = futures.filter((b) => {
+  const categories = getCategoriesForType(selectedType, data);
+  const filtered = data.filter((b) => {
     const matchType = selectedType === "All" || b.type === selectedType;
     const matchCat =
       selectedCategory === "All" || b.category === selectedCategory;
@@ -52,7 +53,7 @@ const FuturesModal = () => {
     <div className="w-full max-w-2xl mx-auto text-white bg-neutral-900 border border-neutral-700 rounded-xl shadow-2xl p-6">
       {/* Header */}
       <div className="mb-6">
-        <h2 className="text-xl font-bold text-white mb-4">Futures & Props</h2>
+        <h2 className="text-xl font-bold text-white mb-4">{sport}</h2>
 
         {/* Tabs */}
         <div className="flex flex-wrap gap-2 mb-4">
