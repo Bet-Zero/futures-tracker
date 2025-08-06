@@ -105,7 +105,7 @@ async function takeScreenshot(url, sport, type, category) {
       type,
       category
     );
-  } catch (err) {
+  } catch {
     console.warn("⚠️ Betting content may not have fully loaded.");
   }
 
