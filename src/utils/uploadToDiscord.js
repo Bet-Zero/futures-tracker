@@ -2,7 +2,7 @@
 
 export const uploadImageToDiscord = async (base64Png, betType = "General") => {
   try {
-    const res = await fetch("http://localhost:3001/upload-image", {
+    const res = await fetch("http://localhost:3002/upload-image", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

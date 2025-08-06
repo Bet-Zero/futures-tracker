@@ -49,7 +49,6 @@ if (process.env.DISCORD_TOKEN) {
 }
 
 // ✅ Slash command: /futures
-// ✅ Slash command: /futures
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
@@ -64,7 +63,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
     try {
       await interaction.deferReply();
-      const filePath = await takeScreenshot(url, sport, type, category);
+      const filePath = await takeScreenshot(url);
       const file = new AttachmentBuilder(filePath);
       await interaction.editReply({ files: [file] });
       fs.unlinkSync(filePath);
@@ -76,40 +75,33 @@ client.on(Events.InteractionCreate, async (interaction) => {
 });
 
 // ✅ Enhanced Puppeteer Screenshot
-async function takeScreenshot(url, sport, type, category) {
+async function takeScreenshot(url) {
   const browser = await puppeteer.launch({
-    headless: "new",
+    headless: true,
     defaultViewport: { width: 1000, height: 1400 },
   });
-
   const page = await browser.newPage();
 
-  // Navigate directly to the desired page
-  await page.goto(url, { waitUntil: "networkidle0" });
+  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
 
-  // Step 3: Wait for text-based confirmation of dynamic content
-  try {
-    await page.waitForFunction(
-      (sport, type, category) => {
-        const text = document.body.innerText.toLowerCase();
-        return (
-          text.includes(sport.toLowerCase()) &&
-          text.includes(type.toLowerCase()) &&
-          (category ? text.includes(category.toLowerCase()) : true)
-        );
-      },
-      { timeout: 10000 },
-      sport,
-      type,
-      category
-    );
-  } catch {
-    console.warn("⚠️ Betting content may not have fully loaded.");
-  }
+  // Wait until the home screen sentinel is gone (means filters applied)
+  await page.waitForSelector("#home-screen", { hidden: true, timeout: 15000 });
 
-  // Step 4: Screenshot
+  // Two animation frames for React paint
+  await page.evaluate(
+    () =>
+      new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
+  );
+
+  // Ensure the modal is present, then screenshot only it
+  await page.waitForSelector("#futures-modal", {
+    visible: true,
+    timeout: 10000,
+  });
+  const handle = await page.$("#futures-modal");
+
   const filePath = `screenshot_${Date.now()}.png`;
-  await page.screenshot({ path: filePath });
+  await handle.screenshot({ path: filePath });
 
   await browser.close();
   return filePath;

@@ -93,7 +93,10 @@ const FuturesModal = ({ sport }) => {
   });
 
   return (
-    <div className="w-full max-w-2xl mx-auto text-white bg-neutral-900 border border-neutral-700 rounded-xl shadow-2xl p-6">
+    <div
+      id="futures-modal"
+      className="w-full max-w-2xl mx-auto text-white bg-neutral-900 border border-neutral-700 rounded-xl shadow-2xl p-6"
+    >
       {/* Header */}
       <div className="mb-6">
         <h2 className="text-xl font-bold text-white mb-4">{sport}</h2>
