@@ -8,7 +8,7 @@ export const uploadImageToDiscord = async (base64Png, betType = "General") => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        imageData: base64Png,
+        image: base64Png,
         betType,
       }),
     });
