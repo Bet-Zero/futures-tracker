@@ -23,7 +23,7 @@ npm install
 npm run dev
 ```
 
-````
+This launches both the Vite dev server and the Discord bot.
 
 Then visit: [http://localhost:5173/futures](http://localhost:5173/futures)
 
@@ -49,4 +49,3 @@ src/
 - [ ] LocalStorage or Firebase save
 - [ ] Export to image (for sharing)
 - [ ] Discord bot integration (`/bzero` commands)
-````
