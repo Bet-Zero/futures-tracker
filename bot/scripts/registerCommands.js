@@ -54,7 +54,7 @@ const commands = [
   },
 ];
 
-const rest = new REST({ version: "10" }).setToken(process.env.BOT_TOKEN);
+const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
 
 await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), {
   body: commands,

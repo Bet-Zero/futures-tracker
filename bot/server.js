@@ -36,7 +36,7 @@ client.once(Events.ClientReady, () => {
   console.log(`🤖 Bot is ready as ${client.user.tag}`);
 });
 
-client.login(process.env.BOT_TOKEN);
+client.login(process.env.DISCORD_TOKEN);
 
 // Command handler
 client.on(Events.InteractionCreate, async (interaction) => {
