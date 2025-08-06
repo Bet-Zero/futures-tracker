@@ -93,26 +93,27 @@ const AddBetModal = ({ onClose }) => {
     const playerKey = form.player.trim().toLowerCase();
     const teamName = form.team || playerTeamMap[playerKey] || "";
 
-    try {
-      const res = await fetch("/api/bets", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, team: teamName }),
-      });
+      try {
+        const res = await fetch("/api/bets", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...form, team: teamName }),
+        });
 
-      if (!res.ok) throw new Error("Request failed");
+        if (!res.ok) throw new Error("Request failed");
 
-      if (playerKey && teamName) {
-        playerTeamMap[playerKey] = teamName;
+        if (playerKey && teamName) {
+          playerTeamMap[playerKey] = teamName;
+        }
+
+        setForm(initialForm);
+        setMessage("Bet saved!");
+        window.dispatchEvent(new Event("betsUpdated"));
+      } catch {
+        setIsError(true);
+        setMessage("Error saving bet.");
       }
-
-      setForm(initialForm);
-      setMessage("Bet saved!");
-    } catch {
-      setIsError(true);
-      setMessage("Error saving bet.");
-    }
-  };
+    };
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
