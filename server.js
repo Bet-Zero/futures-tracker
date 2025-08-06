@@ -16,14 +16,26 @@ app.use(express.json());
 
 function loadBets() {
   try {
-    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+    const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+    return data && typeof data === 'object' && !Array.isArray(data) ? data : {};
   } catch {
-    return [];
+    return {};
   }
 }
 
 function saveBets(bets) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(bets, null, 2));
+}
+
+function addBet(bets, bet) {
+  const { league, type } = bet;
+  if (!league || !type) return;
+  if (!bets[league]) bets[league] = {};
+  if (!bets[league][type]) bets[league][type] = [];
+  bets[league][type].unshift(bet);
+  if (bets[league][type].length > 100) {
+    bets[league][type] = bets[league][type].slice(0, 100);
+  }
 }
 
 app.get('/api/bets', (req, res) => {
@@ -32,21 +44,25 @@ app.get('/api/bets', (req, res) => {
 });
 
 app.post('/api/bets', (req, res) => {
-  const { league, subjectType, subject, bet, line, odds } = req.body;
-  if (!league || !subjectType || !subject || !bet || !odds) {
+  const { site, league, team, player, type, ou, line, odds } = req.body;
+  if (!site || !league || !player || !type || !ou || !odds) {
     return res.status(400).json({ error: 'Missing fields' });
   }
+
   const bets = loadBets();
   const newBet = {
+    site,
     league,
-    subjectType,
-    subject,
-    bet,
-    line: line || null,
+    team: team || '',
+    player,
+    type,
+    ou,
+    line: line || '',
     odds,
     date: new Date().toISOString(),
   };
-  bets.push(newBet);
+
+  addBet(bets, newBet);
   saveBets(bets);
   res.status(201).json(newBet);
 });

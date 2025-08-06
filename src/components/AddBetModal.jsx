@@ -25,35 +25,21 @@ const teamsByLeague = {
   CFL: [],
 };
 
-// 🔐 Utility to save and retrieve team links locally (can move to Firestore later)
-const getPlayerTeamMap = () =>
-  JSON.parse(localStorage.getItem("playerToTeamMap") || "{}");
-
-const setPlayerTeamMap = (newMap) =>
-  localStorage.setItem("playerToTeamMap", JSON.stringify(newMap));
+const initialForm = {
+  site: "FD",
+  league: "NBA",
+  team: "",
+  player: "",
+  type: "",
+  ou: "Over",
+  line: "",
+  odds: "",
+};
 
 const AddBetModal = ({ onClose }) => {
-  const [form, setForm] = useState({
-    site: "FD",
-    league: "NBA",
-    team: "",
-    player: "",
-    type: "",
-    ou: "Over",
-    line: "",
-    odds: "",
-  });
-
+  const [form, setForm] = useState(initialForm);
   const [message, setMessage] = useState("");
-
-  // 🔁 Auto-fill team if player is already mapped
-  useEffect(() => {
-    const map = getPlayerTeamMap();
-    const playerName = form.player.trim();
-    if (playerName && map[playerName] && map[playerName] !== form.team) {
-      setForm((prev) => ({ ...prev, team: map[playerName] }));
-    }
-  }, [form.player]);
+  const [isError, setIsError] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -67,31 +53,20 @@ const AddBetModal = ({ onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
+    setIsError(false);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      // 🔄 Save player-to-team map
-      if (form.player && form.team) {
-        const existingMap = JSON.parse(
-          localStorage.getItem("playerTeamMap") || "{}"
-        );
-        existingMap[form.player] = form.team;
-        localStorage.setItem("playerTeamMap", JSON.stringify(existingMap));
-      }
-
-      setForm({
-        site: "FD",
-        league: "NBA",
-        team: "",
-        player: "",
-        type: "",
-        ou: "Over",
-        line: "",
-        odds: "",
+      const res = await fetch("/api/bets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
       });
+
+      if (!res.ok) throw new Error("Request failed");
+
+      setForm(initialForm);
       setMessage("Bet saved!");
     } catch {
+      setIsError(true);
       setMessage("Error saving bet.");
     }
   };
@@ -262,7 +237,7 @@ const AddBetModal = ({ onClose }) => {
           {message && (
             <p
               className={`text-center text-sm ${
-                message.includes("Error") ? "text-red-400" : "text-green-400"
+                isError ? "text-red-400" : "text-green-400"
               }`}
             >
               {message}
