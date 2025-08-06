@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 // Mock logo maps for demonstration
 const nflLogoMap = {
@@ -25,6 +25,13 @@ const teamsByLeague = {
   CFL: [],
 };
 
+// 🔐 Utility to save and retrieve team links locally (can move to Firestore later)
+const getPlayerTeamMap = () =>
+  JSON.parse(localStorage.getItem("playerToTeamMap") || "{}");
+
+const setPlayerTeamMap = (newMap) =>
+  localStorage.setItem("playerToTeamMap", JSON.stringify(newMap));
+
 const AddBetModal = ({ onClose }) => {
   const [form, setForm] = useState({
     site: "FD",
@@ -38,6 +45,15 @@ const AddBetModal = ({ onClose }) => {
   });
 
   const [message, setMessage] = useState("");
+
+  // 🔁 Auto-fill team if player is already mapped
+  useEffect(() => {
+    const map = getPlayerTeamMap();
+    const playerName = form.player.trim();
+    if (playerName && map[playerName] && map[playerName] !== form.team) {
+      setForm((prev) => ({ ...prev, team: map[playerName] }));
+    }
+  }, [form.player]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -54,6 +70,16 @@ const AddBetModal = ({ onClose }) => {
     try {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 500));
+
+      // 🔄 Save player-to-team map
+      if (form.player && form.team) {
+        const existingMap = JSON.parse(
+          localStorage.getItem("playerTeamMap") || "{}"
+        );
+        existingMap[form.player] = form.team;
+        localStorage.setItem("playerTeamMap", JSON.stringify(existingMap));
+      }
+
       setForm({
         site: "FD",
         league: "NBA",
@@ -85,7 +111,7 @@ const AddBetModal = ({ onClose }) => {
         </div>
 
         <div className="space-y-4">
-          {/* Sportsbook & League - Top row, equal importance */}
+          {/* Sportsbook & League */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-neutral-300 mb-1.5">
@@ -95,7 +121,7 @@ const AddBetModal = ({ onClose }) => {
                 name="site"
                 value={form.site}
                 onChange={handleChange}
-                className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
               >
                 {["FD", "DK", "MG", "CAESARS"].map((s) => (
                   <option key={s} value={s}>
@@ -113,7 +139,7 @@ const AddBetModal = ({ onClose }) => {
                 name="league"
                 value={form.league}
                 onChange={handleChange}
-                className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
               >
                 {["NBA", "NFL", "MLB", "PGA", "CFL"].map((lg) => (
                   <option key={lg} value={lg}>
@@ -124,7 +150,7 @@ const AddBetModal = ({ onClose }) => {
             </div>
           </div>
 
-          {/* Team - Full width when teams are available */}
+          {/* Team */}
           {teamsByLeague[form.league]?.length > 0 && (
             <div>
               <label className="block text-sm font-medium text-neutral-300 mb-1.5">
@@ -134,7 +160,7 @@ const AddBetModal = ({ onClose }) => {
                 name="team"
                 value={form.team}
                 onChange={handleChange}
-                className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
               >
                 <option value="">Select team...</option>
                 {teamsByLeague[form.league].map((team) => (
@@ -146,7 +172,7 @@ const AddBetModal = ({ onClose }) => {
             </div>
           )}
 
-          {/* Player - Full width, most important field */}
+          {/* Player */}
           <div>
             <label className="block text-sm font-medium text-neutral-300 mb-1.5">
               Player
@@ -157,11 +183,11 @@ const AddBetModal = ({ onClose }) => {
               placeholder="Enter player name"
               value={form.player}
               onChange={handleChange}
-              className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg placeholder-neutral-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
             />
           </div>
 
-          {/* Bet Type - Full width for clarity */}
+          {/* Bet Type */}
           <div>
             <label className="block text-sm font-medium text-neutral-300 mb-1.5">
               Bet Type
@@ -172,12 +198,12 @@ const AddBetModal = ({ onClose }) => {
               placeholder="e.g., Points, Rebounds, 3-Pointers"
               value={form.type}
               onChange={handleChange}
-              className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg placeholder-neutral-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
               required
             />
           </div>
 
-          {/* Bet Details - Three columns with appropriate sizing */}
+          {/* Bet Details */}
           <div className="grid grid-cols-4 gap-3">
             <div>
               <label className="block text-sm font-medium text-neutral-300 mb-1.5">
@@ -187,7 +213,7 @@ const AddBetModal = ({ onClose }) => {
                 name="ou"
                 value={form.ou}
                 onChange={handleChange}
-                className="w-full h-12 p-3 bg-neutral-800 border border-neutral-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full h-12 p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
               >
                 <option value="Over">Over</option>
                 <option value="Under">Under</option>
@@ -204,7 +230,7 @@ const AddBetModal = ({ onClose }) => {
                 placeholder="0.5"
                 value={form.line}
                 onChange={handleChange}
-                className="w-full h-12 p-3 bg-neutral-800 border border-neutral-700 rounded-lg placeholder-neutral-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full h-12 p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
               />
             </div>
 
@@ -218,16 +244,17 @@ const AddBetModal = ({ onClose }) => {
                 placeholder="+110"
                 value={form.odds}
                 onChange={handleChange}
-                className="w-full h-12 p-3 bg-neutral-800 border border-neutral-700 rounded-lg placeholder-neutral-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full h-12 p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
                 required
               />
             </div>
           </div>
 
+          {/* Submit */}
           <button
             type="submit"
             onClick={handleSubmit}
-            className="w-full bg-neutral-700 hover:bg-neutral-600 text-white py-3 rounded-lg font-semibold transition-colors focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2 focus:ring-offset-neutral-900"
+            className="w-full bg-neutral-700 hover:bg-neutral-600 text-white py-3 rounded-lg font-semibold transition-colors"
           >
             Add Bet
           </button>

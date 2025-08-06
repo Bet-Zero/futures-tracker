@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { futuresByLeague } from "../data/futuresData";
+import nbaLogoMap from "../utils/logoMap"; // <-- make sure this is imported
 
 const typeOptions = ["All", "Futures", "Awards", "Props", "Leaders"];
 
@@ -22,25 +23,41 @@ const getGroupsForFutures = (data) => {
   return [...new Set(groups)];
 };
 
-const BetRow = ({ label, lineText, oddsText, rightText, tag }) => {
+const BetRow = ({ label, lineText, oddsText, rightText, tag, league }) => {
   const displayTag = lineText || tag;
+
+  // Load player→team map
+  const map = JSON.parse(localStorage.getItem("playerTeamMap") || "{}");
+  const team = map[label];
+  const logoSrc = team && league === "NBA" ? nbaLogoMap[team] : null;
+
   return (
-    <div className="flex items-center justify-between px-3 py-2 rounded bg-neutral-800/30 hover:bg-neutral-800/50 transition-colors">
-      <div className="flex-1 pr-4 text-white text-sm font-medium truncate">
-        {label}
-      </div>
-      <div className="flex items-center justify-end gap-2 min-w-[180px] text-right">
-        <div className="w-[110px] flex justify-end">
-          {displayTag && (
-            <span className="bg-neutral-700 px-2 py-0.5 rounded text-xs font-medium text-neutral-200 whitespace-nowrap">
-              {displayTag}
-            </span>
-          )}
+    <div className="relative overflow-hidden rounded bg-neutral-800/30 hover:bg-neutral-800/50 transition-colors px-3 py-2">
+      {logoSrc && (
+        <img
+          src={logoSrc}
+          alt=""
+          className="absolute inset-0 w-full h-full object-contain opacity-10 pointer-events-none"
+          style={{ filter: "grayscale(100%)" }}
+        />
+      )}
+      <div className="relative z-10 flex items-center justify-between">
+        <div className="flex-1 pr-4 text-white text-sm font-medium truncate">
+          {label}
         </div>
-        <div className="w-[60px] text-right">
-          <span className="text-green-400 font-semibold text-sm whitespace-nowrap">
-            {oddsText || rightText}
-          </span>
+        <div className="flex items-center justify-end gap-2 min-w-[180px] text-right">
+          <div className="w-[110px] flex justify-end">
+            {displayTag && (
+              <span className="bg-neutral-700 px-2 py-0.5 rounded text-xs font-medium text-neutral-200 whitespace-nowrap">
+                {displayTag}
+              </span>
+            )}
+          </div>
+          <div className="w-[60px] text-right">
+            <span className="text-green-400 font-semibold text-sm whitespace-nowrap">
+              {oddsText || rightText}
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -168,6 +185,7 @@ const FuturesModal = ({ sport }) => {
                 oddsText={oddsText}
                 rightText={bet.rightText}
                 tag={tag}
+                league={sport}
               />
             );
           })
