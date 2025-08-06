@@ -1,9 +1,10 @@
 // src/components/FuturesModal.jsx
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { futuresByLeague } from "../data/futuresData";
 
 const typeOptions = ["All", "Futures", "Awards", "Props", "Leaders"];
+
 const getCategoriesForType = (type, data, group) => {
   let filtered = type === "All" ? data : data.filter((b) => b.type === type);
   if (type === "Futures" && group && group !== "All") {
@@ -32,7 +33,6 @@ const BetRow = ({ label, lineText, oddsText, rightText, tag }) => {
 
       {/* Right: Tag and Odds */}
       <div className="flex items-center justify-end gap-2 min-w-[180px] text-right">
-        {/* Tag container (fixed width), tag span (auto width, aligned right) */}
         <div className="w-[110px] flex justify-end">
           {displayTag && (
             <span className="bg-neutral-700 px-2 py-0.5 rounded text-xs font-medium text-neutral-200 whitespace-nowrap">
@@ -40,8 +40,6 @@ const BetRow = ({ label, lineText, oddsText, rightText, tag }) => {
             </span>
           )}
         </div>
-
-        {/* Odds */}
         <div className="w-[60px] text-right">
           <span className="text-green-400 font-semibold text-sm whitespace-nowrap">
             {oddsText || rightText}
@@ -58,6 +56,28 @@ const FuturesModal = ({ sport }) => {
   const [selectedType, setSelectedType] = useState("All");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedGroup, setSelectedGroup] = useState("All");
+
+  // ✅ Apply URL params on first mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const typeParam = urlParams.get("type");
+    const categoryParam = urlParams.get("category");
+    const groupParam = urlParams.get("group");
+
+    if (typeParam) setSelectedType(typeParam);
+    if (categoryParam) setSelectedCategory(categoryParam);
+    if (groupParam) setSelectedGroup(groupParam);
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    params.set("sport", sport);
+    params.set("type", selectedType);
+    params.set("category", selectedCategory);
+    params.set("group", selectedGroup);
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState(null, "", newUrl);
+  }, [sport, selectedType, selectedCategory, selectedGroup]);
 
   const groups = getGroupsForFutures(data);
   const categories = getCategoriesForType(selectedType, data, selectedGroup);
@@ -90,7 +110,7 @@ const FuturesModal = ({ sport }) => {
               }}
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                 selectedType === type
-                  ? "bg-neutral-200 text-neutral-900 shadow-lg"
+                  ? "bg-neutral-500 text-neutral-900 shadow-lg text-white border-neutral-300"
                   : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white"
               }`}
             >
