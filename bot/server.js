@@ -78,30 +78,38 @@ client.on(Events.InteractionCreate, async (interaction) => {
 async function takeScreenshot(url) {
   const browser = await puppeteer.launch({
     headless: true,
-    defaultViewport: { width: 1000, height: 1400 },
+    defaultViewport: {
+      width: 1000,
+      height: 1400,
+      deviceScaleFactor: 3, // 🔥 Retina-style sharpness
+    },
   });
+
   const page = await browser.newPage();
 
   await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
 
-  // Wait until the home screen sentinel is gone (means filters applied)
+  // Wait for React to fully render filtered state
   await page.waitForSelector("#home-screen", { hidden: true, timeout: 15000 });
+  await page.waitForSelector("#futures-modal", {
+    visible: true,
+    timeout: 10000,
+  });
 
-  // Two animation frames for React paint
+  // Let React settle with 2 animation frames
   await page.evaluate(
     () =>
       new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
   );
 
-  // Ensure the modal is present, then screenshot only it
-  await page.waitForSelector("#futures-modal", {
-    visible: true,
-    timeout: 10000,
-  });
   const handle = await page.$("#futures-modal");
 
   const filePath = `screenshot_${Date.now()}.png`;
-  await handle.screenshot({ path: filePath });
+  await handle.screenshot({
+    path: filePath,
+    type: "png",
+    omitBackground: false,
+  });
 
   await browser.close();
   return filePath;

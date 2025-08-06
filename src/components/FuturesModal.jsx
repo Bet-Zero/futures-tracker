@@ -1,6 +1,7 @@
 // src/components/FuturesModal.jsx
 
 import React, { useState, useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { futuresByLeague } from "../data/futuresData";
 
 const typeOptions = ["All", "Futures", "Awards", "Props", "Leaders"];
@@ -23,15 +24,11 @@ const getGroupsForFutures = (data) => {
 
 const BetRow = ({ label, lineText, oddsText, rightText, tag }) => {
   const displayTag = lineText || tag;
-
   return (
     <div className="flex items-center justify-between px-3 py-2 rounded bg-neutral-800/30 hover:bg-neutral-800/50 transition-colors">
-      {/* Left: Bet Label */}
       <div className="flex-1 pr-4 text-white text-sm font-medium truncate">
         {label}
       </div>
-
-      {/* Right: Tag and Odds */}
       <div className="flex items-center justify-end gap-2 min-w-[180px] text-right">
         <div className="w-[110px] flex justify-end">
           {displayTag && (
@@ -52,35 +49,29 @@ const BetRow = ({ label, lineText, oddsText, rightText, tag }) => {
 
 const FuturesModal = ({ sport }) => {
   const data = futuresByLeague[sport] || [];
+  const [params] = useSearchParams();
+  const navigate = useNavigate();
 
-  const [selectedType, setSelectedType] = useState("All");
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [selectedGroup, setSelectedGroup] = useState("All");
-
-  // ✅ Apply URL params on first mount
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const typeParam = urlParams.get("type");
-    const categoryParam = urlParams.get("category");
-    const groupParam = urlParams.get("group");
-
-    if (typeParam) setSelectedType(typeParam);
-    if (categoryParam) setSelectedCategory(categoryParam);
-    if (groupParam) setSelectedGroup(groupParam);
-  }, []);
+  const [selectedType, setSelectedType] = useState(params.get("type") || "All");
+  const [selectedCategory, setSelectedCategory] = useState(
+    params.get("category") || "All"
+  );
+  const [selectedGroup, setSelectedGroup] = useState(
+    params.get("group") || "All"
+  );
 
   useEffect(() => {
-    const params = new URLSearchParams();
-    params.set("sport", sport);
-    params.set("type", selectedType);
-    params.set("category", selectedCategory);
-    params.set("group", selectedGroup);
-    const newUrl = `${window.location.pathname}?${params.toString()}`;
-    window.history.replaceState(null, "", newUrl);
+    const nextParams = new URLSearchParams();
+    nextParams.set("sport", sport);
+    nextParams.set("type", selectedType);
+    nextParams.set("category", selectedCategory);
+    nextParams.set("group", selectedGroup);
+    navigate(`?${nextParams.toString()}`, { replace: true });
   }, [sport, selectedType, selectedCategory, selectedGroup]);
 
   const groups = getGroupsForFutures(data);
   const categories = getCategoriesForType(selectedType, data, selectedGroup);
+
   const filtered = data.filter((b) => {
     const matchType = selectedType === "All" || b.type === selectedType;
     const matchGroup =
@@ -97,11 +88,10 @@ const FuturesModal = ({ sport }) => {
       id="futures-modal"
       className="w-full max-w-2xl mx-auto text-white bg-neutral-900 border border-neutral-700 rounded-xl shadow-2xl p-6"
     >
-      {/* Header */}
       <div className="mb-6">
         <h2 className="text-xl font-bold text-white mb-4">{sport}</h2>
 
-        {/* Tabs */}
+        {/* Type Tabs */}
         <div className="flex flex-wrap gap-2 mb-4">
           {typeOptions.map((type) => (
             <button
