@@ -25,19 +25,21 @@ const teamsByLeague = {
   CFL: [],
 };
 
-const AddBetModal = ({ onClose }) => {
-  const [form, setForm] = useState({
-    site: "FD",
-    league: "NBA",
-    team: "",
-    player: "",
-    type: "",
-    ou: "Over",
-    line: "",
-    odds: "",
-  });
+const initialForm = {
+  site: "FD",
+  league: "NBA",
+  team: "",
+  player: "",
+  type: "",
+  ou: "Over",
+  line: "",
+  odds: "",
+};
 
+const AddBetModal = ({ onClose }) => {
+  const [form, setForm] = useState(initialForm);
   const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -51,21 +53,20 @@ const AddBetModal = ({ onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
+    setIsError(false);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      setForm({
-        site: "FD",
-        league: "NBA",
-        team: "",
-        player: "",
-        type: "",
-        ou: "Over",
-        line: "",
-        odds: "",
+      const res = await fetch("/api/bets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
       });
+
+      if (!res.ok) throw new Error("Request failed");
+
+      setForm(initialForm);
       setMessage("Bet saved!");
     } catch {
+      setIsError(true);
       setMessage("Error saving bet.");
     }
   };
@@ -235,7 +236,7 @@ const AddBetModal = ({ onClose }) => {
           {message && (
             <p
               className={`text-center text-sm ${
-                message.includes("Error") ? "text-red-400" : "text-green-400"
+                isError ? "text-red-400" : "text-green-400"
               }`}
             >
               {message}
