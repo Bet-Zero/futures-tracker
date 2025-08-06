@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import playerTeamMap from "../data/playerTeamMap";
 
 // Mock logo maps for demonstration
 const nflLogoMap = {
@@ -45,23 +46,48 @@ const AddBetModal = ({ onClose }) => {
     const { name, value } = e.target;
     if (name === "league") {
       setForm({ ...form, league: value, team: "" });
-    } else {
-      setForm({ ...form, [name]: value });
+      return;
     }
+
+    if (name === "player") {
+      const key = value.trim().toLowerCase();
+      const mappedTeam = playerTeamMap[key];
+      if (mappedTeam) {
+        const league = Object.keys(teamsByLeague).find((lg) =>
+          teamsByLeague[lg].includes(mappedTeam)
+        );
+        setForm({
+          ...form,
+          player: value,
+          team: mappedTeam,
+          league: league || form.league,
+        });
+        return;
+      }
+    }
+
+    setForm({ ...form, [name]: value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
     setIsError(false);
+    const playerKey = form.player.trim().toLowerCase();
+    const teamName = form.team || playerTeamMap[playerKey] || "";
+
     try {
       const res = await fetch("/api/bets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, team: teamName }),
       });
 
       if (!res.ok) throw new Error("Request failed");
+
+      if (playerKey && teamName) {
+        playerTeamMap[playerKey] = teamName;
+      }
 
       setForm(initialForm);
       setMessage("Bet saved!");
