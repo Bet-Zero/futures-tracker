@@ -1,27 +1,25 @@
-require("dotenv").config();
-const { Client, GatewayIntentBits } = require("discord.js");
+// bot/index.js
+import dotenv from "dotenv";
+import process from "node:process";
+import { Client, GatewayIntentBits, Events } from "discord.js";
+
+dotenv.config();
 
 const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-  ],
+  intents: [GatewayIntentBits.Guilds],
 });
 
-client.once("ready", () => {
+client.once(Events.ClientReady, () => {
   console.log(`🤖 Bot is online as ${client.user.tag}`);
 });
 
-client.on("messageCreate", (message) => {
-  if (message.content === "!ping") {
-    message.reply("🏓 Pong!");
-  }
-});
+client.on(Events.InteractionCreate, async (interaction) => {
+  if (!interaction.isChatInputCommand()) return;
 
-client.on("messageCreate", (message) => {
-  if (message.content === "/bzero") {
-    message.reply("Futures bot reporting for duty 📊");
+  if (interaction.commandName === "ping") {
+    await interaction.reply("🏓 Pong!");
+  } else if (interaction.commandName === "bzero") {
+    await interaction.reply("Futures bot reporting for duty 📊");
   }
 });
 

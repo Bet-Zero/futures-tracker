@@ -2,8 +2,8 @@
 
 import express from "express";
 import bodyParser from "body-parser";
+/* global process, Buffer */
 import fs from "fs";
-import path from "path";
 import {
   Client,
   GatewayIntentBits,
@@ -63,10 +63,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 });
 
-function capitalize(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
 async function takeScreenshot(url) {
   const browser = await puppeteer.launch({
     headless: "new",
@@ -98,6 +94,32 @@ async function takeScreenshot(url) {
   await browser.close();
   return filePath;
 }
+
+app.post("/upload-image", async (req, res) => {
+  try {
+    const { image } = req.body;
+    if (!image) {
+      return res
+        .status(400)
+        .json({ success: false, error: "No image provided" });
+    }
+
+    const base64 = image.replace(/^data:image\/\w+;base64,/, "");
+    const buffer = Buffer.from(base64, "base64");
+    const attachment = new AttachmentBuilder(buffer, {
+      name: `upload_${Date.now()}.png`,
+    });
+
+    const channelId = process.env.CHANNEL_ID;
+    const channel = await client.channels.fetch(channelId);
+    await channel.send({ files: [attachment] });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("❌ Image upload failed:", err);
+    res.status(500).json({ success: false });
+  }
+});
 
 app.listen(port, () => {
   console.log(`🚀 Upload server listening on http://localhost:${port}`);
