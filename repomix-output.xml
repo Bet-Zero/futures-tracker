@@ -1,0 +1,2186 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+bot/
+  scripts/
+    registerCommands.js
+  package.json
+  server.js
+public/
+  vite.svg
+src/
+  assets/
+    react.svg
+  components/
+    AddBetModal.jsx
+    BetRow.jsx
+    FuturesDisplay.jsx
+    FuturesModal.jsx
+  data/
+    futuresData.js
+    playerTeamMap.js
+  pages/
+    AddBetPage.jsx
+    FuturesPage.jsx
+  utils/
+    logoMap.js
+    uploadToDiscord.js
+  App.css
+  App.jsx
+  index.css
+  main.jsx
+.gitignore
+AGENTS.md
+bets.json
+eslint.config.js
+index.html
+package.json
+README.md
+server.js
+vite.config.js
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="public/vite.svg">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--logos" width="31.88" height="32" preserveAspectRatio="xMidYMid meet" viewBox="0 0 256 257"><defs><linearGradient id="IconifyId1813088fe1fbc01fb466" x1="-.828%" x2="57.636%" y1="7.652%" y2="78.411%"><stop offset="0%" stop-color="#41D1FF"></stop><stop offset="100%" stop-color="#BD34FE"></stop></linearGradient><linearGradient id="IconifyId1813088fe1fbc01fb467" x1="43.376%" x2="50.316%" y1="2.242%" y2="89.03%"><stop offset="0%" stop-color="#FFEA83"></stop><stop offset="8.333%" stop-color="#FFDD35"></stop><stop offset="100%" stop-color="#FFA800"></stop></linearGradient></defs><path fill="url(#IconifyId1813088fe1fbc01fb466)" d="M255.153 37.938L134.897 252.976c-2.483 4.44-8.862 4.466-11.382.048L.875 37.958c-2.746-4.814 1.371-10.646 6.827-9.67l120.385 21.517a6.537 6.537 0 0 0 2.322-.004l117.867-21.483c5.438-.991 9.574 4.796 6.877 9.62Z"></path><path fill="url(#IconifyId1813088fe1fbc01fb467)" d="M185.432.063L96.44 17.501a3.268 3.268 0 0 0-2.634 3.014l-5.474 92.456a3.268 3.268 0 0 0 3.997 3.378l24.777-5.718c2.318-.535 4.413 1.507 3.936 3.838l-7.361 36.047c-.495 2.426 1.782 4.5 4.151 3.78l15.304-4.649c2.372-.72 4.652 1.36 4.15 3.788l-11.698 56.621c-.732 3.542 3.979 5.473 5.943 2.437l1.313-2.028l72.516-144.72c1.215-2.423-.88-5.186-3.54-4.672l-25.505 4.922c-2.396.462-4.435-1.77-3.759-4.114l16.646-57.705c.677-2.35-1.37-4.583-3.769-4.113Z"></path></svg>
+</file>
+
+<file path="src/assets/react.svg">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--logos" width="35.93" height="32" preserveAspectRatio="xMidYMid meet" viewBox="0 0 256 228"><path fill="#00D8FF" d="M210.483 73.824a171.49 171.49 0 0 0-8.24-2.597c.465-1.9.893-3.777 1.273-5.621c6.238-30.281 2.16-54.676-11.769-62.708c-13.355-7.7-35.196.329-57.254 19.526a171.23 171.23 0 0 0-6.375 5.848a155.866 155.866 0 0 0-4.241-3.917C100.759 3.829 77.587-4.822 63.673 3.233C50.33 10.957 46.379 33.89 51.995 62.588a170.974 170.974 0 0 0 1.892 8.48c-3.28.932-6.445 1.924-9.474 2.98C17.309 83.498 0 98.307 0 113.668c0 15.865 18.582 31.778 46.812 41.427a145.52 145.52 0 0 0 6.921 2.165a167.467 167.467 0 0 0-2.01 9.138c-5.354 28.2-1.173 50.591 12.134 58.266c13.744 7.926 36.812-.22 59.273-19.855a145.567 145.567 0 0 0 5.342-4.923a168.064 168.064 0 0 0 6.92 6.314c21.758 18.722 43.246 26.282 56.54 18.586c13.731-7.949 18.194-32.003 12.4-61.268a145.016 145.016 0 0 0-1.535-6.842c1.62-.48 3.21-.974 4.76-1.488c29.348-9.723 48.443-25.443 48.443-41.52c0-15.417-17.868-30.326-45.517-39.844Zm-6.365 70.984c-1.4.463-2.836.91-4.3 1.345c-3.24-10.257-7.612-21.163-12.963-32.432c5.106-11 9.31-21.767 12.459-31.957c2.619.758 5.16 1.557 7.61 2.4c23.69 8.156 38.14 20.213 38.14 29.504c0 9.896-15.606 22.743-40.946 31.14Zm-10.514 20.834c2.562 12.94 2.927 24.64 1.23 33.787c-1.524 8.219-4.59 13.698-8.382 15.893c-8.067 4.67-25.32-1.4-43.927-17.412a156.726 156.726 0 0 1-6.437-5.87c7.214-7.889 14.423-17.06 21.459-27.246c12.376-1.098 24.068-2.894 34.671-5.345a134.17 134.17 0 0 1 1.386 6.193ZM87.276 214.515c-7.882 2.783-14.16 2.863-17.955.675c-8.075-4.657-11.432-22.636-6.853-46.752a156.923 156.923 0 0 1 1.869-8.499c10.486 2.32 22.093 3.988 34.498 4.994c7.084 9.967 14.501 19.128 21.976 27.15a134.668 134.668 0 0 1-4.877 4.492c-9.933 8.682-19.886 14.842-28.658 17.94ZM50.35 144.747c-12.483-4.267-22.792-9.812-29.858-15.863c-6.35-5.437-9.555-10.836-9.555-15.216c0-9.322 13.897-21.212 37.076-29.293c2.813-.98 5.757-1.905 8.812-2.773c3.204 10.42 7.406 21.315 12.477 32.332c-5.137 11.18-9.399 22.249-12.634 32.792a134.718 134.718 0 0 1-6.318-1.979Zm12.378-84.26c-4.811-24.587-1.616-43.134 6.425-47.789c8.564-4.958 27.502 2.111 47.463 19.835a144.318 144.318 0 0 1 3.841 3.545c-7.438 7.987-14.787 17.08-21.808 26.988c-12.04 1.116-23.565 2.908-34.161 5.309a160.342 160.342 0 0 1-1.76-7.887Zm110.427 27.268a347.8 347.8 0 0 0-7.785-12.803c8.168 1.033 15.994 2.404 23.343 4.08c-2.206 7.072-4.956 14.465-8.193 22.045a381.151 381.151 0 0 0-7.365-13.322Zm-45.032-43.861c5.044 5.465 10.096 11.566 15.065 18.186a322.04 322.04 0 0 0-30.257-.006c4.974-6.559 10.069-12.652 15.192-18.18ZM82.802 87.83a323.167 323.167 0 0 0-7.227 13.238c-3.184-7.553-5.909-14.98-8.134-22.152c7.304-1.634 15.093-2.97 23.209-3.984a321.524 321.524 0 0 0-7.848 12.897Zm8.081 65.352c-8.385-.936-16.291-2.203-23.593-3.793c2.26-7.3 5.045-14.885 8.298-22.6a321.187 321.187 0 0 0 7.257 13.246c2.594 4.48 5.28 8.868 8.038 13.147Zm37.542 31.03c-5.184-5.592-10.354-11.779-15.403-18.433c4.902.192 9.899.29 14.978.29c5.218 0 10.376-.117 15.453-.343c-4.985 6.774-10.018 12.97-15.028 18.486Zm52.198-57.817c3.422 7.8 6.306 15.345 8.596 22.52c-7.422 1.694-15.436 3.058-23.88 4.071a382.417 382.417 0 0 0 7.859-13.026a347.403 347.403 0 0 0 7.425-13.565Zm-16.898 8.101a358.557 358.557 0 0 1-12.281 19.815a329.4 329.4 0 0 1-23.444.823c-7.967 0-15.716-.248-23.178-.732a310.202 310.202 0 0 1-12.513-19.846h.001a307.41 307.41 0 0 1-10.923-20.627a310.278 310.278 0 0 1 10.89-20.637l-.001.001a307.318 307.318 0 0 1 12.413-19.761c7.613-.576 15.42-.876 23.31-.876H128c7.926 0 15.743.303 23.354.883a329.357 329.357 0 0 1 12.335 19.695a358.489 358.489 0 0 1 11.036 20.54a329.472 329.472 0 0 1-11 20.722Zm22.56-122.124c8.572 4.944 11.906 24.881 6.52 51.026c-.344 1.668-.73 3.367-1.15 5.09c-10.622-2.452-22.155-4.275-34.23-5.408c-7.034-10.017-14.323-19.124-21.64-27.008a160.789 160.789 0 0 1 5.888-5.4c18.9-16.447 36.564-22.941 44.612-18.3ZM128 90.808c12.625 0 22.86 10.235 22.86 22.86s-10.235 22.86-22.86 22.86s-22.86-10.235-22.86-22.86s10.235-22.86 22.86-22.86Z"></path></svg>
+</file>
+
+<file path="src/data/playerTeamMap.js">
+const playerTeamMap = {};
+
+export default playerTeamMap;
+</file>
+
+<file path="src/App.css">
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+</file>
+
+<file path="src/main.jsx">
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.jsx'
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+</file>
+
+<file path="AGENTS.md">
+# 🤖 AGENTS.md
+
+## 🔧 Codex Agent Instructions
+
+This project uses a simple Vite + React + Tailwind setup.
+
+You can assume:
+
+- No routing alias (use relative paths)
+- No backend yet (data is imported from a local file)
+- Goal is **screenshot-ready display of sports bets**, centered like a modal
+
+---
+
+## 🛠️ When Modifying This Project
+
+**DO:**
+
+- Keep the layout compact (max `w-[600px]`)
+- Use Tailwind for all styling
+- Maintain clean separation of components
+- Keep everything inside `src/` folder
+- If new UI needs data, extend `futuresData.js`
+
+**DON’T:**
+
+- Introduce complex state management (no Redux or Context)
+- Add backend integrations unless explicitly asked
+- Modify layout to full-page scroll — this is modal-style
+
+---
+
+## 🤖 Example Tasks Codex Can Handle
+
+- Add a new tab for a bet type
+- Add a form for submitting new bets
+- Convert dropdown to segmented buttons
+- Style the modal with better hover/focus states
+- Add an export-to-image button (e.g. using html-to-image)
+
+---
+
+## 🔄 Data Format (futuresData.js)
+
+```js
+{
+  type: "Props",
+  category: "Pass Yds",
+  label: "Matthew Stafford",
+  rightText: "o3825.5",
+  starred: true
+}
+```
+</file>
+
+<file path="src/components/BetRow.jsx">
+// src/components/BetRow.jsx
+
+import React from "react";
+import { nbaLogoMap, nflLogoMap, mlbLogoMap } from "../utils/nbaLogoMap";
+
+const getTeamLogo = (league, teamOrLabel) => {
+  const map =
+    league === "NBA"
+      ? nbaLogoMap
+      : league === "NFL"
+      ? nflLogoMap
+      : league === "MLB"
+      ? mlbLogoMap
+      : {};
+  return map?.[teamOrLabel] || null;
+};
+
+const BetRow = ({
+  label,
+  lineText,
+  oddsText,
+  rightText,
+  tag,
+  team,
+  league,
+}) => {
+  const logoUrl = getTeamLogo(league, team || label);
+
+  return (
+    <div className="relative overflow-hidden rounded">
+      {/* Faded Background Logo */}
+      {logoUrl && (
+        <img
+          src={logoUrl}
+          alt=""
+          className="absolute inset-0 w-full h-full object-contain opacity-10 pointer-events-none scale-125"
+        />
+      )}
+
+      {/* Content */}
+      <div className="relative z-10 flex items-center justify-between px-3 py-2 bg-neutral-800/30 hover:bg-neutral-800/50 transition-colors">
+        {/* Player Label */}
+        <div className="flex-1 pr-4 text-white text-sm font-medium truncate">
+          {label}
+        </div>
+
+        {/* Right Side */}
+        <div className="flex items-center justify-end gap-2 min-w-[180px] text-right">
+          <div className="w-[110px] flex justify-end">
+            {(lineText || tag) && (
+              <span className="bg-neutral-700 px-2 py-0.5 rounded text-xs font-medium text-neutral-200 whitespace-nowrap">
+                {lineText || tag}
+              </span>
+            )}
+          </div>
+          <div className="w-[60px] text-right">
+            <span className="text-green-400 font-semibold text-sm whitespace-nowrap">
+              {oddsText || rightText}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default BetRow;
+</file>
+
+<file path="src/pages/AddBetPage.jsx">
+import React, { useState } from "react";
+
+const AddBetPage = () => {
+  const [form, setForm] = useState({
+    league: "NBA",
+    subjectType: "Team",
+    subject: "",
+    bet: "",
+    line: "",
+    odds: "",
+  });
+  const [message, setMessage] = useState("");
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setMessage("");
+    try {
+      const res = await fetch("/api/bets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        throw new Error("Request failed");
+      }
+      setForm({
+        league: "NBA",
+        subjectType: "Team",
+        subject: "",
+        bet: "",
+        line: "",
+        odds: "",
+      });
+      setMessage("Bet saved!");
+    } catch {
+      setMessage("Error saving bet.");
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-black text-white p-4">
+      <form onSubmit={handleSubmit} className="space-y-3 w-full max-w-md bg-neutral-900 p-6 rounded">
+        <select
+          className="w-full p-2 bg-neutral-800 rounded"
+          name="league"
+          value={form.league}
+          onChange={handleChange}
+        >
+          {['NBA', 'NFL', 'MLB', 'PGA', 'CFL'].map((lg) => (
+            <option key={lg} value={lg}>
+              {lg}
+            </option>
+          ))}
+        </select>
+        <select
+          className="w-full p-2 bg-neutral-800 rounded"
+          name="subjectType"
+          value={form.subjectType}
+          onChange={handleChange}
+        >
+          {['Team', 'Player'].map((st) => (
+            <option key={st} value={st}>
+              {st}
+            </option>
+          ))}
+        </select>
+        <input
+          className="w-full p-2 bg-neutral-800 rounded"
+          placeholder="Subject"
+          name="subject"
+          value={form.subject}
+          onChange={handleChange}
+          required
+        />
+        <input
+          className="w-full p-2 bg-neutral-800 rounded"
+          placeholder="Bet description"
+          name="bet"
+          value={form.bet}
+          onChange={handleChange}
+          required
+        />
+        <input
+          className="w-full p-2 bg-neutral-800 rounded"
+          placeholder="Line (optional)"
+          name="line"
+          value={form.line}
+          onChange={handleChange}
+        />
+        <input
+          className="w-full p-2 bg-neutral-800 rounded"
+          placeholder="Odds"
+          name="odds"
+          value={form.odds}
+          onChange={handleChange}
+          required
+        />
+        <button type="submit" className="w-full bg-white text-black py-2 rounded">
+          Submit
+        </button>
+        {message && <p className="text-center text-sm">{message}</p>}
+      </form>
+    </div>
+  );
+};
+
+export default AddBetPage;
+</file>
+
+<file path="src/utils/logoMap.js">
+export const nflLogoMap = {
+  "49ers": "/assets/nfl-logos/49ers.png",
+  Bears: "/assets/nfl-logos/bears.png",
+  Bengals: "/assets/nfl-logos/bengals.png",
+  Bills: "/assets/nfl-logos/bills.png",
+  Broncos: "/assets/nfl-logos/broncos.png",
+  Browns: "/assets/nfl-logos/browns.png",
+  Buccaneers: "/assets/nfl-logos/buccaneers.png",
+  Cardinals: "/assets/nfl-logos/cardinals.png",
+  Chargers: "/assets/nfl-logos/chargers.png",
+  Chiefs: "/assets/nfl-logos/chiefs.png",
+  Colts: "/assets/nfl-logos/colts.png",
+  Cowboys: "/assets/nfl-logos/cowboys.png",
+  Dolphins: "/assets/nfl-logos/dolphins.png",
+  Eagles: "/assets/nfl-logos/eagles.png",
+  Falcons: "/assets/nfl-logos/falcons.png",
+  Giants: "/assets/nfl-logos/giants.png",
+  Jaguars: "/assets/nfl-logos/jaguars.png",
+  Jets: "/assets/nfl-logos/jets.png",
+  Lions: "/assets/nfl-logos/lions.png",
+  Packers: "/assets/nfl-logos/packers.png",
+  Panthers: "/assets/nfl-logos/panthers.png",
+  Patriots: "/assets/nfl-logos/patriots.png",
+  Raiders: "/assets/nfl-logos/raiders.png",
+  Rams: "/assets/nfl-logos/rams.png",
+  Ravens: "/assets/nfl-logos/ravens.png",
+  Saints: "/assets/nfl-logos/saints.png",
+  Seahawks: "/assets/nfl-logos/seahawks.png",
+  Steelers: "/assets/nfl-logos/steelers.png",
+  Texans: "/assets/nfl-logos/texans.png",
+  Titans: "/assets/nfl-logos/titans.png",
+  Vikings: "/assets/nfl-logos/vikings.png",
+  Commanders: "/assets/nfl-logos/redskins.png",
+  Redskins: "/assets/nfl-logos/redskins.png",
+  NFL: "/assets/nfl-logos/_NFL_logo.png",
+};
+
+export const nbaLogoMap = {
+  "76ers": "/assets/nba-logos/76ers.png",
+  Bucks: "/assets/nba-logos/bucks.png",
+  Bulls: "/assets/nba-logos/bulls.png",
+  Cavaliers: "/assets/nba-logos/cavaliers.png",
+  Celtics: "/assets/nba-logos/celtics.png",
+  Clippers: "/assets/nba-logos/clippers.png",
+  Grizzlies: "/assets/nba-logos/grizzlies.png",
+  Hawks: "/assets/nba-logos/hawks.png",
+  Heat: "/assets/nba-logos/heat.png",
+  Hornets: "/assets/nba-logos/hornets.png",
+  Jazz: "/assets/nba-logos/jazz.png",
+  Kings: "/assets/nba-logos/kings.png",
+  Knicks: "/assets/nba-logos/knicks.png",
+  Lakers: "/assets/nba-logos/lakers.png",
+  Magic: "/assets/nba-logos/magic.png",
+  Mavericks: "/assets/nba-logos/mavericks.png",
+  Nets: "/assets/nba-logos/nets.png",
+  Nuggets: "/assets/nba-logos/nuggets.png",
+  Pacers: "/assets/nba-logos/pacers.png",
+  Pelicans: "/assets/nba-logos/pelicans.png",
+  Pistons: "/assets/nba-logos/pistons.png",
+  Raptors: "/assets/nba-logos/raptors.png",
+  Rockets: "/assets/nba-logos/rockets.png",
+  Spurs: "/assets/nba-logos/spurs.png",
+  Suns: "/assets/nba-logos/suns.png",
+  Thunder: "/assets/nba-logos/thunder.png",
+  Timberwolves: "/assets/nba-logos/timberwolves.png",
+  "Trail Blazers": "/assets/nba-logos/trailBlazers.png",
+  Warriors: "/assets/nba-logos/warriors.png",
+  Wizards: "/assets/nba-logos/wizards.png",
+  NBA: "/assets/nba-logos/_NBA_logo.png",
+};
+
+export const mlbLogoMap = {
+  Angels: "/assets/mlb-logos/angels.png",
+  Astros: "/assets/mlb-logos/astros.png",
+  Athletics: "/assets/mlb-logos/athletics.png",
+  "Blue Jays": "/assets/mlb-logos/blueJays.png",
+  Braves: "/assets/mlb-logos/braves.png",
+  Brewers: "/assets/mlb-logos/brewers.png",
+  Cardinals: "/assets/mlb-logos/cardinals.png",
+  Cubs: "/assets/mlb-logos/cubs.png",
+  Diamondbacks: "/assets/mlb-logos/diamondbacks.png",
+  Dodgers: "/assets/mlb-logos/dodgers.png",
+  Giants: "/assets/mlb-logos/giants.png",
+  Guardians: "/assets/mlb-logos/indians.png",
+  Mariners: "/assets/mlb-logos/mariners.png",
+  Marlins: "/assets/mlb-logos/marlins.png",
+  Mets: "/assets/mlb-logos/mets.png",
+  Nationals: "/assets/mlb-logos/nationals.png",
+  Orioles: "/assets/mlb-logos/orioles.png",
+  Padres: "/assets/mlb-logos/padres.png",
+  Phillies: "/assets/mlb-logos/phillies.png",
+  Pirates: "/assets/mlb-logos/pirates.png",
+  Rangers: "/assets/mlb-logos/rangers.png",
+  Rays: "/assets/mlb-logos/rays.png",
+  "Red Sox": "/assets/mlb-logos/redSox.png",
+  Reds: "/assets/mlb-logos/reds.png",
+  Rockies: "/assets/mlb-logos/rockies.png",
+  Royals: "/assets/mlb-logos/royals.png",
+  Tigers: "/assets/mlb-logos/tigers.png",
+  Twins: "/assets/mlb-logos/twins.png",
+  "White Sox": "/assets/mlb-logos/whiteSox.png",
+  Yankees: "/assets/mlb-logos/yankees.png",
+  MLB: "/assets/mlb-logos/_MLB_logo.png",
+};
+
+export default { nflLogoMap, nbaLogoMap, mlbLogoMap };
+</file>
+
+<file path="src/App.jsx">
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import FuturesPage from "./pages/FuturesPage";
+import AddBetPage from "./pages/AddBetPage";
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/futures" element={<FuturesPage />} />
+        <Route path="/add-bet" element={<AddBetPage />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
+</file>
+
+<file path="src/index.css">
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: dark;
+  color: #ffffff;
+  background-color: #111111;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: #111111;
+  color: #ffffff;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
+</file>
+
+<file path=".gitignore">
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+bot/node_modules/
+bot/.env
+
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+</file>
+
+<file path="bets.json">
+{}
+</file>
+
+<file path="eslint.config.js">
+import js from '@eslint/js'
+import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+import { defineConfig, globalIgnores } from 'eslint/config'
+
+export default defineConfig([
+  globalIgnores(['dist', 'bot/index.js', 'bot/scripts/**']),
+  {
+    files: ['**/*.{js,jsx}'],
+    extends: [
+      js.configs.recommended,
+      reactHooks.configs['recommended-latest'],
+      reactRefresh.configs.vite,
+    ],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        ecmaFeatures: { jsx: true },
+        sourceType: 'module',
+      },
+    },
+    rules: {
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+    },
+  },
+])
+</file>
+
+<file path="index.html">
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Futures Tracker</title>
+    <!-- Include Tailwind via CDN for quick styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+</file>
+
+<file path="vite.config.js">
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    proxy: {
+      '/api': 'http://localhost:3001',
+    },
+  },
+})
+</file>
+
+<file path="bot/package.json">
+{
+  "name": "futures-bot",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Discord bot + screenshot server for Futures Tracker",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "register": "node scripts/registerCommands.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "discord.js": "^14.21.0",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "puppeteer": "^24.15.0"
+  }
+}
+</file>
+
+<file path="src/utils/uploadToDiscord.js">
+// src/utils/uploadToDiscord.js
+
+export const uploadImageToDiscord = async (base64Png, betType = "General") => {
+  try {
+    const res = await fetch("http://localhost:3002/upload-image", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        image: base64Png,
+        betType,
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Upload failed");
+
+    console.log("✅ Upload successful:", data.message);
+    return true;
+  } catch (err) {
+    console.error("❌ Upload failed:", err);
+    return false;
+  }
+};
+</file>
+
+<file path="server.js">
+/* global process */
+import express from 'express';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+
+const DATA_FILE = path.join(__dirname, 'bets.json');
+
+app.use(express.json());
+
+function loadBets() {
+  try {
+    const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+    return data && typeof data === 'object' && !Array.isArray(data) ? data : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveBets(bets) {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(bets, null, 2));
+}
+
+function addBet(bets, bet) {
+  const { league, type } = bet;
+  if (!league || !type) return;
+  if (!bets[league]) bets[league] = {};
+  if (!bets[league][type]) bets[league][type] = [];
+  bets[league][type].unshift(bet);
+  if (bets[league][type].length > 100) {
+    bets[league][type] = bets[league][type].slice(0, 100);
+  }
+}
+
+app.get('/api/bets', (req, res) => {
+  const bets = loadBets();
+  res.json(bets);
+});
+
+app.post('/api/bets', (req, res) => {
+  const { site, league, team, player, type, ou, line, odds } = req.body;
+  if (!site || !league || !player || !type || !ou || !odds) {
+    return res.status(400).json({ error: 'Missing fields' });
+  }
+
+  const bets = loadBets();
+  const newBet = {
+    site,
+    league,
+    team: team || '',
+    player,
+    type,
+    ou,
+    line: line || '',
+    odds,
+    date: new Date().toISOString(),
+  };
+
+  addBet(bets, newBet);
+  saveBets(bets);
+  res.status(201).json(newBet);
+});
+
+app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
+});
+</file>
+
+<file path="src/data/futuresData.js">
+// src/data/futuresData.js
+
+// Base NFL data used for demonstration
+const nflData = [
+  // FUTURES
+  {
+    type: "Futures",
+    category: "Super Bowl",
+    label: "Chiefs",
+    rightText: "+550",
+    group: "To Win",
+  },
+  {
+    type: "Futures",
+    category: "Super Bowl",
+    label: "Lions",
+    rightText: "+1200",
+    group: "To Win",
+  },
+
+  {
+    type: "Futures",
+    category: "NFC",
+    label: "49ers",
+    rightText: "+350",
+    group: "To Win",
+  },
+  {
+    type: "Futures",
+    category: "AFC East",
+    label: "Bills",
+    rightText: "+120",
+    group: "To Win",
+  },
+
+  {
+    type: "Futures",
+    category: "Win Total",
+    label: "Chiefs",
+    line: 11.5,
+    odds: "-110",
+    ou: "o",
+    group: "Win Totals",
+  },
+  {
+    type: "Futures",
+    category: "Make Playoffs",
+    label: "Lions",
+    rightText: "-180",
+    group: "Playoffs",
+  },
+
+  // AWARDS
+  {
+    type: "Awards",
+    category: "MVP",
+    label: "Patrick Mahomes",
+    rightText: "+450",
+  },
+  {
+    type: "Awards",
+    category: "MVP",
+    label: "Matthew Stafford",
+    rightText: "+3000",
+  },
+  {
+    type: "Awards",
+    category: "DPOY",
+    label: "Micah Parsons",
+    rightText: "+550",
+  },
+  {
+    type: "Awards",
+    category: "DPOY",
+    label: "Aidan Hutchinson",
+    rightText: "+1100",
+  },
+
+  // PLAYER PROPS
+  {
+    type: "Props",
+    category: "Pass Yds",
+    label: "Matthew Stafford",
+    rightText: "o3825.5",
+    line: 3825.5,
+    odds: "-110",
+    ou: "o",
+    starred: true,
+  },
+  {
+    type: "Props",
+    category: "Pass Yds",
+    label: "Bryce Young",
+    rightText: "o3200.5",
+    line: 3200.5,
+    odds: "-110",
+    ou: "o",
+  },
+  {
+    type: "Props",
+    category: "Rush Yds",
+    label: "Aaron Jones",
+    rightText: "o725.5",
+    line: 725.5,
+    odds: "-110",
+    ou: "o",
+  },
+  {
+    type: "Props",
+    category: "Rush Yds",
+    label: "Jonathan Taylor",
+    rightText: "o1050.5",
+    line: 1050.5,
+    odds: "-110",
+    ou: "o",
+    starred: true,
+  },
+
+  // YARDAGE CLUBS
+  {
+    type: "Props",
+    category: "4000+ Pass Yds",
+    label: "Jared Goff",
+    rightText: "-130",
+  },
+  {
+    type: "Props",
+    category: "4000+ Pass Yds",
+    label: "Will Levis",
+    rightText: "+290",
+    starred: true,
+  },
+  {
+    type: "Props",
+    category: "1000+ Rush Yds",
+    label: "Saquon Barkley",
+    rightText: "-110",
+  },
+  {
+    type: "Props",
+    category: "1000+ Rush Yds",
+    label: "Josh Jacobs",
+    rightText: "+110",
+  },
+
+  // LEADERS
+  {
+    type: "Leaders",
+    category: "Pass Yds",
+    label: "Matthew Stafford",
+    rightText: "+2100",
+    starred: true,
+  },
+  {
+    type: "Leaders",
+    category: "Pass Yds",
+    label: "Sam Darnold",
+    rightText: "+3500",
+    starred: true,
+  },
+  {
+    type: "Leaders",
+    category: "Rush TD",
+    label: "David Montgomery",
+    rightText: "+1300",
+  },
+  {
+    type: "Leaders",
+    category: "Rush TD",
+    label: "Saquon Barkley",
+    rightText: "+2200",
+  },
+  {
+    type: "Leaders",
+    category: "Rec Yds",
+    label: "Garrett Wilson",
+    rightText: "+1600",
+  },
+  {
+    type: "Leaders",
+    category: "Rec Yds",
+    label: "Cooper Kupp",
+    rightText: "+3900",
+    starred: true,
+  },
+];
+
+// Minimal sample data for other leagues
+const nbaData = [
+  {
+    type: "Futures",
+    category: "Championship",
+    label: "Lakers",
+    rightText: "+850",
+    group: "To Win",
+  },
+  { type: "Awards", category: "MVP", label: "Luka Doncic", rightText: "+450" },
+  {
+    type: "Props",
+    category: "Points",
+    label: "Shai Gilgeous-Alexander",
+    rightText: "o30.5",
+    line: 30.5,
+    odds: "-110",
+    ou: "o",
+  },
+];
+
+const mlbData = [
+  {
+    type: "Futures",
+    category: "World Series",
+    label: "Braves",
+    rightText: "+350",
+    group: "To Win",
+  },
+  { type: "Awards", category: "MVP", label: "Shohei Ohtani", rightText: "+150" },
+  {
+    type: "Props",
+    category: "Home Runs",
+    label: "Aaron Judge",
+    rightText: "o45.5",
+    line: 45.5,
+    odds: "-110",
+    ou: "o",
+  },
+];
+
+export const futuresByLeague = {
+  NFL: nflData,
+  NBA: nbaData,
+  MLB: mlbData,
+};
+</file>
+
+<file path="bot/scripts/registerCommands.js">
+/* global process */
+// scripts/registerCommands.js
+
+import { REST, Routes } from "discord.js";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Load environment variables
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, "../.env"), override: true });
+
+const { DISCORD_TOKEN, CLIENT_ID } = process.env;
+if (!DISCORD_TOKEN || !CLIENT_ID) {
+  throw new Error("❌ Missing DISCORD_TOKEN or CLIENT_ID in .env");
+}
+
+// Slash command structure
+const commands = [
+  {
+    name: "futures",
+    description: "Get a screenshot of futures odds",
+    options: [
+      {
+        name: "sport",
+        type: 3, // STRING
+        description: "Choose a sport",
+        required: true,
+        choices: [
+          { name: "NFL", value: "NFL" },
+          { name: "NBA", value: "NBA" },
+          { name: "MLB", value: "MLB" },
+        ],
+      },
+      {
+        name: "type",
+        type: 3, // STRING
+        description: "Choose the bet type",
+        required: true,
+        choices: [
+          { name: "All Types", value: "All" },
+          { name: "Futures", value: "Futures" },
+          { name: "Awards", value: "Awards" },
+          { name: "Props", value: "Props" },
+          { name: "Leaders", value: "Leaders" },
+        ],
+      },
+      {
+        name: "category",
+        type: 3, // STRING
+        description: "Optional: Filter by category",
+        required: false,
+        choices: [
+          { name: "MVP", value: "MVP" },
+          { name: "DPOY", value: "DPOY" },
+          { name: "ROY", value: "ROY" },
+          { name: "COY", value: "COY" },
+          { name: "Passing Yards Leader", value: "Passing Yards Leader" },
+          { name: "Most Wins", value: "Most Wins" },
+          { name: "Rushing TD Leader", value: "Rushing TD Leader" },
+          { name: "Comeback Player", value: "Comeback Player" },
+        ],
+      },
+    ],
+  },
+];
+
+// Register command with Discord
+const rest = new REST({ version: "10" }).setToken(DISCORD_TOKEN);
+
+try {
+  await rest.put(Routes.applicationCommands(CLIENT_ID), { body: commands });
+  console.log("✅ Slash command registered successfully");
+} catch (err) {
+  console.error("❌ Failed to register slash command:", err);
+}
+</file>
+
+<file path="package.json">
+{
+  "name": "futures-tracker",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm run start:frontend\" \"npm run start:bot\"",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "start:frontend": "vite",
+    "start:bot": "node bot/server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "html-to-image": "^1.11.13",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^7.7.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.30.1",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.6.0",
+    "concurrently": "^9.2.0",
+    "eslint": "^9.30.1",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.3.0",
+    "vite": "^7.0.4"
+  }
+}
+</file>
+
+<file path="README.md">
+Here’s an updated and comprehensive `README.md` based on your full codebase structure, backend functionality, and Discord bot integration:
+
+---
+
+````markdown
+# 🧠 Futures Tracker
+
+A clean, compact, screenshot-ready web app for tracking and sharing sports futures bets.
+
+Built with **React**, **Tailwind**, and **Discord bot integration**, it supports:
+
+- Viewing and filtering NFL, NBA, and MLB bets
+- Submitting new bets via a styled modal or standalone form
+- Exporting and sharing bet screenshots to Discord via Puppeteer
+- Organized for easy extension and automation
+
+---
+
+## 🚀 Quick Start
+
+Install dependencies and start the app and bot together:
+
+```bash
+npm install
+npm run dev
+```
+````
+
+> 🔧 This runs both the frontend and the bot upload server concurrently.
+
+Frontend: [http://localhost:5173/futures](http://localhost:5173/futures)
+Upload server: [http://localhost:3002](http://localhost:3002)
+
+---
+
+## 🛠️ Features
+
+✅ Modal-based bet tracker
+✅ Responsive layout for screenshots
+✅ Screenshot export via Puppeteer
+✅ Discord slash command integration
+✅ Auto-upload to Discord channel
+✅ Supports NFL, NBA, MLB, PGA, CFL
+✅ Local JSON bet saving (server + UI)
+🔜 Firebase or LocalStorage integration
+🔜 User accounts or auth
+🔜 Bet editing and deletion
+
+---
+
+## 📦 Tech Stack
+
+- [Vite](https://vitejs.dev/) + [React](https://reactjs.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Puppeteer](https://pptr.dev/) for screenshot capture
+- [Discord.js v14](https://discord.js.org/)
+- [Express](https://expressjs.com/) for simple API and image upload
+- Local JSON as a lightweight backend substitute
+
+---
+
+## 📂 Project Structure
+
+```
+├── public/                     # Static assets
+├── src/
+│   ├── assets/                # Logo and image assets
+│   ├── components/            # UI components (modals, display)
+│   ├── data/                  # Local bet data by league
+│   ├── pages/                 # Page-level components
+│   ├── utils/                 # Upload & logo mapping utilities
+│   ├── App.jsx                # Router setup
+│   └── main.jsx               # App entry point
+├── bot/                       # Discord bot + Puppeteer screenshot server
+│   ├── scripts/               # Slash command registration
+│   ├── server.js              # Upload API + bot listener
+│   └── package.json           # Bot dependencies
+├── bets.json                  # Local saved bets
+├── server.js                  # Express API for bet POST/GET
+├── .env                       # Discord bot token + channel ID
+├── vite.config.js             # Vite server + proxy
+├── AGENTS.md                  # Codex instructions
+└── README.md                  # This file
+```
+
+---
+
+## 🤖 Discord Bot Setup
+
+Add a `.env` file inside the `bot/` folder:
+
+```
+DISCORD_TOKEN=your_bot_token_here
+CLIENT_ID=your_discord_app_client_id
+CHANNEL_ID=optional_channel_id_to_upload_images
+```
+
+Register slash commands:
+
+```bash
+npm run register
+```
+
+Use `/futures` to trigger screenshot upload via Puppeteer.
+
+---
+
+## 🧪 Development Tips
+
+- The modal layout is intentionally capped in width for clean screenshots
+- Screenshots only begin after filters are applied (`#home-screen` disappears)
+- Add new bet types or groups in `src/data/futuresData.js`
+- To export images directly from UI: click **"Share"** in the top bar
+
+---
+
+## 🔮 Example Bet Format
+
+```js
+{
+  type: "Props",
+  category: "Pass Yds",
+  label: "Matthew Stafford",
+  rightText: "o3825.5",
+  line: 3825.5,
+  odds: "-110",
+  ou: "o",
+  starred: true
+}
+```
+
+---
+
+## ✨ Roadmap
+
+- [x] Modal UI with form inputs
+- [x] Share to Discord via screenshot
+- [x] AddBetPage route with POST handling
+- [ ] Firebase or localStorage persistence
+- [ ] Visual themes by sportsbook or league
+- [ ] Filter chips for team/player/position
+
+---
+
+## 🧠 Built For
+
+- **Sports bettors** who want to organize and share their plays
+- **Discord sharers** who want instant screenshots from `/slash` commands
+- **Creators** who want clean betting content for Instagram/X
+
+---
+
+## 🧼 Credits
+
+Built using Vite + React + Tailwind + Discord.js
+Puppeteer powered screenshots
+
+---
+
+```
+
+```
+</file>
+
+<file path="src/components/FuturesDisplay.jsx">
+// src/components/FuturesDisplay.jsx
+
+import React from "react";
+
+const SectionTitle = ({ title }) => (
+  <h2 className="text-xl font-bold text-white mb-6 pb-3 border-b border-neutral-700">
+    {title}
+  </h2>
+);
+
+const SubsectionTitle = ({ title }) => (
+  <h3 className="text-base font-semibold text-neutral-300 mb-4 mt-6">
+    {title}
+  </h3>
+);
+
+const BetRow = ({ label, lineText, oddsText, rightText, tag }) => (
+  <div className="flex items-center justify-between px-3 py-2 rounded bg-neutral-800/30 hover:bg-neutral-800/50 transition-colors">
+    <div className="flex-1 flex items-center">
+      <span className="text-white text-sm font-medium">{label}</span>
+    </div>
+
+    <div className="flex items-center gap-3">
+      {tag && (
+        <span className="ml-auto bg-neutral-700 px-2 py-0.5 rounded text-xs font-medium text-neutral-200">
+          {tag}
+        </span>
+      )}
+      {lineText && oddsText ? (
+        <>
+          <span className="bg-neutral-700 px-2 py-0.5 rounded text-xs font-medium text-neutral-200">
+            {lineText}
+          </span>
+          <span className="text-green-400 font-semibold text-sm min-w-[50px] text-right">
+            {oddsText}
+          </span>
+        </>
+      ) : (
+        <span className="text-green-400 font-semibold text-sm">
+          {rightText}
+        </span>
+      )}
+    </div>
+  </div>
+);
+
+const FuturesDisplay = ({ data }) => {
+  return (
+    <div className="max-w-4xl mx-auto px-6 py-8">
+      {Object.entries(data).map(([sectionKey, sectionValue]) => (
+        <div key={sectionKey} className="mb-12">
+          <SectionTitle title={sectionKey} />
+
+          {Array.isArray(sectionValue) ? (
+            <div className="space-y-1.5">
+              {sectionValue.map((item, idx) => {
+                const hasProps = item.line && item.odds;
+                const lineText = hasProps
+                  ? `${item.ou || "o"}${item.line}`
+                  : null;
+                const oddsText = hasProps ? item.odds : null;
+                const rightText = hasProps ? null : item.odds || item.bet;
+                const tag = !hasProps ? item.category : null;
+                return (
+                  <BetRow
+                    key={idx}
+                    label={item.label || item.player || item.team}
+                    lineText={lineText}
+                    oddsText={oddsText}
+                    rightText={rightText}
+                    tag={tag}
+                  />
+                );
+              })}
+            </div>
+          ) : (
+            Object.entries(sectionValue).map(([subKey, subList]) => (
+              <div key={subKey} className="mb-8">
+                <SubsectionTitle title={subKey} />
+                <div className="space-y-1.5">
+                  {subList.map((item, idx) => {
+                    const hasProps = item.line && item.odds;
+                    const lineText = hasProps
+                      ? `${item.ou || "o"}${item.line}`
+                      : null;
+                    const oddsText = hasProps ? item.odds : null;
+                    const rightText = hasProps ? null : item.odds || item.bet;
+                    const tag = !hasProps ? item.category : null;
+                    return (
+                      <BetRow
+                        key={idx}
+                        label={item.label || item.player || item.team}
+                        lineText={lineText}
+                        oddsText={oddsText}
+                        rightText={rightText}
+                        tag={tag}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default FuturesDisplay;
+</file>
+
+<file path="src/pages/FuturesPage.jsx">
+// src/pages/FuturesPage.jsx
+
+import React, { useState } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import FuturesModal from "../components/FuturesModal";
+import AddBetModal from "../components/AddBetModal";
+
+const FuturesPage = () => {
+  const [params] = useSearchParams();
+  const navigate = useNavigate();
+  const [showAdd, setShowAdd] = useState(false);
+
+  const sportParam = params.get("sport");
+  const sport = sportParam || "NFL";
+
+  const handleSportChange = (newSport) => {
+    const newParams = new URLSearchParams(params);
+    newParams.set("sport", newSport);
+    newParams.set("type", "All");
+    newParams.set("category", "All");
+    newParams.set("group", "All");
+    navigate(`?${newParams.toString()}`);
+  };
+
+  const handleShare = async () => {
+    const node = document.getElementById("futures-modal");
+    const { toPng } = await import("html-to-image");
+    const dataUrl = await toPng(node, { pixelRatio: 2 });
+    const { uploadImageToDiscord } = await import(
+      "../utils/uploadToDiscord.js"
+    );
+    await uploadImageToDiscord(dataUrl, "Futures");
+    alert("Shared to Discord");
+  };
+
+  const hasSportParam = Boolean(sportParam);
+
+  return (
+    <div
+      id={!hasSportParam ? "home-screen" : undefined}
+      className="space-y-4 relative"
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between max-w-2xl mx-auto px-4">
+        <div className="flex gap-1.5">
+          {["NFL", "NBA", "MLB"].map((lg) => (
+            <button
+              key={lg}
+              onClick={() => handleSportChange(lg)}
+              className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                sport === lg
+                  ? "bg-neutral-200 text-neutral-900"
+                  : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white"
+              }`}
+            >
+              {lg}
+            </button>
+          ))}
+        </div>
+
+        {/* Add Bet Button */}
+        <button
+          onClick={() => setShowAdd(true)}
+          className="text-2xl -mb-2 text-white w-8 h-8 flex items-center justify-center rounded-full bg-neutral-800 hover:bg-neutral-700"
+          aria-label="Add Bet"
+        >
+          +
+        </button>
+      </div>
+
+      {/* Modal UI */}
+      <FuturesModal sport={sport} />
+      {showAdd && <AddBetModal onClose={() => setShowAdd(false)} />}
+
+      {/* Floating Share Button */}
+      <button
+        onClick={handleShare}
+        className="fixed bottom-6 right-6 px-4 py-2 text-sm font-semibold rounded-full bg-neutral-700 hover:bg-neutral-500 shadow-lg text-white z-50"
+      >
+        Share
+      </button>
+    </div>
+  );
+};
+
+export default FuturesPage;
+</file>
+
+<file path="src/components/AddBetModal.jsx">
+import React, { useState } from "react";
+import playerTeamMap from "../data/playerTeamMap";
+
+// Mock logo maps for demonstration
+const nflLogoMap = {
+  NFL: "",
+  Patriots: "",
+  Cowboys: "",
+  "49ers": "",
+  Packers: "",
+};
+const nbaLogoMap = { NBA: "", Lakers: "", Warriors: "", Celtics: "", Heat: "" };
+const mlbLogoMap = {
+  MLB: "",
+  Yankees: "",
+  Dodgers: "",
+  "Red Sox": "",
+  Giants: "",
+};
+
+const teamsByLeague = {
+  NBA: Object.keys(nbaLogoMap).filter((t) => t !== "NBA"),
+  NFL: Object.keys(nflLogoMap).filter((t) => t !== "NFL"),
+  MLB: Object.keys(mlbLogoMap).filter((t) => t !== "MLB"),
+  PGA: [],
+  CFL: [],
+};
+
+const initialForm = {
+  site: "FD",
+  league: "NBA",
+  team: "",
+  player: "",
+  type: "",
+  ou: "Over",
+  line: "",
+  odds: "",
+};
+
+const AddBetModal = ({ onClose }) => {
+  const [form, setForm] = useState(initialForm);
+  const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "league") {
+      setForm({ ...form, league: value, team: "" });
+      return;
+    }
+
+    if (name === "player") {
+      const key = value.trim().toLowerCase();
+      const mappedTeam = playerTeamMap[key];
+      if (mappedTeam) {
+        const league = Object.keys(teamsByLeague).find((lg) =>
+          teamsByLeague[lg].includes(mappedTeam)
+        );
+        setForm({
+          ...form,
+          player: value,
+          team: mappedTeam,
+          league: league || form.league,
+        });
+        return;
+      }
+    }
+
+    setForm({ ...form, [name]: value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setMessage("");
+    setIsError(false);
+    const playerKey = form.player.trim().toLowerCase();
+    const teamName = form.team || playerTeamMap[playerKey] || "";
+
+    try {
+      const res = await fetch("/api/bets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, team: teamName }),
+      });
+
+      if (!res.ok) throw new Error("Request failed");
+
+      if (playerKey && teamName) {
+        playerTeamMap[playerKey] = teamName;
+      }
+
+      setForm(initialForm);
+      setMessage("Bet saved!");
+    } catch {
+      setIsError(true);
+      setMessage("Error saving bet.");
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+      <div className="bg-neutral-900 w-full max-w-sm p-5 rounded-xl space-y-5 text-white">
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold">Add Bet</h2>
+          <button
+            onClick={onClose}
+            className="text-neutral-400 hover:text-white text-2xl leading-none transition-colors"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          {/* Sportsbook & League */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-neutral-300 mb-1.5">
+                Sportsbook
+              </label>
+              <select
+                name="site"
+                value={form.site}
+                onChange={handleChange}
+                className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
+              >
+                {["FD", "DK", "MG", "CAESARS"].map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-neutral-300 mb-1.5">
+                League
+              </label>
+              <select
+                name="league"
+                value={form.league}
+                onChange={handleChange}
+                className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
+              >
+                {["NBA", "NFL", "MLB", "PGA", "CFL"].map((lg) => (
+                  <option key={lg} value={lg}>
+                    {lg}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Team */}
+          {teamsByLeague[form.league]?.length > 0 && (
+            <div>
+              <label className="block text-sm font-medium text-neutral-300 mb-1.5">
+                Team
+              </label>
+              <select
+                name="team"
+                value={form.team}
+                onChange={handleChange}
+                className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
+              >
+                <option value="">Select team...</option>
+                {teamsByLeague[form.league].map((team) => (
+                  <option key={team} value={team}>
+                    {team}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Player */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-1.5">
+              Player
+            </label>
+            <input
+              type="text"
+              name="player"
+              placeholder="Enter player name"
+              value={form.player}
+              onChange={handleChange}
+              className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
+            />
+          </div>
+
+          {/* Bet Type */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-1.5">
+              Bet Type
+            </label>
+            <input
+              type="text"
+              name="type"
+              placeholder="e.g., Points, Rebounds, 3-Pointers"
+              value={form.type}
+              onChange={handleChange}
+              className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
+              required
+            />
+          </div>
+
+          {/* Bet Details */}
+          <div className="grid grid-cols-4 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-neutral-300 mb-1.5">
+                O/U
+              </label>
+              <select
+                name="ou"
+                value={form.ou}
+                onChange={handleChange}
+                className="w-full h-12 p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
+              >
+                <option value="Over">Over</option>
+                <option value="Under">Under</option>
+              </select>
+            </div>
+
+            <div className="col-span-1.5">
+              <label className="block text-sm font-medium text-neutral-300 mb-1.5">
+                Line
+              </label>
+              <input
+                type="text"
+                name="line"
+                placeholder="0.5"
+                value={form.line}
+                onChange={handleChange}
+                className="w-full h-12 p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
+              />
+            </div>
+
+            <div className="col-span-1.5">
+              <label className="block text-sm font-medium text-neutral-300 mb-1.5">
+                Odds
+              </label>
+              <input
+                type="text"
+                name="odds"
+                placeholder="+110"
+                value={form.odds}
+                onChange={handleChange}
+                className="w-full h-12 p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            onClick={handleSubmit}
+            className="w-full bg-neutral-700 hover:bg-neutral-600 text-white py-3 rounded-lg font-semibold transition-colors"
+          >
+            Add Bet
+          </button>
+
+          {message && (
+            <p
+              className={`text-center text-sm ${
+                isError ? "text-red-400" : "text-green-400"
+              }`}
+            >
+              {message}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AddBetModal;
+</file>
+
+<file path="bot/server.js">
+/* global process, Buffer */
+// server.js — Discord image upload + screenshot server
+
+import express from "express";
+import fs from "fs";
+import {
+  Client,
+  GatewayIntentBits,
+  AttachmentBuilder,
+  Events,
+} from "discord.js";
+import dotenv from "dotenv";
+import cors from "cors";
+import puppeteer from "puppeteer";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.resolve(__dirname, ".env") });
+
+const app = express();
+const port = process.env.PORT || 3002; // ⚠️ Changed from 3001 to avoid conflict with main API
+
+app.use(cors());
+app.use(express.json({ limit: "10mb" }));
+
+// ✅ Discord Client Setup
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+  ],
+});
+
+client.once(Events.ClientReady, () => {
+  console.log(`🤖 Bot is ready as ${client.user.tag}`);
+});
+
+// ✅ Login bot
+if (process.env.DISCORD_TOKEN) {
+  client
+    .login(process.env.DISCORD_TOKEN)
+    .catch((err) => console.error("❌ Discord login failed:", err));
+} else {
+  console.log("⚠️ DISCORD_TOKEN not set; Discord features disabled.");
+}
+
+// ✅ Slash command: /futures
+client.on(Events.InteractionCreate, async (interaction) => {
+  if (!interaction.isChatInputCommand()) return;
+
+  if (interaction.commandName === "futures") {
+    const sport = interaction.options.getString("sport");
+    const type = interaction.options.getString("type");
+    const category = interaction.options.getString("category");
+
+    const url = `http://localhost:5173/futures?sport=${sport}&type=${type}&category=${encodeURIComponent(
+      category || ""
+    )}&group=All`;
+
+    try {
+      await interaction.deferReply();
+      const filePath = await takeScreenshot(url);
+      const file = new AttachmentBuilder(filePath);
+      await interaction.editReply({ files: [file] });
+      fs.unlinkSync(filePath);
+    } catch (err) {
+      console.error("❌ Slash command failed:", err);
+      await interaction.editReply("Something went wrong!");
+    }
+  }
+});
+
+// ✅ Enhanced Puppeteer Screenshot
+async function takeScreenshot(url) {
+  const browser = await puppeteer.launch({
+    headless: true,
+    defaultViewport: {
+      width: 1000,
+      height: 1400,
+      deviceScaleFactor: 3, // 🔥 Retina-style sharpness
+    },
+  });
+
+  const page = await browser.newPage();
+
+  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
+
+  // Wait for React to fully render filtered state
+  await page.waitForSelector("#home-screen", { hidden: true, timeout: 15000 });
+  await page.waitForSelector("#futures-modal", {
+    visible: true,
+    timeout: 10000,
+  });
+
+  // Let React settle with 2 animation frames
+  await page.evaluate(
+    () =>
+      new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
+  );
+
+  const handle = await page.$("#futures-modal");
+
+  const filePath = `screenshot_${Date.now()}.png`;
+  await handle.screenshot({
+    path: filePath,
+    type: "png",
+    omitBackground: false,
+  });
+
+  await browser.close();
+  return filePath;
+}
+
+// ✅ Upload Image API (from frontend -> Discord)
+app.post("/upload-image", async (req, res) => {
+  try {
+    const { image } = req.body;
+    if (!image) {
+      return res
+        .status(400)
+        .json({ success: false, error: "No image provided" });
+    }
+
+    console.log("📨 Received image upload");
+    const base64 = image.replace(/^data:image\/\w+;base64,/, "");
+    const buffer = Buffer.from(base64, "base64");
+    const attachment = new AttachmentBuilder(buffer, {
+      name: `upload_${Date.now()}.png`,
+    });
+
+    const channelId = process.env.CHANNEL_ID;
+    if (client.isReady() && channelId) {
+      const channel = await client.channels.fetch(channelId);
+      await channel.send({ files: [attachment] });
+    } else {
+      console.log("⚠️ Discord not ready or CHANNEL_ID missing");
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("❌ Image upload failed:", err);
+    res.status(500).json({ success: false });
+  }
+});
+
+// ✅ Server Listener
+app.listen(port, () => {
+  console.log(`🚀 Upload server listening on http://localhost:${port}`);
+});
+</file>
+
+<file path="src/components/FuturesModal.jsx">
+// src/components/FuturesModal.jsx
+
+import React, { useState, useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { futuresByLeague } from "../data/futuresData";
+import nbaLogoMap from "../utils/logoMap"; // <-- make sure this is imported
+
+const typeOptions = ["All", "Futures", "Awards", "Props", "Leaders"];
+
+const getCategoriesForType = (type, data, group) => {
+  let filtered = type === "All" ? data : data.filter((b) => b.type === type);
+  if (type === "Futures" && group && group !== "All") {
+    filtered = filtered.filter((b) => b.group === group);
+  }
+  const categories = [...new Set(filtered.map((b) => b.category))];
+  return categories;
+};
+
+const getGroupsForFutures = (data) => {
+  const groups = data
+    .filter((b) => b.type === "Futures" && b.group)
+    .map((b) => b.group);
+  return [...new Set(groups)];
+};
+
+const BetRow = ({ label, lineText, oddsText, rightText, tag, league }) => {
+  const displayTag = lineText || tag;
+
+  // Load player→team map
+  const map = JSON.parse(localStorage.getItem("playerTeamMap") || "{}");
+  const team = map[label];
+  const logoSrc = team && league === "NBA" ? nbaLogoMap[team] : null;
+
+  return (
+    <div className="relative overflow-hidden rounded bg-neutral-800/30 hover:bg-neutral-800/50 transition-colors px-3 py-2">
+      {logoSrc && (
+        <img
+          src={logoSrc}
+          alt=""
+          className="absolute inset-0 w-full h-full object-contain opacity-10 pointer-events-none"
+          style={{ filter: "grayscale(100%)" }}
+        />
+      )}
+      <div className="relative z-10 flex items-center justify-between">
+        <div className="flex-1 pr-4 text-white text-sm font-medium truncate">
+          {label}
+        </div>
+        <div className="flex items-center justify-end gap-2 min-w-[180px] text-right">
+          <div className="w-[110px] flex justify-end">
+            {displayTag && (
+              <span className="bg-neutral-700 px-2 py-0.5 rounded text-xs font-medium text-neutral-200 whitespace-nowrap">
+                {displayTag}
+              </span>
+            )}
+          </div>
+          <div className="w-[60px] text-right">
+            <span className="text-green-400 font-semibold text-sm whitespace-nowrap">
+              {oddsText || rightText}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const FuturesModal = ({ sport }) => {
+  const data = futuresByLeague[sport] || [];
+  const [params] = useSearchParams();
+  const navigate = useNavigate();
+
+  const [selectedType, setSelectedType] = useState(params.get("type") || "All");
+  const [selectedCategory, setSelectedCategory] = useState(
+    params.get("category") || "All"
+  );
+  const [selectedGroup, setSelectedGroup] = useState(
+    params.get("group") || "All"
+  );
+
+  useEffect(() => {
+    const nextParams = new URLSearchParams();
+    nextParams.set("sport", sport);
+    nextParams.set("type", selectedType);
+    nextParams.set("category", selectedCategory);
+    nextParams.set("group", selectedGroup);
+    navigate(`?${nextParams.toString()}`, { replace: true });
+  }, [sport, selectedType, selectedCategory, selectedGroup]);
+
+  const groups = getGroupsForFutures(data);
+  const categories = getCategoriesForType(selectedType, data, selectedGroup);
+
+  const filtered = data.filter((b) => {
+    const matchType = selectedType === "All" || b.type === selectedType;
+    const matchGroup =
+      selectedType !== "Futures" ||
+      selectedGroup === "All" ||
+      b.group === selectedGroup;
+    const matchCat =
+      selectedCategory === "All" || b.category === selectedCategory;
+    return matchType && matchGroup && matchCat;
+  });
+
+  return (
+    <div
+      id="futures-modal"
+      className="w-full max-w-2xl mx-auto text-white bg-neutral-900 border border-neutral-700 rounded-xl shadow-2xl p-6"
+    >
+      <div className="mb-6">
+        <h2 className="text-xl font-bold text-white mb-4">{sport}</h2>
+
+        {/* Type Tabs */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {typeOptions.map((type) => (
+            <button
+              key={type}
+              onClick={() => {
+                setSelectedType(type);
+                setSelectedCategory("All");
+                setSelectedGroup("All");
+              }}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                selectedType === type
+                  ? "bg-neutral-500 text-neutral-900 shadow-lg text-white border-neutral-300"
+                  : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white"
+              }`}
+            >
+              {type}
+            </button>
+          ))}
+        </div>
+
+        {/* Group Dropdown for Futures */}
+        {selectedType === "Futures" && groups.length > 1 && (
+          <div className="mb-4">
+            <select
+              className="w-full bg-neutral-800 text-white rounded-lg border border-neutral-600 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={selectedGroup}
+              onChange={(e) => {
+                setSelectedGroup(e.target.value);
+                setSelectedCategory("All");
+              }}
+            >
+              <option value="All">All Futures</option>
+              {groups.map((g) => (
+                <option key={g} value={g}>
+                  {g}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Category Dropdown */}
+        {categories.length > 1 && (
+          <div className="mb-4">
+            <select
+              className="w-full bg-neutral-800 text-white rounded-lg border border-neutral-600 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
+              <option value="All">All Categories</option>
+              {categories.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
+
+      {/* Bets List */}
+      <div className="space-y-1.5 max-h-96 overflow-y-auto">
+        {filtered.length > 0 ? (
+          filtered.map((bet, i) => {
+            const hasProps = bet.type === "Props" && bet.line && bet.odds;
+            const lineText = hasProps ? `${bet.ou || "o"}${bet.line}` : null;
+            const oddsText = hasProps ? bet.odds : null;
+            const tag = !hasProps ? bet.category : null;
+            return (
+              <BetRow
+                key={`${bet.label}-${bet.rightText}-${i}`}
+                label={bet.label}
+                lineText={lineText}
+                oddsText={oddsText}
+                rightText={bet.rightText}
+                tag={tag}
+                league={sport}
+              />
+            );
+          })
+        ) : (
+          <div className="text-center py-8 text-neutral-400">
+            No bets found for the selected filters.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default FuturesModal;
+</file>
+
+</files>

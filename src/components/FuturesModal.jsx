@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { futuresByLeague } from "../data/futuresData";
-import nbaLogoMap from "../utils/logoMap"; // <-- make sure this is imported
+import { nbaLogoMap, nflLogoMap, mlbLogoMap } from "../utils/logoMap"; // <-- make sure this is imported
 
 const typeOptions = ["All", "Futures", "Awards", "Props", "Leaders"];
 

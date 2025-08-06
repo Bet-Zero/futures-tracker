@@ -1,8 +1,8 @@
 /* global process */
-import express from 'express';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import express from "express";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -10,14 +10,14 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-const DATA_FILE = path.join(__dirname, 'bets.json');
+const DATA_FILE = path.join(__dirname, "bets.json");
 
 app.use(express.json());
 
 function loadBets() {
   try {
-    const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-    return data && typeof data === 'object' && !Array.isArray(data) ? data : {};
+    const data = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
+    return data && typeof data === "object" && !Array.isArray(data) ? data : {};
   } catch {
     return {};
   }
@@ -38,26 +38,29 @@ function addBet(bets, bet) {
   }
 }
 
-app.get('/api/bets', (req, res) => {
+app.get("/api/bets", (req, res) => {
   const bets = loadBets();
   res.json(bets);
 });
 
-app.post('/api/bets', (req, res) => {
-  const { site, league, team, player, type, ou, line, odds } = req.body;
+app.post("/api/bets", (req, res) => {
+  const { site, league, team, player, type, category, group, ou, line, odds } =
+    req.body;
   if (!site || !league || !player || !type || !ou || !odds) {
-    return res.status(400).json({ error: 'Missing fields' });
+    return res.status(400).json({ error: "Missing fields" });
   }
 
   const bets = loadBets();
   const newBet = {
     site,
     league,
-    team: team || '',
+    team: team || "",
     player,
     type,
+    category: category || "",
+    group: group || "",
     ou,
-    line: line || '',
+    line: line || "",
     odds,
     date: new Date().toISOString(),
   };

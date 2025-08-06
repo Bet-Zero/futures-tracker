@@ -4,11 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"npm run start:frontend\" \"npm run start:bot\"",
+    "dev": "concurrently \"npm run start:frontend\" \"npm run start:api\" \"npm run start:bot\"",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "start:frontend": "vite",
+    "start:api": "node server.js",
     "start:bot": "node bot/server.js"
   },
   "dependencies": {

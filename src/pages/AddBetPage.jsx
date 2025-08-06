@@ -19,10 +19,20 @@ const AddBetPage = () => {
     e.preventDefault();
     setMessage("");
     try {
+      const { league, subject, bet, line, odds } = form;
+      const payload = {
+        site: "FD",
+        league,
+        player: subject,
+        type: bet,
+        ou: "Over",
+        line,
+        odds,
+      };
       const res = await fetch("/api/bets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) {
         throw new Error("Request failed");
@@ -43,14 +53,17 @@ const AddBetPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black text-white p-4">
-      <form onSubmit={handleSubmit} className="space-y-3 w-full max-w-md bg-neutral-900 p-6 rounded">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-3 w-full max-w-md bg-neutral-900 p-6 rounded"
+      >
         <select
           className="w-full p-2 bg-neutral-800 rounded"
           name="league"
           value={form.league}
           onChange={handleChange}
         >
-          {['NBA', 'NFL', 'MLB', 'PGA', 'CFL'].map((lg) => (
+          {["NBA", "NFL", "MLB", "PGA", "CFL"].map((lg) => (
             <option key={lg} value={lg}>
               {lg}
             </option>
@@ -62,7 +75,7 @@ const AddBetPage = () => {
           value={form.subjectType}
           onChange={handleChange}
         >
-          {['Team', 'Player'].map((st) => (
+          {["Team", "Player"].map((st) => (
             <option key={st} value={st}>
               {st}
             </option>
@@ -99,7 +112,10 @@ const AddBetPage = () => {
           onChange={handleChange}
           required
         />
-        <button type="submit" className="w-full bg-white text-black py-2 rounded">
+        <button
+          type="submit"
+          className="w-full bg-white text-black py-2 rounded"
+        >
           Submit
         </button>
         {message && <p className="text-center text-sm">{message}</p>}

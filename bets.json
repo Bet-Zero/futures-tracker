@@ -1,1 +1,19 @@
-{}
+{
+  "NBA": {
+    "Props": [
+      {
+        "site": "FD",
+        "league": "NBA",
+        "team": "Lakers",
+        "player": "LeBron James",
+        "type": "Props",
+        "category": "Points",
+        "group": "",
+        "ou": "Over",
+        "line": "25.5",
+        "odds": "+110",
+        "date": "2025-08-06T09:14:18.130Z"
+      }
+    ]
+  }
+}

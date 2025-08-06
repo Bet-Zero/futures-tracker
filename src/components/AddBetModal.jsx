@@ -26,12 +26,29 @@ const teamsByLeague = {
   CFL: [],
 };
 
+const TYPE_OPTIONS = ["Futures", "Awards", "Props", "Leaders"];
+const CATEGORY_BY_TYPE = {
+  Futures: [
+    "Super Bowl",
+    "Conference",
+    "Division",
+    "Win Total",
+    "Make Playoffs",
+  ],
+  Awards: ["MVP", "DPOY", "ROY", "COY"],
+  Props: ["Pass Yds", "Rush Yds", "Rec Yds", "Home Runs", "Points"],
+  Leaders: ["Pass Yds", "Rush TD", "Rec Yds"],
+};
+const GROUP_OPTIONS = ["To Win", "Win Totals", "Playoffs"];
+
 const initialForm = {
   site: "FD",
   league: "NBA",
   team: "",
   player: "",
   type: "",
+  category: "",
+  group: "",
   ou: "Over",
   line: "",
   odds: "",
@@ -196,12 +213,57 @@ const AddBetModal = ({ onClose }) => {
             <input
               type="text"
               name="type"
-              placeholder="e.g., Points, Rebounds, 3-Pointers"
+              list="typeOptions"
               value={form.type}
               onChange={handleChange}
               className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
               required
             />
+            <datalist id="typeOptions">
+              {TYPE_OPTIONS.map((o) => (
+                <option key={o} value={o} />
+              ))}
+            </datalist>
+          </div>
+
+          {/* Category */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-1.5">
+              Category
+            </label>
+            <input
+              type="text"
+              name="category"
+              list="categoryOptions"
+              value={form.category}
+              onChange={handleChange}
+              className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
+            />
+            <datalist id="categoryOptions">
+              {(CATEGORY_BY_TYPE[form.type] || []).map((o) => (
+                <option key={o} value={o} />
+              ))}
+            </datalist>
+          </div>
+
+          {/* Group (optional) */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-1.5">
+              Group (optional)
+            </label>
+            <input
+              type="text"
+              name="group"
+              list="groupOptions"
+              value={form.group}
+              onChange={handleChange}
+              className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
+            />
+            <datalist id="groupOptions">
+              {GROUP_OPTIONS.map((o) => (
+                <option key={o} value={o} />
+              ))}
+            </datalist>
           </div>
 
           {/* Bet Details */}

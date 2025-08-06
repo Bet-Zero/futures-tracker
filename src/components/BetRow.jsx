@@ -1,7 +1,7 @@
 // src/components/BetRow.jsx
 
 import React from "react";
-import { nbaLogoMap, nflLogoMap, mlbLogoMap } from "../utils/nbaLogoMap";
+import { nbaLogoMap, nflLogoMap, mlbLogoMap } from "../utils/logoMap";
 
 const getTeamLogo = (league, teamOrLabel) => {
   const map =
