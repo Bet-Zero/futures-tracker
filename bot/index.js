@@ -1,5 +1,9 @@
-require("dotenv").config();
-const { Client, GatewayIntentBits } = require("discord.js");
+/* eslint-env node */
+import dotenv from "dotenv";
+import { Client, GatewayIntentBits } from "discord.js";
+import process from "node:process";
+
+dotenv.config();
 
 const client = new Client({
   intents: [
@@ -16,11 +20,7 @@ client.once("ready", () => {
 client.on("messageCreate", (message) => {
   if (message.content === "!ping") {
     message.reply("🏓 Pong!");
-  }
-});
-
-client.on("messageCreate", (message) => {
-  if (message.content === "/bzero") {
+  } else if (message.content === "/bzero") {
     message.reply("Futures bot reporting for duty 📊");
   }
 });
