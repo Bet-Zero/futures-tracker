@@ -1,3 +1,4 @@
+/* global process */
 // server.js in futures-bot
 
 import express from "express";
@@ -20,7 +21,7 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 app.use(cors());
-app.use(bodyParser.json({ limit: "10mb" }));
+app.use(express.json({ limit: "10mb" }));
 
 // ✅ FIXED: Add full intents so bot can read messages
 const client = new Client({
