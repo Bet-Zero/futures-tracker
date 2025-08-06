@@ -1,18 +1,17 @@
 {
   "name": "futures-bot",
   "version": "1.0.0",
+  "private": true,
   "type": "module",
-  "main": "index.js",
+  "description": "Discord bot + screenshot server for Futures Tracker",
+  "main": "server.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node server.js",
     "register": "node scripts/registerCommands.js"
   },
-  "keywords": [],
   "author": "",
-  "license": "ISC",
-  "description": "",
+  "license": "MIT",
   "dependencies": {
-    "body-parser": "^2.2.0",
     "cors": "^2.8.5",
     "discord.js": "^14.21.0",
     "dotenv": "^17.2.1",
