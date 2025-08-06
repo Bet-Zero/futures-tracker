@@ -1,9 +1,7 @@
-/* global process */
+/* global process, Buffer */
 // server.js in futures-bot
 
 import express from "express";
-import bodyParser from "body-parser";
-/* global process, Buffer */
 import fs from "fs";
 import {
   Client,
@@ -36,7 +34,13 @@ client.once(Events.ClientReady, () => {
   console.log(`🤖 Bot is ready as ${client.user.tag}`);
 });
 
-client.login(process.env.DISCORD_TOKEN);
+if (process.env.DISCORD_TOKEN) {
+  client
+    .login(process.env.DISCORD_TOKEN)
+    .catch((err) => console.error("❌ Discord login failed:", err));
+} else {
+  console.log("⚠️ DISCORD_TOKEN not set; Discord features disabled.");
+}
 
 // Command handler
 client.on(Events.InteractionCreate, async (interaction) => {
@@ -105,6 +109,7 @@ app.post("/upload-image", async (req, res) => {
         .json({ success: false, error: "No image provided" });
     }
 
+    console.log("📨 Received image upload");
     const base64 = image.replace(/^data:image\/\w+;base64,/, "");
     const buffer = Buffer.from(base64, "base64");
     const attachment = new AttachmentBuilder(buffer, {
@@ -112,8 +117,12 @@ app.post("/upload-image", async (req, res) => {
     });
 
     const channelId = process.env.CHANNEL_ID;
-    const channel = await client.channels.fetch(channelId);
-    await channel.send({ files: [attachment] });
+    if (process.env.DISCORD_TOKEN && client.isReady() && channelId) {
+      const channel = await client.channels.fetch(channelId);
+      await channel.send({ files: [attachment] });
+    } else {
+      console.log("⚠️ Discord not configured; skipping send.");
+    }
 
     res.json({ success: true });
   } catch (err) {
