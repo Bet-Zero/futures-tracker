@@ -59,7 +59,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     const category = interaction.options.getString("category");
 
     const url = `http://localhost:5173/futures?sport=${sport}&type=${type}&category=${encodeURIComponent(
-      category
+      category || ""
     )}&group=All`;
 
     try {
@@ -84,14 +84,7 @@ async function takeScreenshot(url, sport, type, category) {
 
   const page = await browser.newPage();
 
-  // Step 1: Clear storage
-  await page.goto("http://localhost:5173", { waitUntil: "domcontentloaded" });
-  await page.evaluate(() => {
-    localStorage.clear();
-    sessionStorage.clear();
-  });
-
-  // Step 2: Navigate to correct screenshot URL
+  // Navigate directly to the desired page
   await page.goto(url, { waitUntil: "networkidle0" });
 
   // Step 3: Wait for text-based confirmation of dynamic content

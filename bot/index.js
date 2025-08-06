@@ -70,11 +70,7 @@ async function takeScreenshot(url, sport, type, category) {
   });
   const page = await browser.newPage();
 
-  await page.goto("http://localhost:5173", { waitUntil: "domcontentloaded" });
-  await page.evaluate(() => {
-    localStorage.clear();
-    sessionStorage.clear();
-  });
+  // Navigate directly to the filtered page
 
   await page.goto(url, { waitUntil: "networkidle0" });
 
