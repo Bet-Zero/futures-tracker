@@ -1,5 +1,5 @@
 /* global process, Buffer */
-// server.js in futures-bot
+// server.js — Discord image upload + screenshot server
 
 import express from "express";
 import fs from "fs";
@@ -16,12 +16,12 @@ import puppeteer from "puppeteer";
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3002; // ⚠️ Changed from 3001 to avoid conflict with main API
 
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 
-// ✅ FIXED: Add full intents so bot can read messages
+// ✅ Discord Client Setup
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -34,6 +34,7 @@ client.once(Events.ClientReady, () => {
   console.log(`🤖 Bot is ready as ${client.user.tag}`);
 });
 
+// ✅ Login bot
 if (process.env.DISCORD_TOKEN) {
   client
     .login(process.env.DISCORD_TOKEN)
@@ -42,7 +43,8 @@ if (process.env.DISCORD_TOKEN) {
   console.log("⚠️ DISCORD_TOKEN not set; Discord features disabled.");
 }
 
-// Command handler
+// ✅ Slash command: /futures
+// ✅ Slash command: /futures
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
@@ -57,7 +59,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
     try {
       await interaction.deferReply();
-      const filePath = await takeScreenshot(url);
+      const filePath = await takeScreenshot(url, sport, type, category);
       const file = new AttachmentBuilder(filePath);
       await interaction.editReply({ files: [file] });
       fs.unlinkSync(filePath);
@@ -68,7 +70,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 });
 
-async function takeScreenshot(url) {
+// ✅ Enhanced Puppeteer Screenshot
+async function takeScreenshot(url, sport, type, category) {
   const browser = await puppeteer.launch({
     headless: "new",
     defaultViewport: { width: 1000, height: 1400 },
@@ -76,30 +79,45 @@ async function takeScreenshot(url) {
 
   const page = await browser.newPage();
 
-  // 1. Clear any local/session storage before page logic
+  // Step 1: Clear storage
   await page.goto("http://localhost:5173", { waitUntil: "domcontentloaded" });
   await page.evaluate(() => {
     localStorage.clear();
     sessionStorage.clear();
   });
 
-  // 2. Force navigation to actual target URL
+  // Step 2: Navigate to correct screenshot URL
   await page.goto(url, { waitUntil: "networkidle0" });
 
-  // 3. Optional debug shot: before content wait
-  await page.screenshot({ path: `debug_before_wait.png` });
+  // Step 3: Wait for text-based confirmation of dynamic content
+  try {
+    await page.waitForFunction(
+      (sport, type, category) => {
+        const text = document.body.innerText.toLowerCase();
+        return (
+          text.includes(sport.toLowerCase()) &&
+          text.includes(type.toLowerCase()) &&
+          (category ? text.includes(category.toLowerCase()) : true)
+        );
+      },
+      { timeout: 10000 },
+      sport,
+      type,
+      category
+    );
+  } catch (err) {
+    console.warn("⚠️ Betting content may not have fully loaded.");
+  }
 
-  // 4. Wait for the actual category content to render
-  await page.waitForSelector("div.overflow-y-auto", { timeout: 10000 });
-
-  // 5. Final screenshot
+  // Step 4: Screenshot
   const filePath = `screenshot_${Date.now()}.png`;
-  await page.screenshot({ path: filePath, fullPage: false });
+  await page.screenshot({ path: filePath });
 
   await browser.close();
   return filePath;
 }
 
+// ✅ Upload Image API (from frontend -> Discord)
 app.post("/upload-image", async (req, res) => {
   try {
     const { image } = req.body;
@@ -117,11 +135,11 @@ app.post("/upload-image", async (req, res) => {
     });
 
     const channelId = process.env.CHANNEL_ID;
-    if (process.env.DISCORD_TOKEN && client.isReady() && channelId) {
+    if (client.isReady() && channelId) {
       const channel = await client.channels.fetch(channelId);
       await channel.send({ files: [attachment] });
     } else {
-      console.log("⚠️ Discord not configured; skipping send.");
+      console.log("⚠️ Discord not ready or CHANNEL_ID missing");
     }
 
     res.json({ success: true });
@@ -131,6 +149,7 @@ app.post("/upload-image", async (req, res) => {
   }
 });
 
+// ✅ Server Listener
 app.listen(port, () => {
   console.log(`🚀 Upload server listening on http://localhost:${port}`);
 });

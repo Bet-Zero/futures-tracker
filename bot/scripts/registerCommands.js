@@ -1,16 +1,18 @@
 /* global process */
 // scripts/registerCommands.js
+
 import { REST, Routes } from "discord.js";
 import dotenv from "dotenv";
 
-// Load environment variables once
+// Load environment variables
 dotenv.config({ override: true });
 
 const { DISCORD_TOKEN, CLIENT_ID } = process.env;
 if (!DISCORD_TOKEN || !CLIENT_ID) {
-  throw new Error("Missing Discord environment variables");
+  throw new Error("❌ Missing DISCORD_TOKEN or CLIENT_ID in .env");
 }
 
+// Slash command structure
 const commands = [
   {
     name: "futures",
@@ -33,7 +35,7 @@ const commands = [
         description: "Choose the bet type",
         required: true,
         choices: [
-          { name: "All Types", value: "All" }, // Explicit "All" option
+          { name: "All Types", value: "All" },
           { name: "Futures", value: "Futures" },
           { name: "Awards", value: "Awards" },
           { name: "Props", value: "Props" },
@@ -60,10 +62,12 @@ const commands = [
   },
 ];
 
+// Register command with Discord
 const rest = new REST({ version: "10" }).setToken(DISCORD_TOKEN);
 
-await rest.put(Routes.applicationCommands(CLIENT_ID), {
-  body: commands,
-});
-
-console.log("✅ Slash command registered");
+try {
+  await rest.put(Routes.applicationCommands(CLIENT_ID), { body: commands });
+  console.log("✅ Slash command registered successfully");
+} catch (err) {
+  console.error("❌ Failed to register slash command:", err);
+}

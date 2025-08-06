@@ -16,12 +16,19 @@ client.once(Events.ClientReady, () => {
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
-  if (interaction.commandName === "ping") {
-    await interaction.reply("🏓 Pong!");
-  } else if (interaction.commandName === "bzero") {
-    await interaction.reply("Futures bot reporting for duty 📊");
+  switch (interaction.commandName) {
+    case "ping":
+      await interaction.reply("🏓 Pong!");
+      break;
+    case "bzero":
+      await interaction.reply("Futures bot reporting for duty 📊");
+      break;
+    case "futures":
+      await interaction.reply("📈 Futures page screenshot coming soon!");
+      break;
+    default:
+      await interaction.reply("❓ Unknown command");
   }
 });
 
 client.login(process.env.DISCORD_TOKEN);
-
