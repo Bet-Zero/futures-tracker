@@ -1,9 +1,15 @@
+/* global process */
 // scripts/registerCommands.js
-import { REST, Routes, SlashCommandBuilder } from "discord.js";
+import { REST, Routes } from "discord.js";
 import dotenv from "dotenv";
+
+// Load environment variables once
 dotenv.config({ override: true });
 
-dotenv.config();
+const { DISCORD_TOKEN, CLIENT_ID } = process.env;
+if (!DISCORD_TOKEN || !CLIENT_ID) {
+  throw new Error("Missing Discord environment variables");
+}
 
 const commands = [
   {
@@ -54,9 +60,9 @@ const commands = [
   },
 ];
 
-const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
+const rest = new REST({ version: "10" }).setToken(DISCORD_TOKEN);
 
-await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), {
+await rest.put(Routes.applicationCommands(CLIENT_ID), {
   body: commands,
 });
 
