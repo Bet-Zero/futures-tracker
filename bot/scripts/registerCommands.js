@@ -3,9 +3,13 @@
 
 import { REST, Routes } from "discord.js";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 
 // Load environment variables
-dotenv.config({ override: true });
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, "../.env"), override: true });
 
 const { DISCORD_TOKEN, CLIENT_ID } = process.env;
 if (!DISCORD_TOKEN || !CLIENT_ID) {
