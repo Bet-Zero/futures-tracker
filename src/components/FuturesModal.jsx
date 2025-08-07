@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { futuresByLeague } from "../data/futuresData";
-import { nbaLogoMap, nflLogoMap, mlbLogoMap } from "../utils/logoMap"; // <-- make sure this is imported
+import nbaLogoMap from "../utils/logoMap"; // <-- make sure this is imported
 
 const typeOptions = ["All", "Futures", "Awards", "Props", "Leaders"];
 
@@ -29,8 +29,7 @@ const BetRow = ({ label, lineText, oddsText, rightText, tag, league }) => {
   // Load player→team map
   const map = JSON.parse(localStorage.getItem("playerTeamMap") || "{}");
   const team = map[label];
-  const logoMaps = { NBA: nbaLogoMap, NFL: nflLogoMap, MLB: mlbLogoMap };
-  const logoSrc = team && logoMaps[league] ? logoMaps[league][team] : null;
+  const logoSrc = team && league === "NBA" ? nbaLogoMap[team] : null;
 
   return (
     <div className="relative overflow-hidden rounded bg-neutral-800/30 hover:bg-neutral-800/50 transition-colors px-3 py-2">
@@ -66,9 +65,7 @@ const BetRow = ({ label, lineText, oddsText, rightText, tag, league }) => {
 };
 
 const FuturesModal = ({ sport }) => {
-  const [allBets, setAllBets] = useState({});
-  const baseData = futuresByLeague[sport] || [];
-  const data = [...(allBets[sport] || []), ...baseData];
+  const data = futuresByLeague[sport] || [];
   const [params] = useSearchParams();
   const navigate = useNavigate();
 
@@ -87,41 +84,7 @@ const FuturesModal = ({ sport }) => {
     nextParams.set("category", selectedCategory);
     nextParams.set("group", selectedGroup);
     navigate(`?${nextParams.toString()}`, { replace: true });
-  }, [sport, selectedType, selectedCategory, selectedGroup, navigate]);
-
-  useEffect(() => {
-    const loadBets = async () => {
-      try {
-        const res = await fetch("/api/bets");
-        const json = await res.json();
-        const formatted = {};
-        Object.entries(json).forEach(([league, types]) => {
-          const items = [];
-          Object.values(types).forEach((arr) => {
-            arr.forEach((b) => {
-              items.push({
-                type: b.type,
-                category: b.category || "",
-                label: b.player || b.team,
-                line: b.line,
-                odds: b.odds,
-                ou: b.ou ? b.ou[0].toLowerCase() : "",
-                group: b.group || "",
-                rightText: b.odds,
-              });
-            });
-          });
-          formatted[league] = items;
-        });
-        setAllBets(formatted);
-      } catch (err) {
-        console.error("Failed to load bets", err);
-      }
-    };
-    loadBets();
-    window.addEventListener("betsUpdated", loadBets);
-    return () => window.removeEventListener("betsUpdated", loadBets);
-  }, []);
+  }, [sport, selectedType, selectedCategory, selectedGroup]);
 
   const groups = getGroupsForFutures(data);
   const categories = getCategoriesForType(selectedType, data, selectedGroup);

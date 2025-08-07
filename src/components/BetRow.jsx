@@ -15,6 +15,8 @@ const getTeamLogo = (league, teamOrLabel) => {
   return map?.[teamOrLabel] || null;
 };
 
+console.log("BET ROW LOGO:", label, team, league, logoUrl);
+
 const BetRow = ({
   label,
   lineText,
@@ -27,28 +29,28 @@ const BetRow = ({
   const logoUrl = getTeamLogo(league, team || label);
 
   return (
-    <div className="relative overflow-hidden rounded">
-      {/* Faded Background Logo */}
-      {logoUrl && (
-        <img
-          src={logoUrl}
-          alt=""
-          className="absolute inset-0 w-full h-full object-contain opacity-10 pointer-events-none scale-125"
-        />
-      )}
+    <div
+      className="relative overflow-hidden rounded px-3 py-2"
+      style={{
+        backgroundImage: logoUrl ? `url(${logoUrl})` : undefined,
+        backgroundSize: "cover", // fill entire row
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "center",
+        opacity: 1, // no fade
+      }}
+    >
+      {/* Optional: Add semi-transparent black layer ONLY if needed */}
+      <div className="absolute inset-0 bg-black/10 z-0" />
 
-      {/* Content */}
-      <div className="relative z-10 flex items-center justify-between px-3 py-2 bg-neutral-800/30 hover:bg-neutral-800/50 transition-colors">
-        {/* Player Label */}
+      {/* Row Content */}
+      <div className="relative z-10 flex items-center justify-between">
         <div className="flex-1 pr-4 text-white text-sm font-medium truncate">
           {label}
         </div>
-
-        {/* Right Side */}
         <div className="flex items-center justify-end gap-2 min-w-[180px] text-right">
           <div className="w-[110px] flex justify-end">
             {(lineText || tag) && (
-              <span className="bg-neutral-700 px-2 py-0.5 rounded text-xs font-medium text-neutral-200 whitespace-nowrap">
+              <span className="bg-black/70 px-2 py-0.5 rounded text-xs font-medium text-neutral-100 whitespace-nowrap">
                 {lineText || tag}
               </span>
             )}
