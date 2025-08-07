@@ -16,7 +16,7 @@ const getTeamLogo = (league, team) => {
 };
 
 const BetRow = ({ bet }) => {
-  const { type, player, team, odds, league, details = {} } = bet;
+  const { type, player, team, image, odds, league, details = {} } = bet;
   const logoUrl = getTeamLogo(league, team);
 
   let label = "";
@@ -45,15 +45,26 @@ const BetRow = ({ bet }) => {
         backgroundSize: "cover",
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center",
-        opacity: 1,
       }}
     >
-      <div className="absolute inset-0 bg-black/10 z-0" />
+      {logoUrl && <div className="absolute inset-0 bg-black/10 z-0" />}
       <div className="relative z-10 flex items-center justify-between">
-        <div className="flex-1 pr-4 text-white text-sm font-medium truncate">{label}</div>
-        <div className="w-[60px] text-right">
-          <span className="text-green-400 font-semibold text-sm whitespace-nowrap">{odds}</span>
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          {image && (
+            <img
+              src={image}
+              alt=""
+              className="w-8 h-8 rounded object-cover flex-shrink-0"
+            />
+          )}
+          <span className="text-white text-sm font-medium truncate">{label}</span>
+          <span className="ml-2 bg-neutral-700 text-neutral-200 text-xs font-medium px-2 py-0.5 rounded whitespace-nowrap">
+            {type}
+          </span>
         </div>
+        <span className="text-green-400 font-semibold text-sm whitespace-nowrap">
+          {odds}
+        </span>
       </div>
     </div>
   );
