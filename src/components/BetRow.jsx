@@ -3,7 +3,7 @@
 import React from "react";
 import { nbaLogoMap, nflLogoMap, mlbLogoMap } from "../utils/logoMap";
 
-const getTeamLogo = (league, teamOrLabel) => {
+const getTeamLogo = (league, team) => {
   const map =
     league === "NBA"
       ? nbaLogoMap
@@ -12,54 +12,47 @@ const getTeamLogo = (league, teamOrLabel) => {
       : league === "MLB"
       ? mlbLogoMap
       : {};
-  return map?.[teamOrLabel] || null;
+  return map?.[team] || null;
 };
 
-console.log("BET ROW LOGO:", label, team, league, logoUrl);
+const BetRow = ({ bet }) => {
+  const { type, player, team, odds, league, details = {} } = bet;
+  const logoUrl = getTeamLogo(league, team);
 
-const BetRow = ({
-  label,
-  lineText,
-  oddsText,
-  rightText,
-  tag,
-  team,
-  league,
-}) => {
-  const logoUrl = getTeamLogo(league, team || label);
+  let label = "";
+  switch (type) {
+    case "Player Award":
+      label = `${player} — ${details.award}`;
+      break;
+    case "Team Bet":
+      label = `${team} — ${details.bet}${details.value ? ` ${details.value}` : ""}`;
+      break;
+    case "Stat Leader":
+      label = `${player} — ${details.stat}`;
+      break;
+    case "Prop":
+      label = `${player} — ${details.ou} ${details.line} ${details.stat}`;
+      break;
+    default:
+      label = player || team;
+  }
 
   return (
     <div
       className="relative overflow-hidden rounded px-3 py-2"
       style={{
         backgroundImage: logoUrl ? `url(${logoUrl})` : undefined,
-        backgroundSize: "cover", // fill entire row
+        backgroundSize: "cover",
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center",
-        opacity: 1, // no fade
+        opacity: 1,
       }}
     >
-      {/* Optional: Add semi-transparent black layer ONLY if needed */}
       <div className="absolute inset-0 bg-black/10 z-0" />
-
-      {/* Row Content */}
       <div className="relative z-10 flex items-center justify-between">
-        <div className="flex-1 pr-4 text-white text-sm font-medium truncate">
-          {label}
-        </div>
-        <div className="flex items-center justify-end gap-2 min-w-[180px] text-right">
-          <div className="w-[110px] flex justify-end">
-            {(lineText || tag) && (
-              <span className="bg-black/70 px-2 py-0.5 rounded text-xs font-medium text-neutral-100 whitespace-nowrap">
-                {lineText || tag}
-              </span>
-            )}
-          </div>
-          <div className="w-[60px] text-right">
-            <span className="text-green-400 font-semibold text-sm whitespace-nowrap">
-              {oddsText || rightText}
-            </span>
-          </div>
+        <div className="flex-1 pr-4 text-white text-sm font-medium truncate">{label}</div>
+        <div className="w-[60px] text-right">
+          <span className="text-green-400 font-semibold text-sm whitespace-nowrap">{odds}</span>
         </div>
       </div>
     </div>

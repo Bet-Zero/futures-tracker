@@ -28,13 +28,13 @@ function saveBets(bets) {
 }
 
 function addBet(bets, bet) {
-  const { league, type } = bet;
-  if (!league || !type) return;
+  const { league, tabLabel } = bet;
+  if (!league || !tabLabel) return;
   if (!bets[league]) bets[league] = {};
-  if (!bets[league][type]) bets[league][type] = [];
-  bets[league][type].unshift(bet);
-  if (bets[league][type].length > 100) {
-    bets[league][type] = bets[league][type].slice(0, 100);
+  if (!bets[league][tabLabel]) bets[league][tabLabel] = [];
+  bets[league][tabLabel].unshift(bet);
+  if (bets[league][tabLabel].length > 100) {
+    bets[league][tabLabel] = bets[league][tabLabel].slice(0, 100);
   }
 }
 
@@ -44,24 +44,23 @@ app.get("/api/bets", (req, res) => {
 });
 
 app.post("/api/bets", (req, res) => {
-  const { site, league, team, player, type, category, group, ou, line, odds } =
+  const { type, tabLabel, player, team, image, details, odds, site, league } =
     req.body;
-  if (!site || !league || !player || !type || !ou || !odds) {
+  if (!type || !tabLabel || !team || !odds || !site || !league) {
     return res.status(400).json({ error: "Missing fields" });
   }
 
   const bets = loadBets();
   const newBet = {
+    type,
+    tabLabel,
+    player: player ?? null,
+    team,
+    image: image || "",
+    details: details || {},
+    odds,
     site,
     league,
-    team: team || "",
-    player,
-    type,
-    category: category || "",
-    group: group || "",
-    ou,
-    line: line || "",
-    odds,
     date: new Date().toISOString(),
   };
 

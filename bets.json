@@ -2,43 +2,69 @@
   "NBA": {
     "Props": [
       {
-        "site": "FD",
-        "league": "NBA",
-        "team": "Lakers",
+        "type": "Prop",
+        "tabLabel": "Props",
         "player": "LeBron James",
-        "type": "Props",
-        "category": "3pt",
-        "group": "",
-        "ou": "Over",
-        "line": "2.5",
-        "odds": "+160",
-        "date": "2025-08-06T09:39:16.640Z"
-      },
-      {
-        "site": "FD",
-        "league": "NBA",
-        "team": "Heat",
-        "player": "Bam Adebayo",
-        "type": "Props",
-        "category": "Rebounds",
-        "group": "",
-        "ou": "Over",
-        "line": "7.5",
-        "odds": "-110",
-        "date": "2025-08-06T09:38:03.842Z"
-      },
-      {
-        "site": "FD",
-        "league": "NBA",
         "team": "Lakers",
-        "player": "LeBron James",
-        "type": "Props",
-        "category": "Points",
-        "group": "",
-        "ou": "Over",
-        "line": "25.5",
+        "image": "",
+        "details": {
+          "stat": "Points",
+          "ou": "Over",
+          "line": "25.5"
+        },
         "odds": "+110",
+        "site": "FD",
+        "league": "NBA",
         "date": "2025-08-06T09:14:18.130Z"
+      }
+    ],
+    "Player Awards": [
+      {
+        "type": "Player Award",
+        "tabLabel": "Player Awards",
+        "player": "Luka Doncic",
+        "team": "Mavericks",
+        "image": "",
+        "details": {
+          "award": "MVP"
+        },
+        "odds": "+450",
+        "site": "FD",
+        "league": "NBA",
+        "date": "2025-08-06T10:00:00.000Z"
+      }
+    ],
+    "Team Bets": [
+      {
+        "type": "Team Bet",
+        "tabLabel": "Team Bets",
+        "player": null,
+        "team": "Lakers",
+        "image": "",
+        "details": {
+          "bet": "Win Total",
+          "value": "48.5"
+        },
+        "odds": "-110",
+        "site": "FD",
+        "league": "NBA",
+        "date": "2025-08-06T10:01:00.000Z"
+      }
+    ],
+    "Stat Leaders": [
+      {
+        "type": "Stat Leader",
+        "tabLabel": "Stat Leaders",
+        "player": "Stephen Curry",
+        "team": "Warriors",
+        "image": "",
+        "details": {
+          "stat": "3PM"
+        },
+        "odds": "+500",
+        "site": "FD",
+        "league": "NBA",
+        "date": "2025-08-06T10:02:00.000Z"
       }
     ]
   }

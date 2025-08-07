@@ -26,32 +26,28 @@ const teamsByLeague = {
   CFL: [],
 };
 
-const TYPE_OPTIONS = ["Futures", "Awards", "Props", "Leaders"];
-const CATEGORY_BY_TYPE = {
-  Futures: [
-    "Super Bowl",
-    "Conference",
-    "Division",
-    "Win Total",
-    "Make Playoffs",
-  ],
-  Awards: ["MVP", "DPOY", "ROY", "COY"],
-  Props: ["Pass Yds", "Rush Yds", "Rec Yds", "Home Runs", "Points"],
-  Leaders: ["Pass Yds", "Rush TD", "Rec Yds"],
+const TAB_LABELS = {
+  Prop: "Props",
+  "Player Award": "Player Awards",
+  "Team Bet": "Team Bets",
+  "Stat Leader": "Stat Leaders",
 };
-const GROUP_OPTIONS = ["To Win", "Win Totals", "Playoffs"];
+
+const TYPE_OPTIONS = Object.keys(TAB_LABELS);
 
 const initialForm = {
   site: "FD",
   league: "NBA",
-  team: "",
+  type: "Prop",
   player: "",
-  type: "",
-  category: "",
-  group: "",
+  team: "",
+  odds: "",
+  award: "",
+  bet: "",
+  value: "",
+  stat: "",
   ou: "Over",
   line: "",
-  odds: "",
 };
 
 const AddBetModal = ({ onClose }) => {
@@ -61,8 +57,14 @@ const AddBetModal = ({ onClose }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     if (name === "league") {
       setForm({ ...form, league: value, team: "" });
+      return;
+    }
+
+    if (name === "type") {
+      setForm({ ...form, type: value });
       return;
     }
 
@@ -93,27 +95,50 @@ const AddBetModal = ({ onClose }) => {
     const playerKey = form.player.trim().toLowerCase();
     const teamName = form.team || playerTeamMap[playerKey] || "";
 
-      try {
-        const res = await fetch("/api/bets", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...form, team: teamName }),
-        });
+    const details = {};
+    if (form.type === "Player Award") details.award = form.award;
+    if (form.type === "Team Bet") {
+      details.bet = form.bet;
+      if (form.value) details.value = form.value;
+    }
+    if (form.type === "Stat Leader") details.stat = form.stat;
+    if (form.type === "Prop") {
+      details.stat = form.stat;
+      details.ou = form.ou;
+      details.line = form.line;
+    }
 
-        if (!res.ok) throw new Error("Request failed");
+    try {
+      const res = await fetch("/api/bets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: form.type,
+          tabLabel: TAB_LABELS[form.type],
+          player: form.type === "Team Bet" ? null : form.player,
+          team: teamName,
+          image: "",
+          details,
+          odds: form.odds,
+          site: form.site,
+          league: form.league,
+        }),
+      });
 
-        if (playerKey && teamName) {
-          playerTeamMap[playerKey] = teamName;
-        }
+      if (!res.ok) throw new Error("Request failed");
 
-        setForm(initialForm);
-        setMessage("Bet saved!");
-        window.dispatchEvent(new Event("betsUpdated"));
-      } catch {
-        setIsError(true);
-        setMessage("Error saving bet.");
+      if (playerKey && teamName) {
+        playerTeamMap[playerKey] = teamName;
       }
-    };
+
+      setForm(initialForm);
+      setMessage("Bet saved!");
+      window.dispatchEvent(new Event("betsUpdated"));
+    } catch {
+      setIsError(true);
+      setMessage("Error saving bet.");
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
@@ -169,149 +194,175 @@ const AddBetModal = ({ onClose }) => {
             </div>
           </div>
 
-          {/* Team */}
-          {teamsByLeague[form.league]?.length > 0 && (
+          {/* Type */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-1.5">
+              Type
+            </label>
+            <select
+              name="type"
+              value={form.type}
+              onChange={handleChange}
+              className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
+            >
+              {TYPE_OPTIONS.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Player */}
+          {form.type !== "Team Bet" && (
             <div>
               <label className="block text-sm font-medium text-neutral-300 mb-1.5">
-                Team
+                Player
               </label>
-              <select
-                name="team"
-                value={form.team}
+              <input
+                type="text"
+                name="player"
+                placeholder="Enter player name"
+                value={form.player}
                 onChange={handleChange}
-                className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
-              >
-                <option value="">Select team...</option>
-                {teamsByLeague[form.league].map((team) => (
-                  <option key={team} value={team}>
-                    {team}
-                  </option>
-                ))}
-              </select>
+                className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
+              />
             </div>
           )}
 
-          {/* Player */}
+          {/* Team */}
           <div>
             <label className="block text-sm font-medium text-neutral-300 mb-1.5">
-              Player
+              Team
             </label>
             <input
               type="text"
-              name="player"
-              placeholder="Enter player name"
-              value={form.player}
+              name="team"
+              placeholder="Enter team"
+              value={form.team}
               onChange={handleChange}
               className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
             />
           </div>
 
-          {/* Bet Type */}
+          {/* Dynamic Fields */}
+          {form.type === "Player Award" && (
+            <div>
+              <label className="block text-sm font-medium text-neutral-300 mb-1.5">
+                Award
+              </label>
+              <input
+                type="text"
+                name="award"
+                value={form.award}
+                onChange={handleChange}
+                className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
+              />
+            </div>
+          )}
+
+          {form.type === "Team Bet" && (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-neutral-300 mb-1.5">
+                  Bet
+                </label>
+                <input
+                  type="text"
+                  name="bet"
+                  value={form.bet}
+                  onChange={handleChange}
+                  className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-300 mb-1.5">
+                  Value
+                </label>
+                <input
+                  type="text"
+                  name="value"
+                  value={form.value}
+                  onChange={handleChange}
+                  className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
+                />
+              </div>
+            </div>
+          )}
+
+          {form.type === "Stat Leader" && (
+            <div>
+              <label className="block text-sm font-medium text-neutral-300 mb-1.5">
+                Stat
+              </label>
+              <input
+                type="text"
+                name="stat"
+                value={form.stat}
+                onChange={handleChange}
+                className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
+              />
+            </div>
+          )}
+
+          {form.type === "Prop" && (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-neutral-300 mb-1.5">
+                  Stat
+                </label>
+                <input
+                  type="text"
+                  name="stat"
+                  value={form.stat}
+                  onChange={handleChange}
+                  className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-neutral-300 mb-1.5">
+                    O/U
+                  </label>
+                  <select
+                    name="ou"
+                    value={form.ou}
+                    onChange={handleChange}
+                    className="w-full h-12 p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
+                  >
+                    <option value="Over">Over</option>
+                    <option value="Under">Under</option>
+                  </select>
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-neutral-300 mb-1.5">
+                    Line
+                  </label>
+                  <input
+                    type="text"
+                    name="line"
+                    value={form.line}
+                    onChange={handleChange}
+                    className="w-full h-12 p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Odds */}
           <div>
             <label className="block text-sm font-medium text-neutral-300 mb-1.5">
-              Bet Type
+              Odds
             </label>
             <input
               type="text"
-              name="type"
-              list="typeOptions"
-              value={form.type}
+              name="odds"
+              value={form.odds}
               onChange={handleChange}
               className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
               required
             />
-            <datalist id="typeOptions">
-              {TYPE_OPTIONS.map((o) => (
-                <option key={o} value={o} />
-              ))}
-            </datalist>
-          </div>
-
-          {/* Category */}
-          <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1.5">
-              Category
-            </label>
-            <input
-              type="text"
-              name="category"
-              list="categoryOptions"
-              value={form.category}
-              onChange={handleChange}
-              className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
-            />
-            <datalist id="categoryOptions">
-              {(CATEGORY_BY_TYPE[form.type] || []).map((o) => (
-                <option key={o} value={o} />
-              ))}
-            </datalist>
-          </div>
-
-          {/* Group (optional) */}
-          <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1.5">
-              Group (optional)
-            </label>
-            <input
-              type="text"
-              name="group"
-              list="groupOptions"
-              value={form.group}
-              onChange={handleChange}
-              className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
-            />
-            <datalist id="groupOptions">
-              {GROUP_OPTIONS.map((o) => (
-                <option key={o} value={o} />
-              ))}
-            </datalist>
-          </div>
-
-          {/* Bet Details */}
-          <div className="grid grid-cols-4 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-neutral-300 mb-1.5">
-                O/U
-              </label>
-              <select
-                name="ou"
-                value={form.ou}
-                onChange={handleChange}
-                className="w-full h-12 p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
-              >
-                <option value="Over">Over</option>
-                <option value="Under">Under</option>
-              </select>
-            </div>
-
-            <div className="col-span-1.5">
-              <label className="block text-sm font-medium text-neutral-300 mb-1.5">
-                Line
-              </label>
-              <input
-                type="text"
-                name="line"
-                placeholder="0.5"
-                value={form.line}
-                onChange={handleChange}
-                className="w-full h-12 p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
-              />
-            </div>
-
-            <div className="col-span-1.5">
-              <label className="block text-sm font-medium text-neutral-300 mb-1.5">
-                Odds
-              </label>
-              <input
-                type="text"
-                name="odds"
-                placeholder="+110"
-                value={form.odds}
-                onChange={handleChange}
-                className="w-full h-12 p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
-                required
-              />
-            </div>
           </div>
 
           {/* Submit */}

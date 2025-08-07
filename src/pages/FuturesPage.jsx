@@ -16,9 +16,7 @@ const FuturesPage = () => {
   const handleSportChange = (newSport) => {
     const newParams = new URLSearchParams(params);
     newParams.set("sport", newSport);
-    newParams.set("type", "All");
-    newParams.set("category", "All");
-    newParams.set("group", "All");
+    newParams.set("tab", "All");
     navigate(`?${newParams.toString()}`);
   };
 
