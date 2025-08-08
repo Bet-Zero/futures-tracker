@@ -18,9 +18,7 @@ const FuturesModal = ({ sport }) => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
 
-  const [selectedTab, setSelectedTab] = useState(
-    params.get("tab") || "All"
-  );
+  const [selectedTab, setSelectedTab] = useState(params.get("tab") || "All");
 
   const handleTabChange = (tab) => {
     setSelectedTab(tab);
