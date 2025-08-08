@@ -1,7 +1,8 @@
 // src/components/BetRow.jsx
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { nbaLogoMap, nflLogoMap, mlbLogoMap } from "../utils/logoMap";
+import { getHeadshotUrl } from "../utils/getHeadshotUrl";
 
 // 🧠 Logo mapping logic by league
 const getTeamLogo = (league, team) => {
@@ -19,6 +20,29 @@ const getTeamLogo = (league, team) => {
 const BetRow = ({ bet }) => {
   const { type, player, team, image, odds, league, details = {} } = bet;
   const logoUrl = getTeamLogo(league, team);
+
+  const [headshot, setHeadshot] = useState(
+    getHeadshotUrl(player, league, image),
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!headshot && league === "NFL" && player) {
+      fetch("/api/headshots/fetch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: player }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (!cancelled && data.url) setHeadshot(data.url);
+        })
+        .catch(() => {});
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [headshot, league, player]);
 
   // 🧾 Main display text
   let label = "";
@@ -68,9 +92,9 @@ const BetRow = ({ bet }) => {
       <div className="relative z-10 flex items-center justify-between">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           {/* 🖼️ Player Image */}
-          {image && (
+          {headshot && (
             <img
-              src={image}
+              src={headshot}
               alt=""
               className="w-8 h-8 rounded object-cover flex-shrink-0"
             />

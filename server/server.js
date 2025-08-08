@@ -1,17 +1,21 @@
 /* global process */
 import express from "express";
+import cors from "cors";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { fetchHeadshotIfMissing } from "./headshotsFetcher.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const ROOT = path.join(__dirname, "..");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-const DATA_FILE = path.join(__dirname, "bets.json");
+const DATA_FILE = path.join(ROOT, "bets.json");
 
+app.use(cors());
 app.use(express.json());
 
 function loadBets() {
@@ -67,6 +71,18 @@ app.post("/api/bets", (req, res) => {
   addBet(bets, newBet);
   saveBets(bets);
   res.status(201).json(newBet);
+});
+
+app.post("/api/headshots/fetch", async (req, res) => {
+  const { name } = req.body || {};
+  if (!name) return res.status(400).json({ ok: false, error: "Missing name" });
+  try {
+    const { url, cached } = await fetchHeadshotIfMissing(name);
+    if (!url) return res.status(404).json({ ok: false, url: null });
+    res.json({ ok: true, url, cached });
+  } catch {
+    res.status(500).json({ ok: false, error: "Failed" });
+  }
 });
 
 app.listen(PORT, () => {

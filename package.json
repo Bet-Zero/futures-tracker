@@ -9,12 +9,17 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "start:frontend": "vite",
-    "start:api": "node server.js",
-    "start:bot": "node bot/server.js"
+    "start:api": "node server/server.js",
+    "start:bot": "node bot/server.js",
+    "seed:nfl-headshots": "node scripts/fetch_nfl_headshots.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "fs-extra": "^11.2.0",
     "html-to-image": "^1.11.13",
+    "node-fetch": "^2.7.0",
+    "puppeteer": "^22.15.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.7.1"
