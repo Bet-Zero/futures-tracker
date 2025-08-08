@@ -16,7 +16,7 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^5.1.0",
-    "fs-extra": "^11.2.0",
+    "fs-extra": "^11.3.1",
     "html-to-image": "^1.11.13",
     "node-fetch": "^2.7.0",
     "puppeteer": "^22.15.0",
