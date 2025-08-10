@@ -32,7 +32,7 @@ const Headshot = ({ src, name }) => {
   const initials = useMemo(() => getInitials(name), [name]);
 
   return (
-    <div className="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-lg border border-black overflow-hidden bg-black grid place-items-center">
+    <div className="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-md border border-neutral-900 overflow-hidden bg-neutral-800 grid place-items-center">
       {!err && src ? (
         <img
           src={src}
@@ -70,60 +70,83 @@ const BetRow = ({ bet }) => {
       label = player;
       break;
     case "Prop":
-      label = `${player} — ${details.ou ?? ""} ${details.line ?? ""}`.trim();
+      label = player;
       break;
     default:
       label = player || team || "";
   }
 
   // Pill text
-  const tag =
-    type === "Player Award"
-      ? details.award
-      : type === "Team Bet"
-      ? details.bet
-      : type === "Stat Leader"
-      ? details.stat
-      : type === "Prop"
-      ? details.stat
-      : "";
+  let tag = "";
+  if (type === "Player Award") {
+    tag = details.award || "";
+  } else if (type === "Team Bet") {
+    const ou = details.ou === "Over" ? "o" : details.ou === "Under" ? "u" : "";
+    if (details.value) {
+      tag = `${ou}${details.value} ${details.bet || ""}`.trim();
+    } else {
+      tag = details.bet || "";
+    }
+  } else if (type === "Stat Leader") {
+    tag = details.stat || "";
+  } else if (type === "Prop") {
+    const ou = details.ou === "Over" ? "o" : details.ou === "Under" ? "u" : "";
+    tag = `${ou}${details.line || ""} ${details.stat || ""}`.trim();
+  }
 
   return (
-    <div className="relative flex items-center justify-between bg-black rounded overflow-hidden px-3 py-2">
+    <div className="relative flex items-center justify-between bg-neutral-800 rounded border border-black overflow-hidden px-3 py-2">
       {/* Faint background logo band (doesn't affect height) */}
       {logoUrl && (
-        <div className="absolute inset-0 flex items-center bg-white pointer-events-none opacity-40">
+        <div className="absolute inset-0 flex items-center pointer-events-none opacity-35">
           <img
             src={logoUrl}
             alt=""
             className="w-full h-full object-cover py-1.5 px-1 rounded-lg border-2 border-black/50"
           />
+          <div className="absolute inset-0 bg-neutral-800 opacity-90" />
         </div>
       )}
 
-      {/* Left: headshot + label + pill */}
-      <div className="relative z-10 flex items-center gap-2 flex-1 min-w-0">
+      {/* Main row content: headshot, label, tag, odds */}
+      <div className="relative z-10 flex items-center w-full min-w-0">
+        {/* Headshot */}
         <Headshot src={headshotSrc} name={player || team} />
 
-        <span className="text-white text-sm md:text-base font-bold truncate uppercase [text-shadow:_0px_2px_3px_rgb(0_0_0_/_0.25)]">
+        {/* Label */}
+        <span
+          className="ml-2 text-white text-sm md:text-base font-bold truncate uppercase"
+          style={{
+            textShadow:
+              "0px 2px 6px rgba(0,0,0,0.45), 0px 0.5px 0px rgba(0,0,0,0.8)",
+          }}
+        >
           {label}
         </span>
 
-        {tag ? (
-          <span className="bg-neutral-500 text-white text-xs md:text-sm font-bold px-2 py-0.5 rounded-2xl whitespace-nowrap">
-            {tag}
-          </span>
-        ) : null}
-      </div>
+        {/* Spacer to push tag/odds to the right */}
+        <div className="flex-1" />
 
-      {/* Right: odds */}
-      {odds ? (
-        <div className="relative z-10 flex-shrink-0">
-          <span className="text-white text-sm md:text-base font-bold tracking-widest whitespace-nowrap">
-            {odds}
-          </span>
+        {/* Tag and Odds: right-aligned, fixed widths for perfect alignment */}
+        <div className="flex items-center" style={{ minWidth: 0 }}>
+          {/* Tag: always right-aligned, fixed width */}
+          <div className="flex items-center justify-end w-[90px]">
+            {tag ? (
+              <span className="bg-neutral-500/80 text-white text-xs md:text-sm font-bold px-2 py-0.5 rounded-lg whitespace-nowrap">
+                {tag}
+              </span>
+            ) : null}
+          </div>
+          {/* Odds: always right-aligned, fixed width */}
+          <div className="flex-shrink-0 w-[70px] ml-2 flex items-center justify-end">
+            {odds ? (
+              <span className="text-white text-sm md:text-base font-bold tracking-widest whitespace-nowrap">
+                {odds}
+              </span>
+            ) : null}
+          </div>
         </div>
-      ) : null}
+      </div>
     </div>
   );
 };

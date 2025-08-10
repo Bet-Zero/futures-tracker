@@ -39,6 +39,21 @@
         "type": "Team Bet",
         "tabLabel": "Team Bets",
         "player": null,
+        "team": "Los Angeles Rams",
+        "image": "",
+        "details": {
+          "bet": "Win Total",
+          "value": "7.5"
+        },
+        "odds": "-120",
+        "site": "FD",
+        "league": "NBA",
+        "date": "2025-08-09T11:25:22.960Z"
+      },
+      {
+        "type": "Team Bet",
+        "tabLabel": "Team Bets",
+        "player": null,
         "team": "Lakers",
         "image": "",
         "details": {

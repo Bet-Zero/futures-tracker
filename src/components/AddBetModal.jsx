@@ -35,6 +35,14 @@ const TAB_LABELS = {
 
 const TYPE_OPTIONS = Object.keys(TAB_LABELS);
 
+const TEAM_BET_SUBTYPES = [
+  { value: "Win Total", label: "Win Total" },
+  { value: "Super Bowl", label: "Super Bowl Winner" },
+  { value: "Division Winner", label: "Division Winner" },
+  { value: "Conference Winner", label: "Conference Winner" },
+  { value: "Playoffs", label: "Make Playoffs" },
+];
+
 const initialForm = {
   site: "FD",
   league: "NBA",
@@ -43,7 +51,8 @@ const initialForm = {
   team: "",
   odds: "",
   award: "",
-  bet: "",
+  bet: "Win Total",
+  betSubtype: "Win Total",
   value: "",
   stat: "",
   ou: "Over",
@@ -98,8 +107,11 @@ const AddBetModal = ({ onClose }) => {
     const details = {};
     if (form.type === "Player Award") details.award = form.award;
     if (form.type === "Team Bet") {
-      details.bet = form.bet;
-      if (form.value) details.value = form.value;
+      details.bet = form.betSubtype;
+      if (form.betSubtype === "Win Total") {
+        details.value = form.value;
+        details.ou = form.ou;
+      }
     }
     if (form.type === "Stat Leader") details.stat = form.stat;
     if (form.type === "Prop") {
@@ -140,175 +152,217 @@ const AddBetModal = ({ onClose }) => {
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-neutral-900 w-full max-w-sm p-5 rounded-xl space-y-5 text-white">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">Add Bet</h2>
-          <button
-            onClick={onClose}
-            className="text-neutral-400 hover:text-white text-2xl leading-none transition-colors"
-          >
-            ✕
-          </button>
-        </div>
+  // Render the form fields based on the bet type
+  const renderDynamicFields = () => {
+    switch (form.type) {
+      case "Player Award":
+        return (
+          <div className="space-y-4">
+            {/* Player/Team group */}
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                  Player
+                </label>
+                <input
+                  type="text"
+                  name="player"
+                  placeholder="Enter player name"
+                  value={form.player}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
+                  required
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                  Team
+                </label>
+                <input
+                  type="text"
+                  name="team"
+                  placeholder="Enter team"
+                  value={form.team}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
+                />
+              </div>
+            </div>
 
-        <div className="space-y-4">
-          {/* Sportsbook & League */}
-          <div className="grid grid-cols-2 gap-3">
+            {/* Award and Odds */}
+            <div className="flex gap-2 items-end">
+              <div className="flex-1">
+                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                  Award
+                </label>
+                <input
+                  type="text"
+                  name="award"
+                  value={form.award}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
+                  required
+                />
+              </div>
+              <div className="w-20">
+                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                  Odds
+                </label>
+                <input
+                  type="text"
+                  name="odds"
+                  value={form.odds}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm text-right"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case "Team Bet":
+        return (
+          <div className="space-y-4">
+            {/* Team */}
             <div>
-              <label className="block text-sm font-medium text-neutral-300 mb-1.5">
-                Sportsbook
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Team
+              </label>
+              <input
+                type="text"
+                name="team"
+                placeholder="Enter team"
+                value={form.team}
+                onChange={handleChange}
+                className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
+                required
+              />
+            </div>
+
+            {/* Bet Type */}
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Bet Type
               </label>
               <select
-                name="site"
-                value={form.site}
+                name="betSubtype"
+                value={form.betSubtype}
                 onChange={handleChange}
-                className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
+                className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
+                required
               >
-                {["FD", "DK", "MG", "CAESARS"].map((s) => (
-                  <option key={s} value={s}>
-                    {s}
+                {TEAM_BET_SUBTYPES.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
                   </option>
                 ))}
               </select>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-neutral-300 mb-1.5">
-                League
-              </label>
-              <select
-                name="league"
-                value={form.league}
-                onChange={handleChange}
-                className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
-              >
-                {["NBA", "NFL", "MLB", "PGA", "CFL"].map((lg) => (
-                  <option key={lg} value={lg}>
-                    {lg}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+            {/* Win Total specific fields */}
+            {form.betSubtype === "Win Total" && (
+              <div className="flex gap-2 items-end">
+                <div className="w-20">
+                  <label className="block text-xs font-medium text-neutral-300 mb-1">
+                    O/U
+                  </label>
+                  <select
+                    name="ou"
+                    value={form.ou}
+                    onChange={handleChange}
+                    className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
+                    required
+                  >
+                    <option value="Over">Over</option>
+                    <option value="Under">Under</option>
+                  </select>
+                </div>
+                <div className="w-20">
+                  <label className="block text-xs font-medium text-neutral-300 mb-1">
+                    Value
+                  </label>
+                  <input
+                    type="text"
+                    name="value"
+                    value={form.value}
+                    onChange={handleChange}
+                    className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm text-right"
+                    required
+                  />
+                </div>
+                <div className="w-20">
+                  <label className="block text-xs font-medium text-neutral-300 mb-1">
+                    Odds
+                  </label>
+                  <input
+                    type="text"
+                    name="odds"
+                    value={form.odds}
+                    onChange={handleChange}
+                    className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm text-right"
+                    required
+                  />
+                </div>
+              </div>
+            )}
 
-          {/* Type */}
-          <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1.5">
-              Type
-            </label>
-            <select
-              name="type"
-              value={form.type}
-              onChange={handleChange}
-              className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
-            >
-              {TYPE_OPTIONS.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Player */}
-          {form.type !== "Team Bet" && (
-            <div>
-              <label className="block text-sm font-medium text-neutral-300 mb-1.5">
-                Player
-              </label>
-              <input
-                type="text"
-                name="player"
-                placeholder="Enter player name"
-                value={form.player}
-                onChange={handleChange}
-                className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
-              />
-            </div>
-          )}
-
-          {/* Team */}
-          <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1.5">
-              Team
-            </label>
-            <input
-              type="text"
-              name="team"
-              placeholder="Enter team"
-              value={form.team}
-              onChange={handleChange}
-              className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
-            />
-          </div>
-
-          {/* Dynamic Fields */}
-          {form.type === "Player Award" && (
-            <div>
-              <label className="block text-sm font-medium text-neutral-300 mb-1.5">
-                Award
-              </label>
-              <input
-                type="text"
-                name="award"
-                value={form.award}
-                onChange={handleChange}
-                className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
-              />
-            </div>
-          )}
-
-          {form.type === "Team Bet" && (
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm font-medium text-neutral-300 mb-1.5">
-                  Bet
+            {/* Non-Win Total odds */}
+            {form.betSubtype !== "Win Total" && (
+              <div className="w-20">
+                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                  Odds
                 </label>
                 <input
                   type="text"
-                  name="bet"
-                  value={form.bet}
+                  name="odds"
+                  value={form.odds}
                   onChange={handleChange}
-                  className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
+                  className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm text-right"
+                  required
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-neutral-300 mb-1.5">
-                  Value
+            )}
+          </div>
+        );
+      case "Stat Leader":
+        return (
+          <div className="space-y-4">
+            {/* Player/Team group */}
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                  Player
                 </label>
                 <input
                   type="text"
-                  name="value"
-                  value={form.value}
+                  name="player"
+                  placeholder="Enter player name"
+                  value={form.player}
                   onChange={handleChange}
-                  className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
+                  className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
+                  required
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                  Team
+                </label>
+                <input
+                  type="text"
+                  name="team"
+                  placeholder="Enter team"
+                  value={form.team}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
                 />
               </div>
             </div>
-          )}
 
-          {form.type === "Stat Leader" && (
-            <div>
-              <label className="block text-sm font-medium text-neutral-300 mb-1.5">
-                Stat
-              </label>
-              <input
-                type="text"
-                name="stat"
-                value={form.stat}
-                onChange={handleChange}
-                className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
-              />
-            </div>
-          )}
-
-          {form.type === "Prop" && (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-neutral-300 mb-1.5">
+            {/* Stat and Odds */}
+            <div className="flex gap-2 items-end">
+              <div className="w-32">
+                <label className="block text-xs font-medium text-neutral-300 mb-1">
                   Stat
                 </label>
                 <input
@@ -316,73 +370,220 @@ const AddBetModal = ({ onClose }) => {
                   name="stat"
                   value={form.stat}
                   onChange={handleChange}
-                  className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
+                  className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
+                  required
                 />
               </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-neutral-300 mb-1.5">
-                    O/U
-                  </label>
-                  <select
-                    name="ou"
-                    value={form.ou}
-                    onChange={handleChange}
-                    className="w-full h-12 p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
-                  >
-                    <option value="Over">Over</option>
-                    <option value="Under">Under</option>
-                  </select>
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium text-neutral-300 mb-1.5">
-                    Line
-                  </label>
-                  <input
-                    type="text"
-                    name="line"
-                    value={form.line}
-                    onChange={handleChange}
-                    className="w-full h-12 p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
-                  />
-                </div>
+              <div className="w-20">
+                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                  Odds
+                </label>
+                <input
+                  type="text"
+                  name="odds"
+                  value={form.odds}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm text-right"
+                  required
+                />
               </div>
             </div>
-          )}
+          </div>
+        );
+      case "Prop":
+        return (
+          <div className="space-y-4">
+            {/* Player/Team group */}
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                  Player
+                </label>
+                <input
+                  type="text"
+                  name="player"
+                  placeholder="Enter player name"
+                  value={form.player}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
+                  required
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                  Team
+                </label>
+                <input
+                  type="text"
+                  name="team"
+                  placeholder="Enter team"
+                  value={form.team}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
+                />
+              </div>
+            </div>
 
-          {/* Odds */}
-          <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1.5">
-              Odds
-            </label>
-            <input
-              type="text"
-              name="odds"
-              value={form.odds}
-              onChange={handleChange}
-              className="w-full p-3 bg-neutral-800 border border-neutral-700 rounded-lg"
-              required
-            />
+            {/* Bet details group */}
+            <div className="flex gap-2 items-end">
+              <div className="w-32">
+                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                  Stat
+                </label>
+                <input
+                  type="text"
+                  name="stat"
+                  value={form.stat}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
+                  required
+                />
+              </div>
+              <div className="w-20">
+                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                  O/U
+                </label>
+                <select
+                  name="ou"
+                  value={form.ou}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
+                  required
+                >
+                  <option value="Over">Over</option>
+                  <option value="Under">Under</option>
+                </select>
+              </div>
+              <div className="w-20">
+                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                  Line
+                </label>
+                <input
+                  type="text"
+                  name="line"
+                  value={form.line}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm text-right"
+                  required
+                />
+              </div>
+              <div className="w-20">
+                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                  Odds
+                </label>
+                <input
+                  type="text"
+                  name="odds"
+                  value={form.odds}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm text-right"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+      <div className="bg-neutral-900 w-full max-w-md rounded-xl text-white">
+        <div className="flex flex-col">
+          {/* Header with League Selection */}
+          <div className="px-4 py-3 border-b border-neutral-800">
+            <div className="flex justify-between items-center mb-3">
+              <h2 className="text-lg font-semibold">Add Bet</h2>
+              <button
+                onClick={onClose}
+                className="text-neutral-400 hover:text-white text-xl leading-none transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* League Toggle Buttons */}
+            <div className="flex gap-1.5">
+              {["NFL", "NBA", "MLB"].map((lg) => (
+                <button
+                  key={lg}
+                  onClick={() =>
+                    handleChange({ target: { name: "league", value: lg } })
+                  }
+                  className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                    form.league === lg
+                      ? "bg-neutral-200 text-neutral-900"
+                      : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white"
+                  }`}
+                >
+                  {lg}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Submit */}
-          <button
-            type="submit"
-            onClick={handleSubmit}
-            className="w-full bg-neutral-700 hover:bg-neutral-600 text-white py-3 rounded-lg font-semibold transition-colors"
-          >
-            Add Bet
-          </button>
+          {/* Content */}
+          <div className="p-4">
+            <form className="space-y-4">
+              {/* Bet Type Selection */}
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                  Type
+                </label>
+                <select
+                  name="type"
+                  value={form.type}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
+                >
+                  {TYPE_OPTIONS.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-          {message && (
-            <p
-              className={`text-center text-sm ${
-                isError ? "text-red-400" : "text-green-400"
-              }`}
-            >
-              {message}
-            </p>
-          )}
+              {/* Dynamic fields based on bet type */}
+              {renderDynamicFields()}
+            </form>
+          </div>
+
+          {/* Footer */}
+          <div className="px-4 py-3 border-t border-neutral-800">
+            {message && (
+              <p
+                className={`text-center text-xs mb-2 ${
+                  isError ? "text-red-400" : "text-green-400"
+                }`}
+              >
+                {message}
+              </p>
+            )}
+            <div className="flex gap-2 items-center">
+              <select
+                name="site"
+                value={form.site}
+                onChange={handleChange}
+                className="w-24 p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-xs"
+              >
+                {["FD", "DK", "MG", "CAESARS"].map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="submit"
+                onClick={handleSubmit}
+                className="flex-1 bg-neutral-700 hover:bg-neutral-600 text-white py-2 rounded-lg font-semibold transition-colors text-sm"
+              >
+                Add Bet
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

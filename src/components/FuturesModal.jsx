@@ -37,8 +37,15 @@ const FuturesModal = ({ sport }) => {
     <div
       id="futures-modal"
       className="w-full max-w-2xl mx-auto text-white bg-neutral-900 border border-neutral-700 rounded-xl shadow-2xl p-6"
+      style={{ maxHeight: "90vh", overflowY: "auto" }}
     >
-      <div className="mb-6">
+      <div
+        className="mb-6"
+        style={{
+          textShadow:
+            "0px 2px 6px rgba(77, 77, 77, 0.45), 0px 0.5px 0px rgba(174, 171, 171, 0.8)",
+        }}
+      >
         <h2 className="text-xl font-bold text-white mb-4">{sport}</h2>
 
         {/* Tabs */}
