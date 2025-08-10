@@ -1,23 +1,5 @@
 {
   "NBA": {
-    "Props": [
-      {
-        "type": "Prop",
-        "tabLabel": "Props",
-        "player": "LeBron James",
-        "team": "Lakers",
-        "image": "",
-        "details": {
-          "stat": "Points",
-          "ou": "Over",
-          "line": "25.5"
-        },
-        "odds": "+110",
-        "site": "FD",
-        "league": "NBA",
-        "date": "2025-08-06T09:14:18.130Z"
-      }
-    ],
     "Player Awards": [
       {
         "type": "Player Award",
@@ -48,10 +30,10 @@
         "date": "2025-08-06T10:00:00.000Z"
       }
     ],
-    "Team Bets": [
+    "Team Futures": [
       {
         "type": "Team Bet",
-        "tabLabel": "Team Bets",
+        "tabLabel": "Team Futures",
         "player": null,
         "team": "Los Angeles Rams",
         "image": "",
@@ -66,7 +48,7 @@
       },
       {
         "type": "Team Bet",
-        "tabLabel": "Team Bets",
+        "tabLabel": "Team Futures",
         "player": null,
         "team": "Lakers",
         "image": "",
@@ -95,55 +77,156 @@
         "league": "NBA",
         "date": "2025-08-06T10:02:00.000Z"
       }
+    ],
+    "Props": [
+      {
+        "type": "Prop",
+        "tabLabel": "Props",
+        "player": "LeBron James",
+        "team": "Lakers",
+        "image": "",
+        "details": {
+          "stat": "Points",
+          "ou": "Over",
+          "line": "25.5"
+        },
+        "odds": "+110",
+        "site": "FD",
+        "league": "NBA",
+        "date": "2025-08-06T09:14:18.130Z"
+      }
     ]
   },
   "NFL": {
+    "Player Awards": [
+      {
+        "type": "Player Award",
+        "tabLabel": "Player Awards",
+        "player": "Davante Adams",
+        "team": "Los Angeles Rams",
+        "image": "",
+        "details": {
+          "award": "OPOY"
+        },
+        "odds": "+30000",
+        "site": "FD",
+        "league": "NFL",
+        "date": "2025-08-10T11:33:25.535Z"
+      },
+      {
+        "type": "Player Award",
+        "tabLabel": "Player Awards",
+        "player": "Sam Darnold",
+        "team": "Seattle Seahawks",
+        "image": "",
+        "details": {
+          "award": "MVP"
+        },
+        "odds": "+5000",
+        "site": "FD",
+        "league": "NFL",
+        "date": "2025-08-10T11:40:00.000Z"
+      },
+      {
+        "type": "Player Award",
+        "tabLabel": "Player Awards",
+        "player": "Trevor Lawrence",
+        "team": "Jacksonville Jaguars",
+        "image": "",
+        "details": {
+          "award": "OPOY"
+        },
+        "odds": "+2500",
+        "site": "FD",
+        "league": "NFL",
+        "date": "2025-08-10T11:41:00.000Z"
+      }
+    ],
+    "Team Futures": [
+      {
+        "type": "Team Bet",
+        "tabLabel": "Team Futures",
+        "player": null,
+        "team": "Tampa Bay Buccaneers",
+        "image": "",
+        "details": {
+          "bet": "Win Total",
+          "value": "6.5",
+          "ou": "Over"
+        },
+        "odds": "-110",
+        "site": "FD",
+        "league": "NFL",
+        "date": "2025-08-10T11:22:43.293Z"
+      },
+      {
+        "type": "Team Bet",
+        "tabLabel": "Team Futures",
+        "player": null,
+        "team": "Detroit Lions",
+        "image": "",
+        "details": {
+          "bet": "Super Bowl"
+        },
+        "odds": "+1000",
+        "site": "FD",
+        "league": "NFL",
+        "date": "2025-08-10T10:52:47.389Z"
+      },
+      {
+        "type": "Team Bet",
+        "tabLabel": "Team Futures",
+        "player": null,
+        "team": "Las Vegas Raiders",
+        "image": "",
+        "details": {
+          "bet": "Win Total",
+          "value": "6.5",
+          "ou": "Over"
+        },
+        "odds": "+220",
+        "site": "FD",
+        "league": "NFL",
+        "date": "2025-08-10T10:50:37.443Z"
+      },
+      {
+        "type": "Team Bet",
+        "tabLabel": "Team Futures",
+        "player": null,
+        "team": "Cleveland Browns",
+        "image": "",
+        "details": {
+          "bet": "Super Bowl"
+        },
+        "odds": "7000",
+        "site": "FD",
+        "league": "NFL",
+        "date": "2025-08-10T11:31:32.770Z"
+      }
+    ],
     "Stat Leaders": [
       {
         "type": "Stat Leader",
         "tabLabel": "Stat Leaders",
-        "player": "Geno Smith",
-        "team": "Raiders",
+        "player": "Tyreek Hill",
+        "team": "Miami Dolphins",
         "image": "",
         "details": {
-          "stat": "Pass Yds"
-        },
-        "odds": "+1200",
-        "site": "FD",
-        "league": "NFL",
-        "date": "2025-08-10T08:26:35.394Z"
-      },
-      {
-        "type": "Stat Leader",
-        "tabLabel": "Stat Leaders",
-        "player": "Geno Smith",
-        "team": "Las Vegas Raiders",
-        "image": "",
-        "details": {
-          "stat": "Pass Yds"
+          "stat": "Rec Yds"
         },
         "odds": "+1100",
         "site": "FD",
         "league": "NFL",
-        "date": "2025-08-10T07:38:53.485Z"
+        "date": "2025-08-10T11:51:44.143Z"
       }
     ],
+    "Props": [],
+    "Awards": []
+  },
+  "MLB": {
     "Player Awards": [],
-    "Team Bets": [
-      {
-        "type": "Team Bet",
-        "tabLabel": "Team Bets",
-        "player": null,
-        "team": "Chargers",
-        "image": "",
-        "details": {
-          "bet": "Division Winner"
-        },
-        "odds": "+400",
-        "site": "FD",
-        "league": "NFL",
-        "date": "2025-08-10T09:47:40.428Z"
-      }
-    ]
+    "Team Futures": [],
+    "Stat Leaders": [],
+    "Props": []
   }
 }

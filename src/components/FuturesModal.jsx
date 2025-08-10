@@ -7,7 +7,7 @@ import BetRow from "./BetRow";
 const TAB_OPTIONS = [
   "All",
   "Player Awards",
-  "Team Bets",
+  "Team Futures",
   "Stat Leaders",
   "Props",
 ];

@@ -2,6 +2,114 @@ import React, { useState } from "react";
 import playerTeamMap from "../data/playerTeamMap";
 import { nflLogoMap, nbaLogoMap, mlbLogoMap } from "../utils/logoMap";
 
+// Full team name maps
+const nflFullNames = {
+  "49ers": "San Francisco 49ers",
+  Bears: "Chicago Bears",
+  Bengals: "Cincinnati Bengals",
+  Bills: "Buffalo Bills",
+  Broncos: "Denver Broncos",
+  Browns: "Cleveland Browns",
+  Buccaneers: "Tampa Bay Buccaneers",
+  Cardinals: "Arizona Cardinals",
+  Chargers: "Los Angeles Chargers",
+  Chiefs: "Kansas City Chiefs",
+  Colts: "Indianapolis Colts",
+  Cowboys: "Dallas Cowboys",
+  Dolphins: "Miami Dolphins",
+  Eagles: "Philadelphia Eagles",
+  Falcons: "Atlanta Falcons",
+  Giants: "New York Giants",
+  Jaguars: "Jacksonville Jaguars",
+  Jets: "New York Jets",
+  Lions: "Detroit Lions",
+  Packers: "Green Bay Packers",
+  Panthers: "Carolina Panthers",
+  Patriots: "New England Patriots",
+  Raiders: "Las Vegas Raiders",
+  Rams: "Los Angeles Rams",
+  Ravens: "Baltimore Ravens",
+  Saints: "New Orleans Saints",
+  Seahawks: "Seattle Seahawks",
+  Steelers: "Pittsburgh Steelers",
+  Texans: "Houston Texans",
+  Titans: "Tennessee Titans",
+  Vikings: "Minnesota Vikings",
+  Commanders: "Washington Commanders",
+  Redskins: "Washington Redskins",
+};
+const nbaFullNames = {
+  "76ers": "Philadelphia 76ers",
+  Bucks: "Milwaukee Bucks",
+  Bulls: "Chicago Bulls",
+  Cavaliers: "Cleveland Cavaliers",
+  Celtics: "Boston Celtics",
+  Clippers: "Los Angeles Clippers",
+  Grizzlies: "Memphis Grizzlies",
+  Hawks: "Atlanta Hawks",
+  Heat: "Miami Heat",
+  Hornets: "Charlotte Hornets",
+  Jazz: "Utah Jazz",
+  Kings: "Sacramento Kings",
+  Knicks: "New York Knicks",
+  Lakers: "Los Angeles Lakers",
+  Magic: "Orlando Magic",
+  Mavericks: "Dallas Mavericks",
+  Nets: "Brooklyn Nets",
+  Nuggets: "Denver Nuggets",
+  Pacers: "Indiana Pacers",
+  Pelicans: "New Orleans Pelicans",
+  Pistons: "Detroit Pistons",
+  Raptors: "Toronto Raptors",
+  Rockets: "Houston Rockets",
+  Spurs: "San Antonio Spurs",
+  Suns: "Phoenix Suns",
+  Thunder: "Oklahoma City Thunder",
+  Timberwolves: "Minnesota Timberwolves",
+  "Trail Blazers": "Portland Trail Blazers",
+  Warriors: "Golden State Warriors",
+  Wizards: "Washington Wizards",
+};
+const mlbFullNames = {
+  Angels: "Los Angeles Angels",
+  Astros: "Houston Astros",
+  Athletics: "Oakland Athletics",
+  "Blue Jays": "Toronto Blue Jays",
+  Braves: "Atlanta Braves",
+  Brewers: "Milwaukee Brewers",
+  Cardinals: "St. Louis Cardinals",
+  Cubs: "Chicago Cubs",
+  Diamondbacks: "Arizona Diamondbacks",
+  Dodgers: "Los Angeles Dodgers",
+  Giants: "San Francisco Giants",
+  Guardians: "Cleveland Guardians",
+  Mariners: "Seattle Mariners",
+  Marlins: "Miami Marlins",
+  Mets: "New York Mets",
+  Nationals: "Washington Nationals",
+  Orioles: "Baltimore Orioles",
+  Padres: "San Diego Padres",
+  Phillies: "Philadelphia Phillies",
+  Pirates: "Pittsburgh Pirates",
+  Rangers: "Texas Rangers",
+  Rays: "Tampa Bay Rays",
+  "Red Sox": "Boston Red Sox",
+  Reds: "Cincinnati Reds",
+  Rockies: "Colorado Rockies",
+  Royals: "Kansas City Royals",
+  Tigers: "Detroit Tigers",
+  Twins: "Minnesota Twins",
+  "White Sox": "Chicago White Sox",
+  Yankees: "New York Yankees",
+};
+
+const getFullTeamName = (league, team) => {
+  if (league === "NFL") return nflFullNames[team] || team;
+  if (league === "NBA") return nbaFullNames[team] || team;
+  if (league === "MLB") return mlbFullNames[team] || team;
+  return team;
+};
+
 const getPlayerNames = () =>
   Object.keys(playerTeamMap)
     .map((k) => (playerTeamMap[k] ? k : null))
@@ -17,8 +125,8 @@ const teamsByLeague = {
 
 const TAB_LABELS = {
   Prop: "Props",
-  "Player Award": "Player Awards",
-  "Team Bet": "Team Bets",
+  "Player Award": "Awards",
+  "Team Bet": "Team Futures",
   "Stat Leader": "Stat Leaders",
 };
 
@@ -34,7 +142,7 @@ const TEAM_BET_SUBTYPES = [
 
 const initialForm = {
   site: "FD",
-  league: "NBA",
+  league: "NFL",
   type: "Prop",
   player: "",
   team: "",
@@ -50,13 +158,29 @@ const initialForm = {
 
 const getTeamOptions = (league) => {
   if (league === "NFL")
-    return Object.keys(nflLogoMap).filter((t) => t !== "NFL");
+    return Object.keys(nflFullNames).sort((a, b) =>
+      nflFullNames[a].localeCompare(nflFullNames[b])
+    );
   if (league === "NBA")
-    return Object.keys(nbaLogoMap).filter((t) => t !== "NBA");
+    return Object.keys(nbaFullNames).sort((a, b) =>
+      nbaFullNames[a].localeCompare(nbaFullNames[b])
+    );
   if (league === "MLB")
-    return Object.keys(mlbLogoMap).filter((t) => t !== "MLB");
+    return Object.keys(mlbFullNames).sort((a, b) =>
+      mlbFullNames[a].localeCompare(mlbFullNames[b])
+    );
   return [];
 };
+
+const NFL_STATS = [
+  "Pass Yds",
+  "Pass TD",
+  "Rush Yds",
+  "Rec Yds",
+  "Rec",
+  "Sk",
+  "ATTD",
+];
 
 const AddBetModal = ({ onClose }) => {
   const [form, setForm] = useState(initialForm);
@@ -70,6 +194,16 @@ const AddBetModal = ({ onClose }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    // Odds input: default to + if not starting with -
+    if (name === "odds") {
+      let oddsValue = value;
+      if (oddsValue && oddsValue[0] !== "-" && oddsValue[0] !== "+") {
+        oddsValue = "+" + oddsValue.replace(/^\+/, "");
+      }
+      setForm({ ...form, odds: oddsValue });
+      return;
+    }
 
     if (name === "league") {
       setForm({ ...form, league: value, team: "" });
@@ -151,7 +285,10 @@ const AddBetModal = ({ onClose }) => {
     setMessage("");
     setIsError(false);
     const playerKey = form.player.trim().toLowerCase();
-    const teamName = form.team || playerTeamMap[playerKey] || "";
+    const teamName = getFullTeamName(
+      form.league,
+      form.team || playerTeamMap[playerKey] || ""
+    );
 
     const details = {};
     if (form.type === "Player Award") details.award = form.award;
@@ -252,33 +389,20 @@ const AddBetModal = ({ onClose }) => {
                 <label className="block text-xs font-medium text-neutral-300 mb-1">
                   Team
                 </label>
-                <input
-                  type="text"
+                <select
                   name="team"
-                  placeholder="Enter team"
                   value={form.team}
                   onChange={handleChange}
-                  onFocus={() =>
-                    setShowTeamSuggestions(filteredTeams.length > 0)
-                  }
-                  onBlur={() =>
-                    setTimeout(() => setShowTeamSuggestions(false), 100)
-                  }
                   className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
-                />
-                {showTeamSuggestions && filteredTeams.length > 0 && (
-                  <ul className="absolute z-10 left-0 right-0 bg-neutral-900 border border-neutral-700 rounded-lg mt-1 max-h-32 overflow-y-auto">
-                    {filteredTeams.map((team) => (
-                      <li
-                        key={team}
-                        className="px-3 py-1 text-sm text-white cursor-pointer hover:bg-neutral-700"
-                        onMouseDown={() => handleTeamSuggestionClick(team)}
-                      >
-                        {team}
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                  required
+                >
+                  <option value="">Select team</option>
+                  {getTeamOptions(form.league).map((team) => (
+                    <option key={team} value={team}>
+                      {getFullTeamName(form.league, team)}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -322,32 +446,20 @@ const AddBetModal = ({ onClose }) => {
               <label className="block text-xs font-medium text-neutral-300 mb-1">
                 Team
               </label>
-              <input
-                type="text"
+              <select
                 name="team"
-                placeholder="Enter team"
                 value={form.team}
                 onChange={handleChange}
-                onFocus={() => setShowTeamSuggestions(filteredTeams.length > 0)}
-                onBlur={() =>
-                  setTimeout(() => setShowTeamSuggestions(false), 100)
-                }
                 className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
                 required
-              />
-              {showTeamSuggestions && filteredTeams.length > 0 && (
-                <ul className="absolute z-10 left-0 right-0 bg-neutral-900 border border-neutral-700 rounded-lg mt-1 max-h-32 overflow-y-auto">
-                  {filteredTeams.map((team) => (
-                    <li
-                      key={team}
-                      className="px-3 py-1 text-sm text-white cursor-pointer hover:bg-neutral-700"
-                      onMouseDown={() => handleTeamSuggestionClick(team)}
-                    >
-                      {team}
-                    </li>
-                  ))}
-                </ul>
-              )}
+              >
+                <option value="">Select team</option>
+                {getTeamOptions(form.league).map((team) => (
+                  <option key={team} value={team}>
+                    {getFullTeamName(form.league, team)}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Bet Type */}
@@ -458,33 +570,20 @@ const AddBetModal = ({ onClose }) => {
                 <label className="block text-xs font-medium text-neutral-300 mb-1">
                   Team
                 </label>
-                <input
-                  type="text"
+                <select
                   name="team"
-                  placeholder="Enter team"
                   value={form.team}
                   onChange={handleChange}
-                  onFocus={() =>
-                    setShowTeamSuggestions(filteredTeams.length > 0)
-                  }
-                  onBlur={() =>
-                    setTimeout(() => setShowTeamSuggestions(false), 100)
-                  }
                   className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
-                />
-                {showTeamSuggestions && filteredTeams.length > 0 && (
-                  <ul className="absolute z-10 left-0 right-0 bg-neutral-900 border border-neutral-700 rounded-lg mt-1 max-h-32 overflow-y-auto">
-                    {filteredTeams.map((team) => (
-                      <li
-                        key={team}
-                        className="px-3 py-1 text-sm text-white cursor-pointer hover:bg-neutral-700"
-                        onMouseDown={() => handleTeamSuggestionClick(team)}
-                      >
-                        {team}
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                  required
+                >
+                  <option value="">Select team</option>
+                  {getTeamOptions(form.league).map((team) => (
+                    <option key={team} value={team}>
+                      {getFullTeamName(form.league, team)}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -494,14 +593,31 @@ const AddBetModal = ({ onClose }) => {
                 <label className="block text-xs font-medium text-neutral-300 mb-1">
                   Stat
                 </label>
-                <input
-                  type="text"
-                  name="stat"
-                  value={form.stat}
-                  onChange={handleChange}
-                  className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
-                  required
-                />
+                {form.league === "NFL" ? (
+                  <select
+                    name="stat"
+                    value={form.stat}
+                    onChange={handleChange}
+                    className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
+                    required
+                  >
+                    <option value="">Select stat</option>
+                    {NFL_STATS.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    name="stat"
+                    value={form.stat}
+                    onChange={handleChange}
+                    className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
+                    required
+                  />
+                )}
               </div>
               <div className="w-20">
                 <label className="block text-xs font-medium text-neutral-300 mb-1">
@@ -542,33 +658,20 @@ const AddBetModal = ({ onClose }) => {
                 <label className="block text-xs font-medium text-neutral-300 mb-1">
                   Team
                 </label>
-                <input
-                  type="text"
+                <select
                   name="team"
-                  placeholder="Enter team"
                   value={form.team}
                   onChange={handleChange}
-                  onFocus={() =>
-                    setShowTeamSuggestions(filteredTeams.length > 0)
-                  }
-                  onBlur={() =>
-                    setTimeout(() => setShowTeamSuggestions(false), 100)
-                  }
                   className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
-                />
-                {showTeamSuggestions && filteredTeams.length > 0 && (
-                  <ul className="absolute z-10 left-0 right-0 bg-neutral-900 border border-neutral-700 rounded-lg mt-1 max-h-32 overflow-y-auto">
-                    {filteredTeams.map((team) => (
-                      <li
-                        key={team}
-                        className="px-3 py-1 text-sm text-white cursor-pointer hover:bg-neutral-700"
-                        onMouseDown={() => handleTeamSuggestionClick(team)}
-                      >
-                        {team}
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                  required
+                >
+                  <option value="">Select team</option>
+                  {getTeamOptions(form.league).map((team) => (
+                    <option key={team} value={team}>
+                      {getFullTeamName(form.league, team)}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -675,25 +778,31 @@ const AddBetModal = ({ onClose }) => {
           {/* Content */}
           <div className="p-4">
             <form className="space-y-4">
-              {/* Bet Type Selection */}
-              <div>
-                <label className="block text-xs font-medium text-neutral-300 mb-1">
-                  Type
-                </label>
-                <select
-                  name="type"
-                  value={form.type}
-                  onChange={handleChange}
-                  className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
-                >
+              {/* Bet Type Selection as tabs */}
+              <div className="mb-4">
+                <div className="flex gap-2">
                   {TYPE_OPTIONS.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() =>
+                        handleChange({ target: { name: "type", value: t } })
+                      }
+                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                        form.type === t
+                          ? "bg-neutral-500 text-neutral-900 shadow-lg text-white border-neutral-300"
+                          : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white"
+                      }`}
+                    >
+                      {TAB_LABELS[t]}
+                    </button>
                   ))}
-                </select>
+                </div>
+                {/* Subtle divider below type tabs */}
+                <div className="flex justify-center mt-2 mb-1">
+                  <div className="h-1 w-16 bg-neutral-700 rounded-full opacity-60" />
+                </div>
               </div>
-
               {/* Dynamic fields based on bet type */}
               {renderDynamicFields()}
             </form>
