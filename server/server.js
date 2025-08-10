@@ -85,6 +85,34 @@ app.post("/api/headshots/fetch", async (req, res) => {
   }
 });
 
+app.post("/api/bets/delete", (req, res) => {
+  const { league, tabLabel, date, player, team, odds, site } = req.body;
+  console.log("Delete request:", req.body);
+  const bets = loadBets();
+  if (!league || !tabLabel || !date) {
+    return res.status(400).json({ error: "Missing fields" });
+  }
+  if (!bets[league] || !bets[league][tabLabel]) {
+    return res.status(404).json({ error: "Bet not found" });
+  }
+  const normalize = (v) => (v === undefined || v === null ? "" : String(v));
+  const before = bets[league][tabLabel].length;
+  bets[league][tabLabel] = bets[league][tabLabel].filter(
+    (b) =>
+      !(
+        String(b.date) === String(date) &&
+        normalize(b.player) === normalize(player) &&
+        normalize(b.team) === normalize(team) &&
+        normalize(b.odds) === normalize(odds) &&
+        normalize(b.site) === normalize(site)
+      )
+  );
+  const after = bets[league][tabLabel].length;
+  console.log(`Removed ${before - after} bets.`);
+  saveBets(bets);
+  res.json({ ok: true, removed: before - after });
+});
+
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });

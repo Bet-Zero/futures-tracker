@@ -9,6 +9,7 @@ const FuturesPage = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const [showAdd, setShowAdd] = useState(false);
+  const [deleteMode, setDeleteMode] = useState(false);
 
   const sportParam = params.get("sport");
   const sport = sportParam || "NFL";
@@ -56,18 +57,32 @@ const FuturesPage = () => {
           ))}
         </div>
 
-        {/* Add Bet Button */}
-        <button
-          onClick={() => setShowAdd(true)}
-          className="text-2xl -mb-2 text-white w-8 h-8 flex items-center justify-center rounded-full bg-neutral-800 hover:bg-neutral-700"
-          aria-label="Add Bet"
-        >
-          +
-        </button>
+        {/* Add/Remove Bet Buttons */}
+        <div className="flex gap-2 items-center">
+          <button
+            onClick={() => setShowAdd(true)}
+            className="text-2xl -mb-2 text-white w-8 h-8 flex items-center justify-center rounded-full bg-neutral-800 hover:bg-neutral-700"
+            aria-label="Add Bet"
+          >
+            +
+          </button>
+          <button
+            onClick={() => setDeleteMode((m) => !m)}
+            className={`text-2xl -mb-2 w-8 h-8 flex items-center justify-center rounded-full ${
+              deleteMode
+                ? "bg-red-700 text-white border border-red-400"
+                : "bg-neutral-800 text-neutral-300 hover:bg-red-700 hover:text-white"
+            }`}
+            aria-label="Remove Bets"
+            title={deleteMode ? "Done Removing" : "Remove Bets"}
+          >
+            -
+          </button>
+        </div>
       </div>
 
       {/* Modal UI */}
-      <FuturesModal sport={sport} />
+      <FuturesModal sport={sport} deleteMode={deleteMode} />
       {showAdd && <AddBetModal onClose={() => setShowAdd(false)} />}
 
       {/* Floating Share Button */}

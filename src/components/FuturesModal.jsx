@@ -1,8 +1,7 @@
 // src/components/FuturesModal.jsx
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { futuresByLeague } from "../data/futuresData";
 import BetRow from "./BetRow";
 
 const TAB_OPTIONS = [
@@ -13,12 +12,35 @@ const TAB_OPTIONS = [
   "Props",
 ];
 
-const FuturesModal = ({ sport }) => {
-  const data = futuresByLeague[sport] || [];
+const FuturesModal = ({ sport, deleteMode }) => {
+  const [data, setData] = useState([]);
   const [params] = useSearchParams();
   const navigate = useNavigate();
-
   const [selectedTab, setSelectedTab] = useState(params.get("tab") || "All");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("/api/bets");
+        const result = await response.json();
+        // Flatten bets for the selected league
+        let leagueBets = [];
+        if (result && result[sport]) {
+          Object.values(result[sport]).forEach((arr) => {
+            leagueBets = leagueBets.concat(arr);
+          });
+        }
+        setData(leagueBets);
+      } catch (error) {
+        console.error("Error fetching bets:", error);
+      }
+    };
+    fetchData();
+    // Listen for bet updates
+    const updateListener = () => fetchData();
+    window.addEventListener("betsUpdated", updateListener);
+    return () => window.removeEventListener("betsUpdated", updateListener);
+  }, [sport]);
 
   const handleTabChange = (tab) => {
     setSelectedTab(tab);
@@ -39,15 +61,8 @@ const FuturesModal = ({ sport }) => {
       className="w-full max-w-2xl mx-auto text-white bg-neutral-900 border border-neutral-700 rounded-xl shadow-2xl p-6"
       style={{ maxHeight: "90vh", overflowY: "auto" }}
     >
-      <div
-        className="mb-6"
-        style={{
-          textShadow:
-            "0px 2px 6px rgba(77, 77, 77, 0.45), 0px 0.5px 0px rgba(174, 171, 171, 0.8)",
-        }}
-      >
+      <div className="mb-6">
         <h2 className="text-xl font-bold text-white mb-4">{sport}</h2>
-
         {/* Tabs */}
         <div className="flex flex-wrap gap-2 mb-4">
           {TAB_OPTIONS.map((tab) => (
@@ -69,7 +84,9 @@ const FuturesModal = ({ sport }) => {
       {/* Bets List */}
       <div className="space-y-1.5 max-h-96 overflow-y-auto">
         {filtered.length > 0 ? (
-          filtered.map((bet, i) => <BetRow key={i} bet={bet} />)
+          filtered.map((bet, i) => (
+            <BetRow key={i} bet={bet} deleteMode={deleteMode} />
+          ))
         ) : (
           <div className="text-center py-8 text-neutral-400">
             No bets found for the selected tab.

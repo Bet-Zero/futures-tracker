@@ -50,7 +50,7 @@ const Headshot = ({ src, name }) => {
   );
 };
 
-const BetRow = ({ bet }) => {
+const BetRow = ({ bet, deleteMode }) => {
   const { type, player, team, image, odds, league, details = {} } = bet || {};
   const logoUrl = getTeamLogo(league, team);
 
@@ -93,6 +93,28 @@ const BetRow = ({ bet }) => {
     const ou = details.ou === "Over" ? "o" : details.ou === "Under" ? "u" : "";
     tag = `${ou}${details.line || ""} ${details.stat || ""}`.trim();
   }
+
+  const handleDelete = async () => {
+    if (!window.confirm("Remove this bet?")) return;
+    try {
+      await fetch("/api/bets/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          league: bet.league,
+          tabLabel: bet.tabLabel,
+          date: bet.date,
+          player: bet.player,
+          team: bet.team,
+          odds: bet.odds,
+          site: bet.site,
+        }),
+      });
+      window.dispatchEvent(new Event("betsUpdated"));
+    } catch {
+      alert("Error removing bet.");
+    }
+  };
 
   return (
     <div className="relative flex items-center justify-between bg-neutral-800 rounded border border-black overflow-hidden px-3 py-2">
@@ -147,6 +169,19 @@ const BetRow = ({ bet }) => {
           </div>
         </div>
       </div>
+
+      {/* Delete button */}
+      {deleteMode && (
+        <div className="absolute top-3.5 right-2 z-20">
+          <button
+            onClick={handleDelete}
+            className="text-xs px-2 py-1 bg-red-700 hover:bg-red-600 text-white rounded shadow"
+            title="Remove bet"
+          >
+            Delete
+          </button>
+        </div>
+      )}
     </div>
   );
 };

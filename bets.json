@@ -22,6 +22,20 @@
       {
         "type": "Player Award",
         "tabLabel": "Player Awards",
+        "player": "Anthony Davis",
+        "team": "Mavericks",
+        "image": "",
+        "details": {
+          "award": "DPOY"
+        },
+        "odds": "+3000",
+        "site": "FD",
+        "league": "NBA",
+        "date": "2025-08-10T10:17:42.503Z"
+      },
+      {
+        "type": "Player Award",
+        "tabLabel": "Player Awards",
         "player": "Luka Doncic",
         "team": "Mavericks",
         "image": "",
@@ -80,6 +94,55 @@
         "site": "FD",
         "league": "NBA",
         "date": "2025-08-06T10:02:00.000Z"
+      }
+    ]
+  },
+  "NFL": {
+    "Stat Leaders": [
+      {
+        "type": "Stat Leader",
+        "tabLabel": "Stat Leaders",
+        "player": "Geno Smith",
+        "team": "Raiders",
+        "image": "",
+        "details": {
+          "stat": "Pass Yds"
+        },
+        "odds": "+1200",
+        "site": "FD",
+        "league": "NFL",
+        "date": "2025-08-10T08:26:35.394Z"
+      },
+      {
+        "type": "Stat Leader",
+        "tabLabel": "Stat Leaders",
+        "player": "Geno Smith",
+        "team": "Las Vegas Raiders",
+        "image": "",
+        "details": {
+          "stat": "Pass Yds"
+        },
+        "odds": "+1100",
+        "site": "FD",
+        "league": "NFL",
+        "date": "2025-08-10T07:38:53.485Z"
+      }
+    ],
+    "Player Awards": [],
+    "Team Bets": [
+      {
+        "type": "Team Bet",
+        "tabLabel": "Team Bets",
+        "player": null,
+        "team": "Chargers",
+        "image": "",
+        "details": {
+          "bet": "Division Winner"
+        },
+        "odds": "+400",
+        "site": "FD",
+        "league": "NFL",
+        "date": "2025-08-10T09:47:40.428Z"
       }
     ]
   }

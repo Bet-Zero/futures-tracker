@@ -1,22 +1,11 @@
 import React, { useState } from "react";
 import playerTeamMap from "../data/playerTeamMap";
+import { nflLogoMap, nbaLogoMap, mlbLogoMap } from "../utils/logoMap";
 
-// Mock logo maps for demonstration
-const nflLogoMap = {
-  NFL: "",
-  Patriots: "",
-  Cowboys: "",
-  "49ers": "",
-  Packers: "",
-};
-const nbaLogoMap = { NBA: "", Lakers: "", Warriors: "", Celtics: "", Heat: "" };
-const mlbLogoMap = {
-  MLB: "",
-  Yankees: "",
-  Dodgers: "",
-  "Red Sox": "",
-  Giants: "",
-};
+const getPlayerNames = () =>
+  Object.keys(playerTeamMap)
+    .map((k) => (playerTeamMap[k] ? k : null))
+    .filter(Boolean);
 
 const teamsByLeague = {
   NBA: Object.keys(nbaLogoMap).filter((t) => t !== "NBA"),
@@ -59,10 +48,25 @@ const initialForm = {
   line: "",
 };
 
+const getTeamOptions = (league) => {
+  if (league === "NFL")
+    return Object.keys(nflLogoMap).filter((t) => t !== "NFL");
+  if (league === "NBA")
+    return Object.keys(nbaLogoMap).filter((t) => t !== "NBA");
+  if (league === "MLB")
+    return Object.keys(mlbLogoMap).filter((t) => t !== "MLB");
+  return [];
+};
+
 const AddBetModal = ({ onClose }) => {
   const [form, setForm] = useState(initialForm);
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [filteredPlayers, setFilteredPlayers] = useState([]);
+  const [showTeamSuggestions, setShowTeamSuggestions] = useState(false);
+  const [filteredTeams, setFilteredTeams] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -80,6 +84,16 @@ const AddBetModal = ({ onClose }) => {
     if (name === "player") {
       const key = value.trim().toLowerCase();
       const mappedTeam = playerTeamMap[key];
+      // Autocomplete logic
+      const allPlayers = getPlayerNames();
+      setFilteredPlayers(
+        value.length > 0
+          ? allPlayers.filter((p) =>
+              p.toLowerCase().includes(value.toLowerCase())
+            )
+          : []
+      );
+      setShowSuggestions(value.length > 0 && filteredPlayers.length > 0);
       if (mappedTeam) {
         const league = Object.keys(teamsByLeague).find((lg) =>
           teamsByLeague[lg].includes(mappedTeam)
@@ -94,11 +108,46 @@ const AddBetModal = ({ onClose }) => {
       }
     }
 
+    if (name === "team") {
+      const options = getTeamOptions(form.league);
+      setFilteredTeams(
+        value.length > 0
+          ? options.filter((t) => t.toLowerCase().includes(value.toLowerCase()))
+          : options
+      );
+      setShowTeamSuggestions(value.length > 0 && filteredTeams.length > 0);
+    }
+
     setForm({ ...form, [name]: value });
+  };
+
+  const handleSuggestionClick = (name) => {
+    setForm({ ...form, player: name });
+    setShowSuggestions(false);
+  };
+
+  const handleTeamSuggestionClick = (team) => {
+    setForm({ ...form, team });
+    setShowTeamSuggestions(false);
+  };
+
+  const fetchHeadshot = async (player, league) => {
+    if (!player || league !== "NFL") return;
+    try {
+      await fetch("/api/headshots/fetch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: player }),
+      });
+    } catch (err) {
+      // Ignore errors for headshot fetch
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     setMessage("");
     setIsError(false);
     const playerKey = form.player.trim().toLowerCase();
@@ -139,16 +188,24 @@ const AddBetModal = ({ onClose }) => {
 
       if (!res.ok) throw new Error("Request failed");
 
+      // Fetch headshot for NFL players
+      await fetchHeadshot(form.player, form.league);
+
       if (playerKey && teamName) {
         playerTeamMap[playerKey] = teamName;
+      } else if (form.player) {
+        playerTeamMap[form.player.trim().toLowerCase()] = form.team || "";
       }
 
       setForm(initialForm);
       setMessage("Bet saved!");
       window.dispatchEvent(new Event("betsUpdated"));
+      setIsSubmitting(false);
+      if (typeof onClose === "function") onClose();
     } catch {
       setIsError(true);
       setMessage("Error saving bet.");
+      setIsSubmitting(false);
     }
   };
 
@@ -160,7 +217,7 @@ const AddBetModal = ({ onClose }) => {
           <div className="space-y-4">
             {/* Player/Team group */}
             <div className="flex gap-2">
-              <div className="flex-1">
+              <div className="flex-1 relative">
                 <label className="block text-xs font-medium text-neutral-300 mb-1">
                   Player
                 </label>
@@ -170,11 +227,28 @@ const AddBetModal = ({ onClose }) => {
                   placeholder="Enter player name"
                   value={form.player}
                   onChange={handleChange}
+                  onFocus={() => setShowSuggestions(filteredPlayers.length > 0)}
+                  onBlur={() =>
+                    setTimeout(() => setShowSuggestions(false), 100)
+                  }
                   className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
                   required
                 />
+                {showSuggestions && filteredPlayers.length > 0 && (
+                  <ul className="absolute z-10 left-0 right-0 bg-neutral-900 border border-neutral-700 rounded-lg mt-1 max-h-32 overflow-y-auto">
+                    {filteredPlayers.map((name) => (
+                      <li
+                        key={name}
+                        className="px-3 py-1 text-sm text-white cursor-pointer hover:bg-neutral-700"
+                        onMouseDown={() => handleSuggestionClick(name)}
+                      >
+                        {name}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
-              <div className="flex-1">
+              <div className="flex-1 relative">
                 <label className="block text-xs font-medium text-neutral-300 mb-1">
                   Team
                 </label>
@@ -184,8 +258,27 @@ const AddBetModal = ({ onClose }) => {
                   placeholder="Enter team"
                   value={form.team}
                   onChange={handleChange}
+                  onFocus={() =>
+                    setShowTeamSuggestions(filteredTeams.length > 0)
+                  }
+                  onBlur={() =>
+                    setTimeout(() => setShowTeamSuggestions(false), 100)
+                  }
                   className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
                 />
+                {showTeamSuggestions && filteredTeams.length > 0 && (
+                  <ul className="absolute z-10 left-0 right-0 bg-neutral-900 border border-neutral-700 rounded-lg mt-1 max-h-32 overflow-y-auto">
+                    {filteredTeams.map((team) => (
+                      <li
+                        key={team}
+                        className="px-3 py-1 text-sm text-white cursor-pointer hover:bg-neutral-700"
+                        onMouseDown={() => handleTeamSuggestionClick(team)}
+                      >
+                        {team}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </div>
 
@@ -225,7 +318,7 @@ const AddBetModal = ({ onClose }) => {
         return (
           <div className="space-y-4">
             {/* Team */}
-            <div>
+            <div className="relative">
               <label className="block text-xs font-medium text-neutral-300 mb-1">
                 Team
               </label>
@@ -235,9 +328,26 @@ const AddBetModal = ({ onClose }) => {
                 placeholder="Enter team"
                 value={form.team}
                 onChange={handleChange}
+                onFocus={() => setShowTeamSuggestions(filteredTeams.length > 0)}
+                onBlur={() =>
+                  setTimeout(() => setShowTeamSuggestions(false), 100)
+                }
                 className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
                 required
               />
+              {showTeamSuggestions && filteredTeams.length > 0 && (
+                <ul className="absolute z-10 left-0 right-0 bg-neutral-900 border border-neutral-700 rounded-lg mt-1 max-h-32 overflow-y-auto">
+                  {filteredTeams.map((team) => (
+                    <li
+                      key={team}
+                      className="px-3 py-1 text-sm text-white cursor-pointer hover:bg-neutral-700"
+                      onMouseDown={() => handleTeamSuggestionClick(team)}
+                    >
+                      {team}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             {/* Bet Type */}
@@ -344,7 +454,7 @@ const AddBetModal = ({ onClose }) => {
                   required
                 />
               </div>
-              <div className="flex-1">
+              <div className="flex-1 relative">
                 <label className="block text-xs font-medium text-neutral-300 mb-1">
                   Team
                 </label>
@@ -354,8 +464,27 @@ const AddBetModal = ({ onClose }) => {
                   placeholder="Enter team"
                   value={form.team}
                   onChange={handleChange}
+                  onFocus={() =>
+                    setShowTeamSuggestions(filteredTeams.length > 0)
+                  }
+                  onBlur={() =>
+                    setTimeout(() => setShowTeamSuggestions(false), 100)
+                  }
                   className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
                 />
+                {showTeamSuggestions && filteredTeams.length > 0 && (
+                  <ul className="absolute z-10 left-0 right-0 bg-neutral-900 border border-neutral-700 rounded-lg mt-1 max-h-32 overflow-y-auto">
+                    {filteredTeams.map((team) => (
+                      <li
+                        key={team}
+                        className="px-3 py-1 text-sm text-white cursor-pointer hover:bg-neutral-700"
+                        onMouseDown={() => handleTeamSuggestionClick(team)}
+                      >
+                        {team}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </div>
 
@@ -409,7 +538,7 @@ const AddBetModal = ({ onClose }) => {
                   required
                 />
               </div>
-              <div className="flex-1">
+              <div className="flex-1 relative">
                 <label className="block text-xs font-medium text-neutral-300 mb-1">
                   Team
                 </label>
@@ -419,8 +548,27 @@ const AddBetModal = ({ onClose }) => {
                   placeholder="Enter team"
                   value={form.team}
                   onChange={handleChange}
+                  onFocus={() =>
+                    setShowTeamSuggestions(filteredTeams.length > 0)
+                  }
+                  onBlur={() =>
+                    setTimeout(() => setShowTeamSuggestions(false), 100)
+                  }
                   className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
                 />
+                {showTeamSuggestions && filteredTeams.length > 0 && (
+                  <ul className="absolute z-10 left-0 right-0 bg-neutral-900 border border-neutral-700 rounded-lg mt-1 max-h-32 overflow-y-auto">
+                    {filteredTeams.map((team) => (
+                      <li
+                        key={team}
+                        className="px-3 py-1 text-sm text-white cursor-pointer hover:bg-neutral-700"
+                        onMouseDown={() => handleTeamSuggestionClick(team)}
+                      >
+                        {team}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </div>
 
@@ -578,7 +726,10 @@ const AddBetModal = ({ onClose }) => {
               <button
                 type="submit"
                 onClick={handleSubmit}
-                className="flex-1 bg-neutral-700 hover:bg-neutral-600 text-white py-2 rounded-lg font-semibold transition-colors text-sm"
+                disabled={isSubmitting}
+                className={`flex-1 bg-neutral-700 hover:bg-neutral-600 text-white py-2 rounded-lg font-semibold transition-colors text-sm ${
+                  isSubmitting ? "opacity-60 cursor-not-allowed" : ""
+                }`}
               >
                 Add Bet
               </button>
