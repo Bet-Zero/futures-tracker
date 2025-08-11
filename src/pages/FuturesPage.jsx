@@ -39,8 +39,8 @@ const FuturesPage = () => {
       id={!hasSportParam ? "home-screen" : undefined}
       className="space-y-4 relative"
     >
-      {/* Header */}
-      <div className="flex items-center justify-between max-w-2xl mx-auto px-4">
+      {/* Header: sport selection and add/remove buttons */}
+      <div className="flex items-center justify-between max-w-2xl mx-auto px-4 mb-0 sm:mb-6 fixed top-0 left-0 right-0 z-30 bg-transparent sm:static sm:bg-transparent sm:z-auto sm:top-auto sm:left-auto sm:right-auto mt-6 sm:mt-0 h-[56px]">
         <div className="flex gap-1.5">
           {["NFL", "NBA", "MLB"].map((lg) => (
             <button
@@ -56,8 +56,6 @@ const FuturesPage = () => {
             </button>
           ))}
         </div>
-
-        {/* Add/Remove Bet Buttons */}
         <div className="flex gap-2 items-center">
           <button
             onClick={() => setShowAdd(true)}
@@ -80,11 +78,13 @@ const FuturesPage = () => {
           </button>
         </div>
       </div>
-
+      {/* Spacer for fixed header on mobile */}
+      <div className="block sm:hidden" style={{ height: "32px" }} />
       {/* Modal UI */}
-      <FuturesModal sport={sport} deleteMode={deleteMode} />
+      <div className="sm:mt-0 mt-0">
+        <FuturesModal sport={sport} deleteMode={deleteMode} />
+      </div>
       {showAdd && <AddBetModal onClose={() => setShowAdd(false)} />}
-
       {/* Floating Share Button */}
       <button
         onClick={handleShare}

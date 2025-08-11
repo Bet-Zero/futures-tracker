@@ -79,6 +79,19 @@ function getLogoBgPosition(team) {
   return "center 50%";
 }
 
+// Helper to split player name
+function splitPlayerName(name = "") {
+  const parts = name.split(" ").filter(Boolean);
+  if (parts.length === 1) return [parts[0], ""];
+  return [parts.slice(0, -1).join(" "), parts.slice(-1).join(" ")];
+}
+// Helper to split team name (city, mascot)
+function splitTeamName(team = "") {
+  const parts = team.split(" ").filter(Boolean);
+  if (parts.length === 1) return [parts[0], ""];
+  return [parts.slice(0, -1).join(" "), parts.slice(-1).join(" ")];
+}
+
 const BetRow = ({ bet, deleteMode }) => {
   const { type, player, team, image, odds, league, details = {} } = bet || {};
   const logoUrl = getTeamLogo(league, team);
@@ -91,21 +104,28 @@ const BetRow = ({ bet, deleteMode }) => {
 
   // Main label
   let label = "";
+  let labelTop = "";
+  let labelBottom = "";
   switch (type) {
     case "Player Award":
       label = player;
+      [labelTop, labelBottom] = splitPlayerName(player || "");
       break;
     case "Team Bet":
       label = team;
+      [labelTop, labelBottom] = splitTeamName(team || "");
       break;
     case "Stat Leader":
       label = player;
+      [labelTop, labelBottom] = splitPlayerName(player || "");
       break;
     case "Prop":
       label = player;
+      [labelTop, labelBottom] = splitPlayerName(player || "");
       break;
     default:
       label = player || team || "";
+      [labelTop, labelBottom] = splitPlayerName(label);
   }
 
   // Pill text
@@ -115,9 +135,11 @@ const BetRow = ({ bet, deleteMode }) => {
   } else if (type === "Team Bet") {
     const ou = details.ou === "Over" ? "o" : details.ou === "Under" ? "u" : "";
     if (details.value) {
-      tag = `${ou}${details.value} ${details.bet || ""}`.trim();
+      // Change 'Win Total' to 'Wins' for display
+      const betLabel = details.bet === "Win Total" ? "Wins" : details.bet || "";
+      tag = `${ou}${details.value} ${betLabel}`.trim();
     } else {
-      tag = details.bet || "";
+      tag = details.bet === "Win Total" ? "Wins" : details.bet || "";
     }
   } else if (type === "Stat Leader") {
     tag = details.stat || "";
@@ -162,7 +184,7 @@ const BetRow = ({ bet, deleteMode }) => {
             className="w-full h-full object-cover py-1.5 px-1 rounded-lg border-2 border-black/50"
             style={{ objectPosition: bgPosition }}
           />
-          <div className="absolute inset-0 bg-neutral-800 opacity-90" />
+          <div className="absolute inset-0 bg-neutral-800 opacity-85" />
         </div>
       )}
 
@@ -176,14 +198,26 @@ const BetRow = ({ bet, deleteMode }) => {
         />
 
         {/* Label */}
+        {/* Mobile: two lines, Desktop: one line */}
         <span
-          className="ml-2 text-white text-sm md:text-base font-bold truncate uppercase"
+          className="ml-3 text-white text-sm md:text-base font-bold truncate uppercase hidden sm:inline"
           style={{
             textShadow:
               "0px 2px 6px rgba(0,0,0,0.45), 0px 0.5px 0px rgba(0,0,0,0.8)",
           }}
         >
           {label}
+        </span>
+        <span
+          className="ml-3 text-white text-xs font-bold truncate uppercase sm:hidden flex flex-col leading-tight"
+          style={{
+            textShadow:
+              "0px 2px 6px rgba(0,0,0,0.45), 0px 0.5px 0px rgba(0,0,0,0.8)",
+          }}
+        >
+          {/* Restore player/team split for mobile, remove Awards/Leaders override */}
+          <span>{labelTop}</span>
+          <span>{labelBottom}</span>
         </span>
 
         {/* Spacer to push tag/odds to the right */}

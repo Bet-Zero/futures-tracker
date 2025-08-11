@@ -6,10 +6,15 @@ import BetRow from "./BetRow";
 
 const TAB_OPTIONS = [
   "All",
-  "Player Awards",
-  "Team Futures",
-  "Stat Leaders",
-  "Props",
+  // Mobile: show short labels, Desktop: show full labels
+  <span className="hidden sm:inline">Player Awards</span>,
+  <span className="sm:hidden">Awards</span>,
+  <span className="hidden sm:inline">Team Futures</span>,
+  <span className="sm:hidden">Futures</span>,
+  <span className="hidden sm:inline">Stat Leaders</span>,
+  <span className="sm:hidden">Leaders</span>,
+  <span className="hidden sm:inline">Props</span>,
+  <span className="sm:hidden">Props</span>,
 ];
 
 const FuturesModal = ({ sport, deleteMode }) => {
@@ -61,21 +66,45 @@ const FuturesModal = ({ sport, deleteMode }) => {
       className="w-full max-w-2xl mx-auto text-white bg-neutral-900 border border-neutral-700 rounded-xl shadow-2xl p-6"
       style={{ maxHeight: "90vh", overflowY: "auto" }}
     >
-      <div className="mb-6">
+      <div className="mb-2">
         <h2 className="text-xl font-bold text-white mb-4">{sport}</h2>
         {/* Tabs */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {TAB_OPTIONS.map((tab) => (
+        <div className="flex flex-wrap gap-1 sm:gap-2 mb-4">
+          {[
+            "All",
+            "Player Awards",
+            "Team Futures",
+            "Stat Leaders",
+            "Props",
+          ].map((tab, idx) => (
             <button
               key={tab}
               onClick={() => handleTabChange(tab)}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+              className={`py-2 text-sm font-medium rounded-lg transition-colors px-2.5 sm:px-4 ${
                 selectedTab === tab
                   ? "bg-neutral-500 text-neutral-900 shadow-lg text-white border-neutral-300"
                   : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white"
               }`}
             >
-              {tab}
+              {/* Show short label on mobile, full label on desktop */}
+              {tab === "Player Awards" ? (
+                <>
+                  <span className="hidden sm:inline">Player Awards</span>
+                  <span className="sm:hidden">Awards</span>
+                </>
+              ) : tab === "Stat Leaders" ? (
+                <>
+                  <span className="hidden sm:inline">Stat Leaders</span>
+                  <span className="sm:hidden">Leaders</span>
+                </>
+              ) : tab === "Team Futures" ? (
+                <>
+                  <span className="hidden sm:inline">Team Futures</span>
+                  <span className="sm:hidden">Futures</span>
+                </>
+              ) : (
+                <span>{tab}</span>
+              )}
             </button>
           ))}
         </div>
