@@ -11,8 +11,7 @@ import {
 } from "discord.js";
 import dotenv from "dotenv";
 import cors from "cors";
-import puppeteer from "puppeteer-core";
-import chromium from "@sparticuz/chromium";
+import puppeteer from "puppeteer";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -78,7 +77,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
 // ✅ Enhanced Puppeteer Screenshot
 async function takeScreenshot(url) {
   const browser = await puppeteer.launch({
-    ...chromium.linux,
     headless: true,
     defaultViewport: {
       width: 1000,

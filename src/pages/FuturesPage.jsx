@@ -22,36 +22,14 @@ const FuturesPage = () => {
   };
 
   const handleShare = async () => {
-    try {
-      const node = document.getElementById("futures-modal");
-      if (!node) {
-        console.error("Modal element not found");
-        return;
-      }
-
-      // Wait for any animations/transitions to complete
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      const { toPng } = await import("html-to-image");
-      const dataUrl = await toPng(node, {
-        pixelRatio: 2,
-        quality: 1,
-        backgroundColor: "#171717", // Match neutral-900 background
-        style: {
-          opacity: "1",
-          visibility: "visible",
-        },
-      });
-
-      const { uploadImageToDiscord } = await import(
-        "../utils/uploadToDiscord.js"
-      );
-      await uploadImageToDiscord(dataUrl, "Futures");
-      alert("Shared to Discord");
-    } catch (error) {
-      console.error("Screenshot failed:", error);
-      alert("Failed to share screenshot. Please try again.");
-    }
+    const node = document.getElementById("futures-modal");
+    const { toPng } = await import("html-to-image");
+    const dataUrl = await toPng(node, { pixelRatio: 2 });
+    const { uploadImageToDiscord } = await import(
+      "../utils/uploadToDiscord.js"
+    );
+    await uploadImageToDiscord(dataUrl, "Futures");
+    alert("Shared to Discord");
   };
 
   const hasSportParam = Boolean(sportParam);
