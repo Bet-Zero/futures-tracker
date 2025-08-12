@@ -39,12 +39,30 @@ export default async function handler(req, res) {
           data: { content: "🏓 Pong from Vercel" },
         });
 
-      case "futures":
-        // TODO: Replace this placeholder with your real futures tracker output
+      case "futures": {
+        // Use PUBLIC_BASE_URL for your Vercel domain (e.g. https://futures-tracker.vercel.app)
+        // and FUTURES_SNAPSHOT_URL for the page you want to capture (e.g. https://futures-tracker.vercel.app)
+        const base = process.env.PUBLIC_BASE_URL;
+        const target = process.env.FUTURES_SNAPSHOT_URL;
+        if (!base || !target) {
+          return res.status(200).json({
+            type: 4,
+            data: {
+              content:
+                "Error: missing PUBLIC_BASE_URL or FUTURES_SNAPSHOT_URL environment variables",
+            },
+          });
+        }
+        const snapUrl = `${base}/api/snap?url=${encodeURIComponent(
+          target
+        )}&w=1080&h=1350&wait=1000&t=${Date.now()}`;
         return res.status(200).json({
           type: 4,
-          data: { content: "📈 Here’s your futures tracker update (stub)" },
+          data: {
+            content: `📈 Futures Snapshot\n${snapUrl}`,
+          },
         });
+      }
 
       default:
         return res.status(200).json({
