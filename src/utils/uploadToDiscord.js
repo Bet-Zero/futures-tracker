@@ -2,7 +2,9 @@
 
 export const uploadImageToDiscord = async (base64Png, betType = "General") => {
   try {
-    const res = await fetch("http://localhost:3002/upload-image", {
+    console.log("📸 Starting image upload...");
+
+    const res = await fetch("/api/upload-image", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -13,13 +15,18 @@ export const uploadImageToDiscord = async (base64Png, betType = "General") => {
       }),
     });
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Upload failed");
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`Upload failed with status ${res.status}: ${errorText}`);
+    }
 
+    const data = await res.json();
     console.log("✅ Upload successful:", data.message);
     return true;
   } catch (err) {
-    console.error("❌ Upload failed:", err);
-    return false;
+    console.error("❌ Upload failed:", err.message);
+    throw err; // Re-throw to handle in the UI
   }
 };
+
+export default uploadImageToDiscord;
