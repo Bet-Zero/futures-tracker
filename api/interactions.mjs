@@ -27,20 +27,24 @@ export default async function handler(req, res) {
 
   // Slash command
   if (i.type === 2) {
-    let name = i?.data?.name || "";
-    name = name.toLowerCase();
+    let name = i?.data?.name?.toLowerCase() || "";
 
-    // LOG the command for debugging
-    console.log("INT", {
-      name,
-      user: i?.member?.user?.id || i?.user?.id,
-    });
+    // Debug log
+    console.log("INT", { name, user: i?.member?.user?.id || i?.user?.id });
 
     switch (name) {
       case "ping":
-        return res
-          .status(200)
-          .json({ type: 4, data: { content: "🏓 Pong from Vercel" } });
+        return res.status(200).json({
+          type: 4,
+          data: { content: "🏓 Pong from Vercel" },
+        });
+
+      case "futures":
+        // TODO: Replace this placeholder with your real futures tracker output
+        return res.status(200).json({
+          type: 4,
+          data: { content: "📈 Here’s your futures tracker update (stub)" },
+        });
 
       default:
         return res.status(200).json({
@@ -50,5 +54,8 @@ export default async function handler(req, res) {
     }
   }
 
-  return res.status(200).json({ type: 4, data: { content: "Unhandled." } });
+  return res.status(200).json({
+    type: 4,
+    data: { content: "Unhandled." },
+  });
 }
