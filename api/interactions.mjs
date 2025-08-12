@@ -1,15 +1,14 @@
-// api/interactions.js
 import nacl from "tweetnacl";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).send("Method Not Allowed");
 
-  // Read raw body (needed for signature verification)
+  // Read raw body (required for signature verification)
   const chunks = [];
   for await (const c of req) chunks.push(c);
   const raw = Buffer.concat(chunks);
 
-  // Verify signature from Discord
+  // Verify Discord signature
   const sig = req.headers["x-signature-ed25519"];
   const ts = req.headers["x-signature-timestamp"];
   const key = process.env.DISCORD_PUBLIC_KEY;
