@@ -1,7 +1,8 @@
 import fs from "fs-extra";
 import path from "path";
 import fetch from "node-fetch";
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-core";
+import chromium from "@sparticuz/chromium";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -46,7 +47,10 @@ export async function fetchHeadshotIfMissing(playerName) {
 
   let browser;
   try {
-    browser = await puppeteer.launch({ headless: "new" });
+    browser = await puppeteer.launch({
+      headless: "new",
+      executablePath: await chromium.executablePath(),
+    });
     const page = await browser.newPage();
     let response = await page.goto(`https://www.nfl.com/players/${slug}/`, {
       waitUntil: "domcontentloaded",
