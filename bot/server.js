@@ -72,13 +72,16 @@ client.on(Events.InteractionCreate, async (interaction) => {
       console.log(`✅ Screenshot saved to: ${filePath}`);
       const fileName = path.basename(filePath);
       const file = new AttachmentBuilder(filePath, { name: fileName });
-      const embed = new EmbedBuilder().setImage(`attachment://${fileName}`);
 
-      // Send only the image via embed with no content
-      await interaction.editReply({
-        embeds: [embed],
-        files: [file],
-      });
+      // First send the file to get a CDN URL
+      const sent = await interaction.editReply({ files: [file] });
+      const imageUrl = sent.attachments.first()?.url;
+
+      if (imageUrl) {
+        const embed = new EmbedBuilder().setImage(imageUrl);
+        // Replace attachment with embed so no link shows
+        await interaction.editReply({ embeds: [embed], attachments: [] });
+      }
 
       fs.unlinkSync(filePath);
     } catch (err) {
@@ -233,10 +236,6 @@ app.post("/upload-image", async (req, res) => {
       `✅ Temporary file saved to: ${tempFilePath} (${buffer.length} bytes)`
     );
 
-    // Create an attachment from the file (more reliable than using buffer directly)
-    const attachment = new AttachmentBuilder(tempFilePath, { name: fileName });
-    const embed = new EmbedBuilder().setImage(`attachment://${fileName}`);
-
     const channelIds = (process.env.CHANNEL_ID || "")
       .split(",")
       .map((id) => id.trim())
@@ -247,11 +246,19 @@ app.post("/upload-image", async (req, res) => {
         try {
           console.log(`📤 Sending image to channel: ${channelId}`);
           const channel = await client.channels.fetch(channelId);
-          // Send only the image via embed
-          await channel.send({
-            embeds: [embed],
-            files: [attachment],
+          // Create a fresh attachment for each channel
+          const attachment = new AttachmentBuilder(tempFilePath, {
+            name: fileName,
           });
+          // Send the file first to get CDN URL
+          const sentMessage = await channel.send({ files: [attachment] });
+          const imageUrl = sentMessage.attachments.first()?.url;
+
+          if (imageUrl) {
+            const embed = new EmbedBuilder().setImage(imageUrl);
+            // Replace attachment with embed to avoid showing link
+            await sentMessage.edit({ embeds: [embed], attachments: [] });
+          }
           console.log(`✅ Successfully sent image to channel: ${channelId}`);
         } catch (err) {
           console.error(`⚠️ Failed to send to channel ${channelId}:`, err);
