@@ -11,7 +11,7 @@ import {
 } from "discord.js";
 import dotenv from "dotenv";
 import cors from "cors";
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-core";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -76,14 +76,30 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
 // ✅ Enhanced Puppeteer Screenshot
 async function takeScreenshot(url) {
-  const browser = await puppeteer.launch({
+  const options = {
     headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
     defaultViewport: {
       width: 1000,
       height: 1400,
       deviceScaleFactor: 3, // 🔥 Retina-style sharpness
-    },
-  });
+    }
+  };
+  
+  // Add special configuration for Vercel
+  if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+    options.executablePath = await import('@puppeteer/browsers').then(
+      pkg => pkg.getInstalledBrowsers().find(b => b.browser === 'chrome')?.executablePath
+    );
+  } else {
+    options.executablePath = process.platform === 'win32'
+      ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
+      : process.platform === 'linux'
+        ? '/usr/bin/google-chrome'
+        : '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+  }
+
+  const browser = await puppeteer.launch(options);
 
   const page = await browser.newPage();
 

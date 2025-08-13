@@ -1,7 +1,7 @@
 import fs from "fs-extra";
 import path from "path";
 import fetch from "node-fetch";
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-core";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -46,7 +46,28 @@ export async function fetchHeadshotIfMissing(playerName) {
 
   let browser;
   try {
-    browser = await puppeteer.launch({ headless: "new" });
+    const options = {
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      headless: "new",
+    };
+
+    // Add special configuration for Vercel
+    if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+      options.executablePath = await import("@puppeteer/browsers").then(
+        (pkg) =>
+          pkg.getInstalledBrowsers().find((b) => b.browser === "chrome")
+            ?.executablePath
+      );
+    } else {
+      options.executablePath =
+        process.platform === "win32"
+          ? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+          : process.platform === "linux"
+          ? "/usr/bin/google-chrome"
+          : "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+    }
+
+    browser = await puppeteer.launch(options);
     const page = await browser.newPage();
     let response = await page.goto(`https://www.nfl.com/players/${slug}/`, {
       waitUntil: "domcontentloaded",
@@ -57,7 +78,7 @@ export async function fetchHeadshotIfMissing(playerName) {
       const found = await page.evaluate((name) => {
         const links = Array.from(document.querySelectorAll("a"));
         const match = links.find(
-          (a) => a.textContent.trim().toLowerCase() === name.toLowerCase(),
+          (a) => a.textContent.trim().toLowerCase() === name.toLowerCase()
         );
         return match ? match.getAttribute("href") : null;
       }, playerName);
