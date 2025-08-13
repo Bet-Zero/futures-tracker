@@ -11,9 +11,10 @@ import {
 } from "discord.js";
 import dotenv from "dotenv";
 import cors from "cors";
-import puppeteer from "puppeteer-core";
+import puppeteer from "puppeteer";
 import path from "path";
 import { fileURLToPath } from "url";
+import chromium from "@sparticuz/chromium";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -78,7 +79,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
 async function takeScreenshot(url) {
   const options = {
     headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
     defaultViewport: {
       width: 1000,
       height: 1400,
@@ -86,20 +86,43 @@ async function takeScreenshot(url) {
     },
   };
 
-  // Add special configuration for Vercel
-  if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-    options.executablePath = await import("@puppeteer/browsers").then(
-      (pkg) =>
-        pkg.getInstalledBrowsers().find((b) => b.browser === "chrome")
-          ?.executablePath
-    );
+  // Configure for serverless or local environment
+  const isServerless = process.env.AWS_LAMBDA_FUNCTION_VERSION || process.env.VERCEL;
+  
+  if (isServerless) {
+    // Use serverless Chrome
+    options.args = [
+      ...chromium.args,
+      '--no-sandbox',
+      '--disable-setuid-sandbox'
+    ];
+    options.executablePath = await chromium.executablePath();
+    options.headless = chromium.headless;
   } else {
-    options.executablePath =
-      process.platform === "win32"
-        ? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
-        : process.platform === "linux"
-        ? "/usr/bin/google-chrome"
-        : "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+    // Local development - try to find Chrome
+    options.args = ['--no-sandbox', '--disable-setuid-sandbox'];
+    
+    // Try different Chrome locations
+    const chromePaths = [
+      "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", // macOS
+      "/usr/bin/google-chrome", // Linux
+      "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe", // Windows
+      "/usr/bin/chromium-browser", // Ubuntu/Debian
+    ];
+    
+    for (const chromePath of chromePaths) {
+      try {
+        await fs.access(chromePath);
+        options.executablePath = chromePath;
+        break;
+      } catch {
+        // Continue trying other paths
+      }
+    }
+    
+    if (!options.executablePath) {
+      throw new Error('Chrome not found. Please install Google Chrome or set CHROME_PATH environment variable');
+    }
   }
 
   const browser = await puppeteer.launch(options);

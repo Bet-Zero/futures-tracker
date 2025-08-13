@@ -13,6 +13,7 @@
   "license": "MIT",
   "dependencies": {
     "@puppeteer/browsers": "^2.10.6",
+    "@sparticuz/chromium": "^138.0.2",
     "cors": "^2.8.5",
     "discord.js": "^14.21.0",
     "dotenv": "^17.2.1",
