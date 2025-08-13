@@ -14,33 +14,82 @@ export default async function handler(req, res) {
   const width = Number(get(req, "w", "1080"));
   const height = Number(get(req, "h", "1350"));
   const waitMs = Number(get(req, "wait", "1200"));
+  
   if (!target) return res.status(400).json({ error: "missing_url" });
+
+  console.log(`📸 Taking screenshot of: ${target}`);
 
   let browser;
   try {
+    console.log("🚀 Launching browser...");
     browser = await puppeteer.launch({
-      args: chromium.args,
+      args: [
+        ...chromium.args,
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process',
+        '--disable-gpu'
+      ],
       executablePath: await chromium.executablePath(),
       headless: chromium.headless,
       defaultViewport: { width, height, deviceScaleFactor: 2 },
     });
 
     try {
+      console.log("📄 Creating new page...");
       const page = await browser.newPage();
-      await page.goto(target, { waitUntil: "networkidle2", timeout: 45000 });
+      
+      // Set a more generous timeout and wait strategy
+      console.log(`🌐 Navigating to: ${target}`);
+      await page.goto(target, { 
+        waitUntil: "domcontentloaded", // Changed from networkidle2 to be more reliable
+        timeout: 30000 // Reduced from 45s to 30s
+      });
+      
+      console.log(`⏳ Waiting ${waitMs}ms for page to settle...`);
       if (waitMs > 0) await page.waitForTimeout(waitMs);
-      const png = await page.screenshot({ type: "png" });
+      
+      // Try to wait for your main content to load, but don't fail if it doesn't exist
+      try {
+        await page.waitForSelector('body', { timeout: 5000 });
+        console.log("✅ Page body loaded");
+      } catch {
+        console.log("⚠️ No body selector found, proceeding anyway");
+      }
+      
+      console.log("📸 Taking screenshot...");
+      const png = await page.screenshot({ 
+        type: "png",
+        fullPage: false // Only capture viewport, not full page
+      });
+      
+      console.log(`✅ Screenshot successful: ${png.length} bytes`);
       res.setHeader("Content-Type", "image/png");
       res.setHeader("Cache-Control", "public, max-age=60");
       return res.status(200).send(png);
+      
     } catch (e) {
-      console.error("SNAP ERR during goto/screenshot:", e);
-      return res.status(500).json({ error: "goto_or_screenshot_failed" });
+      console.error("❌ SNAP ERR during goto/screenshot:", e.message);
+      console.error("Stack:", e.stack);
+      return res.status(500).json({ 
+        error: "goto_or_screenshot_failed",
+        details: e.message,
+        target: target
+      });
     } finally {
+      console.log("🔒 Closing browser...");
       await browser.close().catch(() => {});
     }
   } catch (e) {
-    console.error("SNAP ERR during launch:", e);
-    return res.status(500).json({ error: "launch_failed" });
+    console.error("❌ SNAP ERR during launch:", e.message);
+    console.error("Stack:", e.stack);
+    return res.status(500).json({ 
+      error: "launch_failed",
+      details: e.message
+    });
   }
 }
