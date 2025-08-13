@@ -46,12 +46,15 @@ export default async function handler(req, res) {
       // Set a more generous timeout and wait strategy
       console.log(`🌐 Navigating to: ${target}`);
       await page.goto(target, { 
-        waitUntil: "domcontentloaded", // Changed from networkidle2 to be more reliable
-        timeout: 30000 // Reduced from 45s to 30s
+        waitUntil: "domcontentloaded",
+        timeout: 30000
       });
       
       console.log(`⏳ Waiting ${waitMs}ms for page to settle...`);
-      if (waitMs > 0) await page.waitForTimeout(waitMs);
+      if (waitMs > 0) {
+        // Use the correct delay method for newer Puppeteer versions
+        await new Promise(resolve => setTimeout(resolve, waitMs));
+      }
       
       // Try to wait for your main content to load, but don't fail if it doesn't exist
       try {
