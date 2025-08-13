@@ -1,41 +1,46 @@
-// api/snap.mjs — serverless screenshot for Discord unfurl
+// api/snap.mjs — Vercel-friendly screenshot route
+export const config = { runtime: "nodejs20.x", memory: 1024, maxDuration: 30 };
+
 import chromium from "@sparticuz/chromium";
 import puppeteer from "puppeteer-core";
 
-// GET /api/snap?url=<page>&w=1080&h=1350&wait=1000
+function get(req, key, dflt = "") {
+  const u = new URL(req.url, "http://localhost");
+  return u.searchParams.get(key) ?? dflt;
+}
+
 export default async function handler(req, res) {
+  const target = get(req, "url", "");
+  const width  = Number(get(req, "w", "1080"));
+  const height = Number(get(req, "h", "1350"));
+  const waitMs = Number(get(req, "wait", "1200"));
+  if (!target) return res.status(400).json({ error: "missing_url" });
+
+  let browser;
   try {
-    const url = req.query?.url || process.env.FUTURES_SNAPSHOT_URL;
-    const width = Number(req.query?.w || 1080);
-    const height = Number(req.query?.h || 1350);
-    const waitMs = Number(req.query?.wait || 1200);
-
-    if (!url) {
-      return res
-        .status(400)
-        .json({ error: "Missing url; set FUTURES_SNAPSHOT_URL or pass ?url=" });
-    }
-
-    const executablePath = await chromium.executablePath();
-    const browser = await puppeteer.launch({
+    browser = await puppeteer.launch({
       args: chromium.args,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
       defaultViewport: { width, height, deviceScaleFactor: 2 },
-      executablePath,
-      headless: true,
     });
 
-    const page = await browser.newPage();
-    await page.goto(url, { waitUntil: "networkidle2", timeout: 30000 });
-    if (waitMs > 0) await page.waitForTimeout(waitMs);
-
-    const png = await page.screenshot({ type: "png" });
-    await browser.close();
-
-    res.setHeader("Content-Type", "image/png");
-    res.setHeader("Cache-Control", "public, max-age=60");
-    return res.status(200).send(png);
-  } catch (err) {
-    console.error("SNAP ERR", err);
-    return res.status(500).json({ error: "screenshot_failed" });
+    try {
+      const page = await browser.newPage();
+      await page.goto(target, { waitUntil: "networkidle2", timeout: 45000 });
+      if (waitMs > 0) await page.waitForTimeout(waitMs);
+      const png = await page.screenshot({ type: "png" });
+      res.setHeader("Content-Type", "image/png");
+      res.setHeader("Cache-Control", "public, max-age=60");
+      return res.status(200).send(png);
+    } catch (e) {
+      console.error("SNAP ERR during goto/screenshot:", e);
+      return res.status(500).json({ error: "goto_or_screenshot_failed" });
+    } finally {
+      await browser.close().catch(() => {});
+    }
+  } catch (e) {
+    console.error("SNAP ERR during launch:", e);
+    return res.status(500).json({ error: "launch_failed" });
   }
 }
