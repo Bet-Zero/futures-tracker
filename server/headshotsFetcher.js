@@ -55,43 +55,81 @@ export async function fetchHeadshotIfMissing(playerName) {
   }
 
   let browser;
-  try {
-    // Configure Puppeteer for serverless environment
-    const options = {
-      args: chromium.args,
-      defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath(),
-      headless: chromium.headless,
-    };
+  let page;
 
-    // Fallback for local development
-    if (!process.env.VERCEL && !process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-      options.executablePath =
-        process.platform === "win32"
-          ? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
-          : process.platform === "linux"
-          ? "/usr/bin/google-chrome"
-          : "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+  try {
+    console.log(`Starting headshot fetch for: ${playerName}`);
+
+    // Configure Puppeteer for serverless environment
+    const isServerless =
+      process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_VERSION;
+
+    let options;
+    if (isServerless) {
+      console.log("Using serverless configuration");
+      options = {
+        args: [
+          ...chromium.args,
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-accelerated-2d-canvas",
+          "--no-first-run",
+          "--no-zygote",
+          "--single-process",
+          "--disable-gpu",
+        ],
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath(),
+        headless: chromium.headless,
+      };
+    } else {
+      console.log("Using local development configuration");
+      options = {
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-accelerated-2d-canvas",
+          "--no-first-run",
+          "--disable-gpu",
+        ],
+        headless: true,
+        executablePath:
+          process.platform === "win32"
+            ? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+            : process.platform === "linux"
+            ? "/usr/bin/google-chrome"
+            : "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+      };
     }
 
+    console.log("Launching browser...");
     browser = await puppeteer.launch(options);
-    const page = await browser.newPage();
 
-    // Set a user agent to avoid detection
+    console.log("Creating new page...");
+    page = await browser.newPage();
+
+    // Set viewport and user agent
+    await page.setViewport({ width: 1280, height: 720 });
     await page.setUserAgent(
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     );
 
+    console.log(`Navigating to NFL.com for: ${playerName}`);
     let response = await page.goto(`https://www.nfl.com/players/${slug}/`, {
-      waitUntil: "domcontentloaded",
-      timeout: 10000,
+      waitUntil: "networkidle2",
+      timeout: 15000,
     });
 
+    console.log(`Response status: ${response.status()}`);
+
     if (response.status() === 404) {
+      console.log("Player page not found, trying search...");
       // Try searching for the player
       await page.goto("https://www.nfl.com/players/", {
-        waitUntil: "domcontentloaded",
-        timeout: 10000,
+        waitUntil: "networkidle2",
+        timeout: 15000,
       });
 
       const found = await page.evaluate((name) => {
@@ -103,13 +141,15 @@ export async function fetchHeadshotIfMissing(playerName) {
       }, playerName);
 
       if (found) {
+        console.log(`Found player link: ${found}`);
         response = await page.goto(`https://www.nfl.com${found}`, {
-          waitUntil: "domcontentloaded",
-          timeout: 10000,
+          waitUntil: "networkidle2",
+          timeout: 15000,
         });
       }
     }
 
+    console.log("Extracting image URL...");
     // Extract the image URL
     const imgUrl = await page.evaluate(() => {
       // Try multiple selectors for headshot images
@@ -119,6 +159,7 @@ export async function fetchHeadshotIfMissing(playerName) {
         ".player-headshot img",
         'img[alt*="headshot"]',
         'img[src*="headshot"]',
+        ".nfl-o-player-image img",
       ];
 
       for (const selector of selectors) {
@@ -126,6 +167,7 @@ export async function fetchHeadshotIfMissing(playerName) {
         if (element) {
           const url = element.content || element.src;
           if (url && url.includes("http")) {
+            console.log(`Found image with selector ${selector}: ${url}`);
             return url;
           }
         }
@@ -136,8 +178,11 @@ export async function fetchHeadshotIfMissing(playerName) {
       for (const img of imgs) {
         if (
           img.src &&
-          (img.src.includes("headshot") || img.src.includes("player"))
+          (img.src.includes("headshot") ||
+            img.src.includes("player") ||
+            img.src.includes("nfl"))
         ) {
+          console.log(`Found fallback image: ${img.src}`);
           return img.src;
         }
       }
@@ -145,16 +190,30 @@ export async function fetchHeadshotIfMissing(playerName) {
       return null;
     });
 
+    console.log("Closing browser...");
+    await page.close();
     await browser.close();
+    browser = null;
+    page = null;
 
     if (!imgUrl) {
       console.log(`No headshot found for ${playerName}`);
       return { url: null, cached: false };
     }
 
+    console.log(`Found image URL: ${imgUrl}`);
+
     // Download the image and upload to Firebase Storage
     try {
-      const imgRes = await fetch(imgUrl, { timeout: 10000 });
+      console.log(`Downloading image for ${playerName}...`);
+      const imgRes = await fetch(imgUrl, {
+        timeout: 15000,
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        },
+      });
+
       if (!imgRes.ok) {
         console.log(
           `Failed to fetch image for ${playerName}: ${imgRes.status}`
@@ -163,6 +222,7 @@ export async function fetchHeadshotIfMissing(playerName) {
       }
 
       const imageBuffer = await imgRes.buffer();
+      console.log(`Downloaded ${imageBuffer.length} bytes for ${playerName}`);
 
       // Upload to Firebase Storage
       const fileName = `${slug}.png`;
@@ -193,13 +253,16 @@ export async function fetchHeadshotIfMissing(playerName) {
     }
   } catch (error) {
     console.error(`Error fetching headshot for ${playerName}:`, error.message);
-    if (browser) {
-      try {
-        await browser.close();
-      } catch (closeError) {
-        console.error("Error closing browser:", closeError.message);
-      }
+    console.error(error.stack);
+
+    // Ensure browser is properly closed
+    try {
+      if (page) await page.close();
+      if (browser) await browser.close();
+    } catch (closeError) {
+      console.error("Error closing browser:", closeError.message);
     }
+
     return { url: null, cached: false };
   }
 }
