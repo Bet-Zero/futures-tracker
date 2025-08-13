@@ -70,7 +70,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
       const filePath = await takeScreenshot(url);
       console.log(`✅ Screenshot saved to: ${filePath}`);
       const file = new AttachmentBuilder(filePath);
-      await interaction.editReply({ files: [file] });
+      // Send only the file without any text content
+      await interaction.editReply({ files: [file], content: null });
       fs.unlinkSync(filePath);
     } catch (err) {
       console.error("❌ Slash command failed:", err);
