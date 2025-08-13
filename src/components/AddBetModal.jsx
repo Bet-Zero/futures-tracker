@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import playerTeamMap from "../data/playerTeamMap";
 import { nflLogoMap, nbaLogoMap, mlbLogoMap } from "../utils/logoMap";
+import { addBet } from "../utils/betService";
 
 // Full team name maps
 const nflFullNames = {
@@ -307,23 +308,20 @@ const AddBetModal = ({ onClose }) => {
     }
 
     try {
-      const res = await fetch("/api/bets", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: form.type,
-          tabLabel: TAB_LABELS[form.type],
-          player: form.type === "Team Bet" ? null : form.player,
-          team: teamName,
-          image: "",
-          details,
-          odds: form.odds,
-          site: form.site,
-          league: form.league,
-        }),
-      });
+      const newBet = {
+        type: form.type,
+        tabLabel: TAB_LABELS[form.type],
+        player: form.type === "Team Bet" ? null : form.player,
+        team: teamName,
+        image: "",
+        details,
+        odds: form.odds,
+        site: form.site,
+        league: form.league,
+        date: new Date().toISOString(),
+      };
 
-      if (!res.ok) throw new Error("Request failed");
+      await addBet(newBet);
 
       // Fetch headshot for NFL players
       await fetchHeadshot(form.player, form.league);
@@ -339,7 +337,7 @@ const AddBetModal = ({ onClose }) => {
       window.dispatchEvent(new Event("betsUpdated"));
       setIsSubmitting(false);
       if (typeof onClose === "function") onClose();
-    } catch {
+    } catch (err) {
       setIsError(true);
       setMessage("Error saving bet.");
       setIsSubmitting(false);

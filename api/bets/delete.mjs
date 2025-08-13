@@ -1,9 +1,8 @@
-import fs from "fs";
+import { getAllBets, saveBets } from "../../src/utils/kvStore.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const BETS_FILE = path.join(__dirname, "..", "..", "bets.json");
 
 export default async function handler(req, res) {
   // Handle CORS preflight
@@ -22,17 +21,12 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Ensure bets.json exists and is readable
-    if (!fs.existsSync(BETS_FILE)) {
-      return res.status(404).json({ error: "Bets database not found" });
-    }
-
+    // Get current bets from KV store
     let currentBets;
     try {
-      const betsData = fs.readFileSync(BETS_FILE, "utf8");
-      currentBets = JSON.parse(betsData);
+      currentBets = await getAllBets();
     } catch (err) {
-      console.error("Error reading bets file:", err);
+      console.error("Error reading from KV store:", err);
       return res.status(500).json({ error: "Failed to read bets database" });
     }
 
@@ -61,9 +55,10 @@ export default async function handler(req, res) {
     }
 
     try {
-      fs.writeFileSync(BETS_FILE, JSON.stringify(currentBets, null, 2));
+      // Save updated bets back to KV store
+      await saveBets(currentBets);
     } catch (err) {
-      console.error("Error saving bets file:", err);
+      console.error("Error saving to KV store:", err);
       return res.status(500).json({ error: "Failed to save changes" });
     }
 

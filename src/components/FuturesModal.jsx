@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import BetRow from "./BetRow";
+import { getAllBets } from "../utils/betService";
 
 const TAB_OPTIONS = [
   "All",
@@ -26,8 +27,7 @@ const FuturesModal = ({ sport, deleteMode }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("/api/bets");
-        const result = await response.json();
+        const result = await getAllBets();
         // Flatten bets for the selected league
         let leagueBets = [];
         if (result && result[sport]) {

@@ -1,14 +1,9 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const BETS_FILE = path.join(__dirname, "..", "bets.json");
+import { getAllBets, saveBets } from '../src/utils/kvStore.js';
 
 export default async function handler(req, res) {
   if (req.method === "GET") {
     try {
-      const data = JSON.parse(fs.readFileSync(BETS_FILE, "utf8"));
+      const data = await getAllBets();
       return res.status(200).json(data);
     } catch (err) {
       console.error("Error loading bets:", err);
@@ -16,7 +11,7 @@ export default async function handler(req, res) {
     }
   } else if (req.method === "POST") {
     try {
-      const currentBets = JSON.parse(fs.readFileSync(BETS_FILE, "utf8"));
+      const currentBets = await getAllBets();
       const {
         type,
         tabLabel,
@@ -50,7 +45,12 @@ export default async function handler(req, res) {
       if (!currentBets[league][tabLabel]) currentBets[league][tabLabel] = [];
       currentBets[league][tabLabel].unshift(newBet);
 
-      fs.writeFileSync(BETS_FILE, JSON.stringify(currentBets, null, 2));
+      // Optional: Limit array size to prevent KV store from growing too large
+      if (currentBets[league][tabLabel].length > 100) {
+        currentBets[league][tabLabel] = currentBets[league][tabLabel].slice(0, 100);
+      }
+
+      await saveBets(currentBets);
       return res.status(201).json(newBet);
     } catch (err) {
       console.error("Error saving bet:", err);

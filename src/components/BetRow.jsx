@@ -4,6 +4,7 @@ import React, { useMemo, useState } from "react";
 import { nbaLogoMap, nflLogoMap, mlbLogoMap } from "../utils/logoMap";
 import getHeadshotUrl from "../utils/getHeadshotUrl";
 import logoBgPosition from "../data/logoBgPosition";
+import { deleteBet } from "../utils/betService";
 
 // Map league -> team logo
 // Enhanced getTeamLogo: supports full team names
@@ -151,31 +152,15 @@ const BetRow = ({ bet, deleteMode }) => {
   const handleDelete = async () => {
     if (!window.confirm("Remove this bet?")) return;
     try {
-      const apiUrl =
-        process.env.NODE_ENV === "production"
-          ? "/api/bets/delete"
-          : "http://localhost:3001/api/bets/delete";
-
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          league: bet.league,
-          tabLabel: bet.tabLabel,
-          date: bet.date,
-          player: bet.player || null,
-          team: bet.team,
-          odds: bet.odds,
-          site: bet.site,
-        }),
+      await deleteBet({
+        league: bet.league,
+        tabLabel: bet.tabLabel,
+        date: bet.date,
+        player: bet.player || null,
+        team: bet.team,
+        odds: bet.odds,
+        site: bet.site,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to delete bet");
-      }
-
       window.dispatchEvent(new Event("betsUpdated"));
     } catch (error) {
       console.error("Error deleting bet:", error);
