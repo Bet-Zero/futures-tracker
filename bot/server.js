@@ -87,21 +87,22 @@ async function takeScreenshot(url) {
   };
 
   // Configure for serverless or local environment
-  const isServerless = process.env.AWS_LAMBDA_FUNCTION_VERSION || process.env.VERCEL;
-  
+  const isServerless =
+    process.env.AWS_LAMBDA_FUNCTION_VERSION || process.env.VERCEL;
+
   if (isServerless) {
     // Use serverless Chrome
     options.args = [
       ...chromium.args,
-      '--no-sandbox',
-      '--disable-setuid-sandbox'
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
     ];
     options.executablePath = await chromium.executablePath();
     options.headless = chromium.headless;
   } else {
     // Local development - try to find Chrome
-    options.args = ['--no-sandbox', '--disable-setuid-sandbox'];
-    
+    options.args = ["--no-sandbox", "--disable-setuid-sandbox"];
+
     // Try different Chrome locations
     const chromePaths = [
       "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", // macOS
@@ -109,7 +110,7 @@ async function takeScreenshot(url) {
       "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe", // Windows
       "/usr/bin/chromium-browser", // Ubuntu/Debian
     ];
-    
+
     for (const chromePath of chromePaths) {
       try {
         await fs.access(chromePath);
@@ -119,9 +120,11 @@ async function takeScreenshot(url) {
         // Continue trying other paths
       }
     }
-    
+
     if (!options.executablePath) {
-      throw new Error('Chrome not found. Please install Google Chrome or set CHROME_PATH environment variable');
+      throw new Error(
+        "Chrome not found. Please install Google Chrome or set CHROME_PATH environment variable"
+      );
     }
   }
 

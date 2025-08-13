@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   const width = Number(get(req, "w", "1080"));
   const height = Number(get(req, "h", "1350"));
   const waitMs = Number(get(req, "wait", "1200"));
-  
+
   if (!target) return res.status(400).json({ error: "missing_url" });
 
   console.log(`📸 Taking screenshot of: ${target}`);
@@ -25,14 +25,14 @@ export default async function handler(req, res) {
     browser = await puppeteer.launch({
       args: [
         ...chromium.args,
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--single-process',
-        '--disable-gpu'
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-accelerated-2d-canvas",
+        "--no-first-run",
+        "--no-zygote",
+        "--single-process",
+        "--disable-gpu",
       ],
       executablePath: await chromium.executablePath(),
       headless: chromium.headless,
@@ -42,46 +42,72 @@ export default async function handler(req, res) {
     try {
       console.log("📄 Creating new page...");
       const page = await browser.newPage();
-      
+
       // Set a more generous timeout and wait strategy
       console.log(`🌐 Navigating to: ${target}`);
-      await page.goto(target, { 
+      await page.goto(target, {
         waitUntil: "domcontentloaded",
-        timeout: 30000
+        timeout: 30000,
       });
-      
+
       console.log(`⏳ Waiting ${waitMs}ms for page to settle...`);
       if (waitMs > 0) {
         // Use the correct delay method for newer Puppeteer versions
-        await new Promise(resolve => setTimeout(resolve, waitMs));
+        await new Promise((resolve) => setTimeout(resolve, waitMs));
       }
-      
-      // Try to wait for your main content to load, but don't fail if it doesn't exist
+
+      // Wait for #futures-modal to be visible
       try {
-        await page.waitForSelector('body', { timeout: 5000 });
-        console.log("✅ Page body loaded");
-      } catch {
-        console.log("⚠️ No body selector found, proceeding anyway");
+        await page.waitForSelector("#futures-modal", {
+          visible: true,
+          timeout: 10000,
+        });
+        console.log("✅ Modal element found");
+
+        // Get handle to the modal element
+        const modalHandle = await page.$("#futures-modal");
+
+        if (modalHandle) {
+          console.log("📸 Taking screenshot of modal only...");
+          const png = await modalHandle.screenshot({
+            type: "png",
+            omitBackground: false,
+          });
+
+          console.log(`✅ Modal screenshot successful: ${png.length} bytes`);
+          res.setHeader("Content-Type", "image/png");
+          res.setHeader("Cache-Control", "public, max-age=60");
+          return res.status(200).send(png);
+        } else {
+          console.log(
+            "⚠️ Modal element found but couldn't get handle, falling back to full screenshot"
+          );
+        }
+      } catch (err) {
+        console.log(
+          "⚠️ Modal selector not found, falling back to full screenshot:",
+          err.message
+        );
       }
-      
-      console.log("📸 Taking screenshot...");
-      const png = await page.screenshot({ 
+
+      // Fallback to taking full viewport screenshot if modal not found
+      console.log("📸 Taking full viewport screenshot...");
+      const png = await page.screenshot({
         type: "png",
-        fullPage: false // Only capture viewport, not full page
+        fullPage: false,
       });
-      
+
       console.log(`✅ Screenshot successful: ${png.length} bytes`);
       res.setHeader("Content-Type", "image/png");
       res.setHeader("Cache-Control", "public, max-age=60");
       return res.status(200).send(png);
-      
     } catch (e) {
       console.error("❌ SNAP ERR during goto/screenshot:", e.message);
       console.error("Stack:", e.stack);
-      return res.status(500).json({ 
+      return res.status(500).json({
         error: "goto_or_screenshot_failed",
         details: e.message,
-        target: target
+        target: target,
       });
     } finally {
       console.log("🔒 Closing browser...");
@@ -90,9 +116,9 @@ export default async function handler(req, res) {
   } catch (e) {
     console.error("❌ SNAP ERR during launch:", e.message);
     console.error("Stack:", e.stack);
-    return res.status(500).json({ 
+    return res.status(500).json({
       error: "launch_failed",
-      details: e.message
+      details: e.message,
     });
   }
 }
