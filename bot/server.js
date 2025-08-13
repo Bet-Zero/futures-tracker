@@ -7,6 +7,7 @@ import {
   Client,
   GatewayIntentBits,
   AttachmentBuilder,
+  EmbedBuilder,
   Events,
 } from "discord.js";
 import dotenv from "dotenv";
@@ -69,11 +70,13 @@ client.on(Events.InteractionCreate, async (interaction) => {
       console.log(`📸 Taking screenshot of: ${url}`);
       const filePath = await takeScreenshot(url);
       console.log(`✅ Screenshot saved to: ${filePath}`);
-      const file = new AttachmentBuilder(filePath);
+      const fileName = path.basename(filePath);
+      const file = new AttachmentBuilder(filePath, { name: fileName });
+      const embed = new EmbedBuilder().setImage(`attachment://${fileName}`);
 
-      // Send ONLY the file with no content
+      // Send only the image via embed with no content
       await interaction.editReply({
-        content: "",
+        embeds: [embed],
         files: [file],
       });
 
@@ -178,8 +181,9 @@ async function takeScreenshot(url) {
       throw new Error("Could not find futures modal element");
     }
 
-    // Create a unique filename with timestamp
-    const filePath = path.resolve(__dirname, `screenshot_${Date.now()}.png`);
+    // Create a unique filename with timestamp in a temporary directory
+    const tmpDir = process.env.TMPDIR || "/tmp";
+    const filePath = path.join(tmpDir, `screenshot_${Date.now()}.png`);
     console.log(`📸 Taking screenshot and saving to: ${filePath}`);
 
     await handle.screenshot({
@@ -220,17 +224,18 @@ app.post("/upload-image", async (req, res) => {
     const base64 = image.replace(/^data:image\/\w+;base64,/, "");
     const buffer = Buffer.from(base64, "base64");
 
-    // Create a temporary file for better debugging if needed
-    const tempFilePath = path.resolve(__dirname, `upload_${Date.now()}.png`);
+    const tmpDir = process.env.TMPDIR || "/tmp";
+    const timestamp = Date.now();
+    const fileName = `${betType.replace(/\s+/g, "_")}_${timestamp}.png`;
+    const tempFilePath = path.join(tmpDir, fileName);
     fs.writeFileSync(tempFilePath, buffer);
     console.log(
       `✅ Temporary file saved to: ${tempFilePath} (${buffer.length} bytes)`
     );
 
     // Create an attachment from the file (more reliable than using buffer directly)
-    const attachment = new AttachmentBuilder(tempFilePath, {
-      name: `${betType.replace(/\s+/g, "_")}_${Date.now()}.png`,
-    });
+    const attachment = new AttachmentBuilder(tempFilePath, { name: fileName });
+    const embed = new EmbedBuilder().setImage(`attachment://${fileName}`);
 
     const channelIds = (process.env.CHANNEL_ID || "")
       .split(",")
@@ -242,8 +247,9 @@ app.post("/upload-image", async (req, res) => {
         try {
           console.log(`📤 Sending image to channel: ${channelId}`);
           const channel = await client.channels.fetch(channelId);
-          // Send only the file attachment without any text content
+          // Send only the image via embed
           await channel.send({
+            embeds: [embed],
             files: [attachment],
           });
           console.log(`✅ Successfully sent image to channel: ${channelId}`);
