@@ -151,21 +151,27 @@ const BetRow = ({ bet, deleteMode }) => {
   const handleDelete = async () => {
     if (!window.confirm("Remove this bet?")) return;
     try {
-      await fetch("/api/bets/delete", {
+      const response = await fetch("/api/bets/delete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           league: bet.league,
           tabLabel: bet.tabLabel,
           date: bet.date,
-          player: bet.player,
+          player: bet.player || null,
           team: bet.team,
           odds: bet.odds,
           site: bet.site,
         }),
       });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete bet");
+      }
+
       window.dispatchEvent(new Event("betsUpdated"));
-    } catch {
+    } catch (error) {
+      console.error("Error deleting bet:", error);
       alert("Error removing bet.");
     }
   };

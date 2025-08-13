@@ -37,9 +37,14 @@ export default async function handler(req, res) {
         )
     );
     const after = currentBets[league][tabLabel].length;
+    const removed = before - after;
+
+    if (removed === 0) {
+      return res.status(404).json({ error: "No matching bet found" });
+    }
 
     fs.writeFileSync(BETS_FILE, JSON.stringify(currentBets, null, 2));
-    return res.status(200).json({ ok: true, removed: before - after });
+    return res.status(200).json({ ok: true, removed });
   } catch (err) {
     console.error("Error deleting bet:", err);
     return res.status(500).json({ error: "Failed to delete bet" });
