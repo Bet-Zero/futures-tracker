@@ -268,7 +268,7 @@ const AddBetModal = ({ onClose }) => {
   const fetchHeadshot = async (player, league) => {
     if (!player || league !== "NFL") return;
     try {
-      await fetch("/api/headshots/fetch", {
+      await fetch("/api/bets/headshots/fetch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: player }),
