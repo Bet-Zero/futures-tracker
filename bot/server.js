@@ -78,25 +78,28 @@ client.on(Events.InteractionCreate, async (interaction) => {
 async function takeScreenshot(url) {
   const options = {
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
     defaultViewport: {
       width: 1000,
       height: 1400,
       deviceScaleFactor: 3, // 🔥 Retina-style sharpness
-    }
+    },
   };
-  
+
   // Add special configuration for Vercel
   if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-    options.executablePath = await import('@puppeteer/browsers').then(
-      pkg => pkg.getInstalledBrowsers().find(b => b.browser === 'chrome')?.executablePath
+    options.executablePath = await import("@puppeteer/browsers").then(
+      (pkg) =>
+        pkg.getInstalledBrowsers().find((b) => b.browser === "chrome")
+          ?.executablePath
     );
   } else {
-    options.executablePath = process.platform === 'win32'
-      ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-      : process.platform === 'linux'
-        ? '/usr/bin/google-chrome'
-        : '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+    options.executablePath =
+      process.platform === "win32"
+        ? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+        : process.platform === "linux"
+        ? "/usr/bin/google-chrome"
+        : "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
   }
 
   const browser = await puppeteer.launch(options);
@@ -148,7 +151,10 @@ app.post("/upload-image", async (req, res) => {
       name: `upload_${Date.now()}.png`,
     });
 
-    const channelIds = (process.env.CHANNEL_ID || "").split(",").map(id => id.trim()).filter(Boolean);
+    const channelIds = (process.env.CHANNEL_ID || "")
+      .split(",")
+      .map((id) => id.trim())
+      .filter(Boolean);
     if (client.isReady() && channelIds.length > 0) {
       for (const channelId of channelIds) {
         try {
