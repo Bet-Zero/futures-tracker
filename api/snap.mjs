@@ -1,5 +1,5 @@
 // api/snap.mjs — Vercel-friendly screenshot route
-export const config = { runtime: "nodejs20.x", memory: 1024, maxDuration: 30 };
+export const config = { runtime: "nodejs", memory: 1024, maxDuration: 30 };
 
 import chromium from "@sparticuz/chromium";
 import puppeteer from "puppeteer-core";
@@ -11,7 +11,7 @@ function get(req, key, dflt = "") {
 
 export default async function handler(req, res) {
   const target = get(req, "url", "");
-  const width  = Number(get(req, "w", "1080"));
+  const width = Number(get(req, "w", "1080"));
   const height = Number(get(req, "h", "1350"));
   const waitMs = Number(get(req, "wait", "1200"));
   if (!target) return res.status(400).json({ error: "missing_url" });
