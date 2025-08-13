@@ -5,9 +5,12 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const BETS_FILE = path.join(__dirname, "..", "..", "bets.json");
 
-const normalize = (v) => (v === undefined || v === null ? "" : String(v));
-
 export default async function handler(req, res) {
+  // Handle CORS preflight
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
@@ -19,11 +22,25 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const currentBets = JSON.parse(fs.readFileSync(BETS_FILE, "utf8"));
+    // Ensure bets.json exists and is readable
+    if (!fs.existsSync(BETS_FILE)) {
+      return res.status(404).json({ error: "Bets database not found" });
+    }
+
+    let currentBets;
+    try {
+      const betsData = fs.readFileSync(BETS_FILE, "utf8");
+      currentBets = JSON.parse(betsData);
+    } catch (err) {
+      console.error("Error reading bets file:", err);
+      return res.status(500).json({ error: "Failed to read bets database" });
+    }
 
     if (!currentBets[league] || !currentBets[league][tabLabel]) {
-      return res.status(404).json({ error: "Bet not found" });
+      return res.status(404).json({ error: "League or tab not found" });
     }
+
+    const normalize = (v) => (v === undefined || v === null ? "" : String(v));
 
     const before = currentBets[league][tabLabel].length;
     currentBets[league][tabLabel] = currentBets[league][tabLabel].filter(
@@ -43,10 +60,16 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: "No matching bet found" });
     }
 
-    fs.writeFileSync(BETS_FILE, JSON.stringify(currentBets, null, 2));
+    try {
+      fs.writeFileSync(BETS_FILE, JSON.stringify(currentBets, null, 2));
+    } catch (err) {
+      console.error("Error saving bets file:", err);
+      return res.status(500).json({ error: "Failed to save changes" });
+    }
+
     return res.status(200).json({ ok: true, removed });
   } catch (err) {
-    console.error("Error deleting bet:", err);
-    return res.status(500).json({ error: "Failed to delete bet" });
+    console.error("Error in delete handler:", err);
+    return res.status(500).json({ error: "Internal server error" });
   }
 }

@@ -151,7 +151,12 @@ const BetRow = ({ bet, deleteMode }) => {
   const handleDelete = async () => {
     if (!window.confirm("Remove this bet?")) return;
     try {
-      const response = await fetch("/api/bets/delete", {
+      const apiUrl =
+        process.env.NODE_ENV === "production"
+          ? "/api/bets/delete"
+          : "http://localhost:3001/api/bets/delete";
+
+      const response = await fetch(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -165,14 +170,16 @@ const BetRow = ({ bet, deleteMode }) => {
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to delete bet");
+        throw new Error(data.error || "Failed to delete bet");
       }
 
       window.dispatchEvent(new Event("betsUpdated"));
     } catch (error) {
       console.error("Error deleting bet:", error);
-      alert("Error removing bet.");
+      alert(error.message || "Error removing bet.");
     }
   };
 
