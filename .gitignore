@@ -26,9 +26,6 @@ bot/.env
 *.sln
 *.sw?
 
-# Images
-public/nfl-headshots/
-
 # Tools
 import_nfl_svgs.js
 CONTEXT.md
