@@ -58,13 +58,17 @@ client.on(Events.InteractionCreate, async (interaction) => {
     const type = interaction.options.getString("type");
     const category = interaction.options.getString("category");
 
-    const url = `http://localhost:5173/futures?sport=${sport}&type=${type}&category=${encodeURIComponent(
+    // Use environment variable for base URL or fallback to localhost for development
+    const baseUrl = process.env.APP_URL || "http://localhost:5173";
+    const url = `${baseUrl}/futures?sport=${sport}&type=${type}&category=${encodeURIComponent(
       category || ""
     )}&group=All`;
 
     try {
       await interaction.deferReply();
+      console.log(`📸 Taking screenshot of: ${url}`);
       const filePath = await takeScreenshot(url);
+      console.log(`✅ Screenshot saved to: ${filePath}`);
       const file = new AttachmentBuilder(filePath);
       await interaction.editReply({ files: [file] });
       fs.unlinkSync(filePath);
@@ -115,6 +119,7 @@ async function takeScreenshot(url) {
       try {
         await fs.access(chromePath);
         options.executablePath = chromePath;
+        console.log(`✅ Found Chrome at: ${chromePath}`);
         break;
       } catch {
         // Continue trying other paths
@@ -128,76 +133,139 @@ async function takeScreenshot(url) {
     }
   }
 
-  const browser = await puppeteer.launch(options);
+  let browser;
+  try {
+    console.log("🚀 Launching browser...");
+    browser = await puppeteer.launch(options);
 
-  const page = await browser.newPage();
+    console.log("📄 Creating new page...");
+    const page = await browser.newPage();
 
-  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
+    console.log(`🌐 Navigating to: ${url}`);
+    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
 
-  // Wait for React to fully render filtered state
-  await page.waitForSelector("#home-screen", { hidden: true, timeout: 15000 });
-  await page.waitForSelector("#futures-modal", {
-    visible: true,
-    timeout: 10000,
-  });
+    // Wait for React to fully render filtered state
+    console.log("⏳ Waiting for home screen to disappear...");
+    await page.waitForSelector("#home-screen", {
+      hidden: true,
+      timeout: 15000,
+    });
 
-  // Let React settle with 2 animation frames
-  await page.evaluate(
-    () =>
-      new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
-  );
+    console.log("⏳ Waiting for futures modal to appear...");
+    await page.waitForSelector("#futures-modal", {
+      visible: true,
+      timeout: 10000,
+    });
 
-  const handle = await page.$("#futures-modal");
+    // Let React settle with 2 animation frames
+    console.log("⏳ Allowing React animations to settle...");
+    await page.evaluate(
+      () =>
+        new Promise((r) =>
+          requestAnimationFrame(() => requestAnimationFrame(r))
+        )
+    );
 
-  const filePath = `screenshot_${Date.now()}.png`;
-  await handle.screenshot({
-    path: filePath,
-    type: "png",
-    omitBackground: false,
-  });
+    console.log("🔍 Locating futures modal element...");
+    const handle = await page.$("#futures-modal");
+    if (!handle) {
+      throw new Error("Could not find futures modal element");
+    }
 
-  await browser.close();
-  return filePath;
+    // Create a unique filename with timestamp
+    const filePath = path.resolve(__dirname, `screenshot_${Date.now()}.png`);
+    console.log(`📸 Taking screenshot and saving to: ${filePath}`);
+
+    await handle.screenshot({
+      path: filePath,
+      type: "png",
+      omitBackground: false,
+    });
+
+    console.log(
+      `✅ Screenshot saved successfully (${fs.statSync(filePath).size} bytes)`
+    );
+    return filePath;
+  } catch (error) {
+    console.error("❌ Screenshot error:", error);
+    throw error;
+  } finally {
+    if (browser) {
+      console.log("🔒 Closing browser...");
+      await browser
+        .close()
+        .catch((e) => console.error("Error closing browser:", e));
+    }
+  }
 }
 
 // ✅ Upload Image API (from frontend -> Discord)
 app.post("/upload-image", async (req, res) => {
   try {
-    const { image } = req.body;
+    const { image, betType = "General" } = req.body;
     if (!image) {
       return res
         .status(400)
         .json({ success: false, error: "No image provided" });
     }
 
-    console.log("📨 Received image upload");
+    console.log(`📨 Received image upload (${betType})`);
     const base64 = image.replace(/^data:image\/\w+;base64,/, "");
     const buffer = Buffer.from(base64, "base64");
-    const attachment = new AttachmentBuilder(buffer, {
-      name: `upload_${Date.now()}.png`,
+
+    // Create a temporary file for better debugging if needed
+    const tempFilePath = path.resolve(__dirname, `upload_${Date.now()}.png`);
+    fs.writeFileSync(tempFilePath, buffer);
+    console.log(
+      `✅ Temporary file saved to: ${tempFilePath} (${buffer.length} bytes)`
+    );
+
+    // Create an attachment from the file (more reliable than using buffer directly)
+    const attachment = new AttachmentBuilder(tempFilePath, {
+      name: `${betType.replace(/\s+/g, "_")}_${Date.now()}.png`,
     });
 
     const channelIds = (process.env.CHANNEL_ID || "")
       .split(",")
       .map((id) => id.trim())
       .filter(Boolean);
+
     if (client.isReady() && channelIds.length > 0) {
       for (const channelId of channelIds) {
         try {
+          console.log(`📤 Sending image to channel: ${channelId}`);
           const channel = await client.channels.fetch(channelId);
-          await channel.send({ files: [attachment] });
+          await channel.send({
+            content: `📊 ${betType} Futures:`,
+            files: [attachment],
+          });
+          console.log(`✅ Successfully sent image to channel: ${channelId}`);
         } catch (err) {
           console.error(`⚠️ Failed to send to channel ${channelId}:`, err);
         }
       }
+
+      // Clean up the temporary file
+      fs.unlinkSync(tempFilePath);
+      console.log(`🧹 Cleaned up temporary file: ${tempFilePath}`);
+
+      res.json({
+        success: true,
+        message: `Image sent to ${channelIds.length} channel(s)`,
+      });
     } else {
       console.log("⚠️ Discord not ready or CHANNEL_ID missing");
+      res.status(500).json({
+        success: false,
+        error: "Discord not ready or CHANNEL_ID missing",
+      });
     }
-
-    res.json({ success: true });
   } catch (err) {
     console.error("❌ Image upload failed:", err);
-    res.status(500).json({ success: false });
+    res.status(500).json({
+      success: false,
+      error: err.message,
+    });
   }
 });
 

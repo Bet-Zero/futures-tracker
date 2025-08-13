@@ -22,14 +22,39 @@ const FuturesPage = () => {
   };
 
   const handleShare = async () => {
-    const node = document.getElementById("futures-modal");
-    const { toPng } = await import("html-to-image");
-    const dataUrl = await toPng(node, { pixelRatio: 2 });
-    const { uploadImageToDiscord } = await import(
-      "../utils/uploadToDiscord.js"
-    );
-    await uploadImageToDiscord(dataUrl, "Futures");
-    alert("Shared to Discord");
+    try {
+      // Get current URL parameters to create a screenshot URL
+      const currentUrl = window.location.href;
+
+      // Directly fetch the screenshot from our snap API
+      const response = await fetch(
+        `/api/snap?url=${encodeURIComponent(currentUrl)}`
+      );
+
+      if (!response.ok) {
+        throw new Error(`Screenshot failed: ${response.statusText}`);
+      }
+
+      // Convert the response to a base64 string
+      const blob = await response.blob();
+      const reader = new FileReader();
+
+      // Use a promise to handle the async FileReader
+      const base64Image = await new Promise((resolve) => {
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
+      });
+
+      // Upload the image to Discord
+      const { uploadImageToDiscord } = await import(
+        "../utils/uploadToDiscord.js"
+      );
+      await uploadImageToDiscord(base64Image, "Futures");
+      alert("Shared to Discord");
+    } catch (error) {
+      console.error("Error sharing to Discord:", error);
+      alert("Failed to share to Discord");
+    }
   };
 
   const hasSportParam = Boolean(sportParam);
