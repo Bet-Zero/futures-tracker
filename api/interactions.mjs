@@ -76,13 +76,13 @@ export default async function handler(req, res) {
         })`;
 
         // ✅ Embed-only response: no content, so no raw link appears
+        // ✅ Embed-only with NO title — just the screenshot
         return res.status(200).json({
           type: 4, // CHANNEL_MESSAGE_WITH_SOURCE
           data: {
             embeds: [
               {
-                title,
-                image: { url: snapUrl }, // show the image without posting the URL as text
+                image: { url: snapUrl }, // show the image only
               },
             ],
             allowed_mentions: { parse: [] },
