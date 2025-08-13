@@ -148,10 +148,16 @@ app.post("/upload-image", async (req, res) => {
       name: `upload_${Date.now()}.png`,
     });
 
-    const channelId = process.env.CHANNEL_ID;
-    if (client.isReady() && channelId) {
-      const channel = await client.channels.fetch(channelId);
-      await channel.send({ files: [attachment] });
+    const channelIds = (process.env.CHANNEL_ID || "").split(",").map(id => id.trim()).filter(Boolean);
+    if (client.isReady() && channelIds.length > 0) {
+      for (const channelId of channelIds) {
+        try {
+          const channel = await client.channels.fetch(channelId);
+          await channel.send({ files: [attachment] });
+        } catch (err) {
+          console.error(`⚠️ Failed to send to channel ${channelId}:`, err);
+        }
+      }
     } else {
       console.log("⚠️ Discord not ready or CHANNEL_ID missing");
     }
