@@ -86,7 +86,7 @@ async function takeScreenshot(url) {
     defaultViewport: {
       width: 1000,
       height: 1400,
-      deviceScaleFactor: 3, // 🔥 Retina-style sharpness
+      deviceScaleFactor: 4, // 🔥 Ultra-high quality (increased from 3)
     },
   };
 
@@ -180,6 +180,7 @@ async function takeScreenshot(url) {
       path: filePath,
       type: "png",
       omitBackground: false,
+      quality: 100, // Maximum image quality
     });
 
     console.log(
@@ -235,8 +236,8 @@ app.post("/upload-image", async (req, res) => {
         try {
           console.log(`📤 Sending image to channel: ${channelId}`);
           const channel = await client.channels.fetch(channelId);
+          // Send only the file attachment without any text content
           await channel.send({
-            content: `📊 ${betType} Futures:`,
             files: [attachment],
           });
           console.log(`✅ Successfully sent image to channel: ${channelId}`);
