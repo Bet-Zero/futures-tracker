@@ -65,13 +65,18 @@ client.on(Events.InteractionCreate, async (interaction) => {
     )}&group=All`;
 
     try {
-      await interaction.deferReply();
+      await interaction.deferReply({ ephemeral: false });
       console.log(`📸 Taking screenshot of: ${url}`);
       const filePath = await takeScreenshot(url);
       console.log(`✅ Screenshot saved to: ${filePath}`);
       const file = new AttachmentBuilder(filePath);
-      // Send only the file without any text content
-      await interaction.editReply({ files: [file], content: null });
+
+      // Send ONLY the file with no content
+      await interaction.editReply({
+        content: "",
+        files: [file],
+      });
+
       fs.unlinkSync(filePath);
     } catch (err) {
       console.error("❌ Slash command failed:", err);

@@ -2,7 +2,12 @@
 
 export const uploadImageToDiscord = async (base64Png, betType = "General") => {
   try {
-    const res = await fetch("http://localhost:3002/upload-image", {
+    // Use a relative path that will work with our Vercel configuration
+    const botApiUrl = "/bot-api/upload-image";
+    
+    console.log(`🔄 Uploading to Discord via: ${botApiUrl}`);
+    
+    const res = await fetch(botApiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -13,13 +18,16 @@ export const uploadImageToDiscord = async (base64Png, betType = "General") => {
       }),
     });
 
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({ error: "Failed to parse response" }));
+      throw new Error(data.error || `Upload failed with status: ${res.status}`);
+    }
+    
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Upload failed");
-
     console.log("✅ Upload successful:", data.message);
     return true;
   } catch (err) {
     console.error("❌ Upload failed:", err);
-    return false;
+    throw err; // Re-throw to allow caller to handle the error
   }
 };
