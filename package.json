@@ -11,7 +11,8 @@
     "start:frontend": "vite",
     "start:api": "node server/server.js",
     "start:bot": "node bot/server.js",
-    "seed:nfl-headshots": "node scripts/fetch_nfl_headshots.js"
+    "seed:nfl-headshots": "node scripts/fetch_nfl_headshots.js",
+    "migrate:bets": "ts-node scripts/migrate_firebets.ts"
   },
   "dependencies": {
     "@puppeteer/browsers": "^2.10.6",
