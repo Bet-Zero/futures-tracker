@@ -6,13 +6,13 @@ import getHeadshotUrl from "../utils/getHeadshotUrl";
 import logoBgPosition from "../data/logoBgPosition";
 import { deleteBet } from "../utils/betService";
 
-// Map league -> team logo
+// Map sport -> team logo
 // Enhanced getTeamLogo: supports full team names
-const getTeamLogo = (league, team) => {
+const getTeamLogo = (sport, team) => {
   let map;
-  if (league === "NBA") map = nbaLogoMap;
-  else if (league === "NFL") map = nflLogoMap;
-  else if (league === "MLB") map = mlbLogoMap;
+  if (sport === "NBA") map = nbaLogoMap;
+  else if (sport === "NFL") map = nflLogoMap;
+  else if (sport === "MLB") map = mlbLogoMap;
   else map = {};
 
   // Try direct match
@@ -94,33 +94,34 @@ function splitTeamName(team = "") {
 }
 
 const BetRow = ({ bet, deleteMode }) => {
-  const { type, player, team, image, odds, league, details = {} } = bet || {};
-  const logoUrl = getTeamLogo(league, team);
+  const { category, player, team, image, odds_american, sport, details = {} } =
+    bet || {};
+  const logoUrl = getTeamLogo(sport, team);
 
-  // For Team Bet, use team logo as headshot
-  const isTeamLogo = type === "Team Bet";
+  // For Team Futures, use team logo as headshot
+  const isTeamLogo = category === "Team Futures";
   const headshotSrc = isTeamLogo
     ? logoUrl
-    : getHeadshotUrl(player, league, image);
+    : getHeadshotUrl(player, sport, image);
 
   // Main label
   let label = "";
   let labelTop = "";
   let labelBottom = "";
-  switch (type) {
-    case "Player Award":
+  switch (category) {
+    case "Awards":
       label = player;
       [labelTop, labelBottom] = splitPlayerName(player || "");
       break;
-    case "Team Bet":
+    case "Team Futures":
       label = team;
       [labelTop, labelBottom] = splitTeamName(team || "");
       break;
-    case "Stat Leader":
+    case "Stat Leaders":
       label = player;
       [labelTop, labelBottom] = splitPlayerName(player || "");
       break;
-    case "Prop":
+    case "Props":
       label = player;
       [labelTop, labelBottom] = splitPlayerName(player || "");
       break;
@@ -131,9 +132,9 @@ const BetRow = ({ bet, deleteMode }) => {
 
   // Pill text
   let tag = "";
-  if (type === "Player Award") {
+  if (category === "Awards") {
     tag = details.award || "";
-  } else if (type === "Team Bet") {
+  } else if (category === "Team Futures") {
     const ou = details.ou === "Over" ? "o" : details.ou === "Under" ? "u" : "";
     if (details.value) {
       // Change 'Win Total' to 'Wins' for display
@@ -142,9 +143,9 @@ const BetRow = ({ bet, deleteMode }) => {
     } else {
       tag = details.bet === "Win Total" ? "Wins" : details.bet || "";
     }
-  } else if (type === "Stat Leader") {
+  } else if (category === "Stat Leaders") {
     tag = details.stat || "";
-  } else if (type === "Prop") {
+  } else if (category === "Props") {
     const ou = details.ou === "Over" ? "o" : details.ou === "Under" ? "u" : "";
     tag = `${ou}${details.line || ""} ${details.stat || ""}`.trim();
   }
@@ -153,13 +154,9 @@ const BetRow = ({ bet, deleteMode }) => {
     if (!window.confirm("Remove this bet?")) return;
     try {
       await deleteBet({
-        league: bet.league,
-        tabLabel: bet.tabLabel,
-        date: bet.date,
-        player: bet.player || null,
-        team: bet.team,
-        odds: bet.odds,
-        site: bet.site,
+        sport: bet.sport || bet.league,
+        category: bet.category || bet.tabLabel || bet.type,
+        createdAt: bet.createdAt || bet.date,
       });
       window.dispatchEvent(new Event("betsUpdated"));
     } catch (error) {
@@ -239,9 +236,9 @@ const BetRow = ({ bet, deleteMode }) => {
           </div>
           {/* Odds: always right-aligned, fixed width */}
           <div className="flex-shrink-0 w-[70px] ml-2 flex items-center justify-end">
-            {odds ? (
+            {odds_american ? (
               <span className="text-white text-sm md:text-base font-bold tracking-widest whitespace-nowrap">
-                {odds}
+                {odds_american}
               </span>
             ) : null}
           </div>

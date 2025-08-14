@@ -56,14 +56,14 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
   if (interaction.commandName === "futures") {
     const sport = interaction.options.getString("sport");
-    const type = interaction.options.getString("type");
     const category = interaction.options.getString("category");
+    const market = interaction.options.getString("market");
 
     // Use environment variable for base URL or fallback to localhost for development
     const baseUrl = process.env.APP_URL || "http://localhost:5173";
-    const url = `${baseUrl}/futures?sport=${sport}&type=${type}&category=${encodeURIComponent(
-      category || ""
-    )}&group=All`;
+    const url = `${baseUrl}/futures?sport=${sport}&category=${encodeURIComponent(
+      category || "All"
+    )}${market ? `&market=${encodeURIComponent(market)}` : ""}`;
 
     try {
       await interaction.deferReply({ ephemeral: false });

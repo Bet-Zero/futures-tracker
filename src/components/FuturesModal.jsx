@@ -16,19 +16,19 @@ const FuturesModal = ({ sport, category, market, deleteMode }) => {
     setActiveCategory(category || "All");
   }, [category]);
 
-  // Fetch bets for league
+  // Fetch bets for sport
   useEffect(() => {
     const fetchData = async () => {
       try {
         const result = await getAllBets();
-        let leagueBets = [];
+        let sportBets = [];
         if (result && result[sport]) {
           Object.values(result[sport]).forEach((arr) => {
-            leagueBets = leagueBets.concat(arr);
+            sportBets = sportBets.concat(arr);
           });
         }
         setData(
-          leagueBets.map((b) => ({
+          sportBets.map((b) => ({
             ...b,
             sport: b.sport ?? b.league,
             category: b.category ?? b.type ?? b.tabLabel ?? "All",
@@ -51,8 +51,6 @@ const FuturesModal = ({ sport, category, market, deleteMode }) => {
     const el = document.getElementById("futures-modal");
     if (el) {
       el.setAttribute("data-active-category", activeCategory);
-      // legacy alias
-      el.setAttribute("data-active-group", activeCategory);
     }
   }, [activeCategory]);
 

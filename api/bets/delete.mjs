@@ -15,9 +15,21 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { league, tabLabel, date, player, team, odds, site } = req.body;
+    const {
+      sport,
+      category,
+      createdAt,
+      player,
+      team,
+      odds_american,
+      book,
+    } = req.body;
 
-    if (!league || !tabLabel || !date) {
+    const s = sport ?? req.body.league;
+    const cat = category ?? req.body.tabLabel;
+    const ts = createdAt ?? req.body.date;
+
+    if (!s || !cat || !ts) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -30,24 +42,24 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Failed to read bets database" });
     }
 
-    if (!currentBets[league] || !currentBets[league][tabLabel]) {
-      return res.status(404).json({ error: "League or tab not found" });
+    if (!currentBets[s] || !currentBets[s][cat]) {
+      return res.status(404).json({ error: "Sport or category not found" });
     }
 
     const normalize = (v) => (v === undefined || v === null ? "" : String(v));
 
-    const before = currentBets[league][tabLabel].length;
-    currentBets[league][tabLabel] = currentBets[league][tabLabel].filter(
+    const before = currentBets[s][cat].length;
+    currentBets[s][cat] = currentBets[s][cat].filter(
       (b) =>
         !(
-          String(b.date) === String(date) &&
-          normalize(b.player) === normalize(player) &&
+          String(b.createdAt ?? b.date) === String(ts) &&
+          normalize(b.selection ?? b.player) === normalize(player) &&
           normalize(b.team) === normalize(team) &&
-          normalize(b.odds) === normalize(odds) &&
-          normalize(b.site) === normalize(site)
+          normalize(b.odds_american ?? b.odds) === normalize(odds_american) &&
+          normalize(b.book ?? b.site) === normalize(book)
         )
     );
-    const after = currentBets[league][tabLabel].length;
+    const after = currentBets[s][cat].length;
     const removed = before - after;
 
     if (removed === 0) {

@@ -1,8 +1,8 @@
 import playerHeadshots from "../data/playerHeadshots.json";
 
-export function getHeadshotUrl(player, league, providedImage) {
+export function getHeadshotUrl(player, sport, providedImage) {
   if (providedImage) return providedImage;
-  if (league !== "NFL") return null;
+  if (sport !== "NFL") return null;
   return playerHeadshots[player] || null;
 }
 
