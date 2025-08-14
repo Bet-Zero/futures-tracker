@@ -39,8 +39,8 @@ export async function addBet(bet) {
     const { sport, category } = bet;
     if (!sport || !category) throw new Error("Missing required fields");
 
-    const leagueRef = ref(db, `${BETS_REF}/${sport}/${category}`);
-    const snapshot = await get(leagueRef);
+    const sportRef = ref(db, `${BETS_REF}/${sport}/${category}`);
+    const snapshot = await get(sportRef);
     const currentBets = snapshot.val() || [];
 
     const payload = {
@@ -54,19 +54,13 @@ export async function addBet(bet) {
       notes: bet.notes ?? "",
       createdAt: bet.createdAt ?? Date.now(),
     };
-    // TEMP legacy mirrors
-    payload.league = payload.sport;
-    payload.type = payload.category;
-    payload.subtype = payload.market;
-    payload.odds = payload.odds_american;
-
     currentBets.unshift(payload);
 
     if (currentBets.length > 100) {
       currentBets.length = 100;
     }
 
-    await set(leagueRef, currentBets, { headers: { origin: appOrigin } });
+    await set(sportRef, currentBets, { headers: { origin: appOrigin } });
     return payload;
   } catch (err) {
     console.error("Failed to save bet:", err);
@@ -80,8 +74,8 @@ export async function deleteBet({ sport, category, createdAt }) {
       throw new Error("Missing required fields");
     }
 
-    const leagueRef = ref(db, `${BETS_REF}/${sport}/${category}`);
-    const snapshot = await get(leagueRef);
+    const sportRef = ref(db, `${BETS_REF}/${sport}/${category}`);
+    const snapshot = await get(sportRef);
     const bets = snapshot.val() || [];
 
     const filteredBets = bets.filter(
@@ -92,7 +86,7 @@ export async function deleteBet({ sport, category, createdAt }) {
       throw new Error("Bet not found");
     }
 
-    await set(leagueRef, filteredBets, { headers: { origin: appOrigin } });
+    await set(sportRef, filteredBets, { headers: { origin: appOrigin } });
     return { removed: bets.length - filteredBets.length };
   } catch (err) {
     console.error("Failed to delete bet:", err);
