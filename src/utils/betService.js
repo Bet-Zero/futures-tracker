@@ -1,4 +1,4 @@
-import { ref, get, set, remove, push, child } from "firebase/database";
+import { ref, get, set } from "firebase/database";
 import { db } from "./firebase";
 
 const BETS_REF = "bets";
@@ -13,7 +13,21 @@ export async function getAllBets() {
   try {
     const betsRef = ref(db, BETS_REF);
     const snapshot = await get(betsRef);
-    return snapshot.val() || {};
+    const data = snapshot.val() || {};
+    const normalized = {};
+    for (const [sportKey, cats] of Object.entries(data)) {
+      normalized[sportKey] = {};
+      for (const [catKey, arr] of Object.entries(cats || {})) {
+        normalized[sportKey][catKey] = (arr || []).map((doc) => ({
+          ...doc,
+          sport: doc.sport ?? doc.league ?? sportKey,
+          category: doc.category ?? doc.type ?? doc.tabLabel ?? catKey,
+          market: doc.market ?? doc.subtype ?? "",
+          odds_american: doc.odds_american ?? doc.odds ?? "",
+        }));
+      }
+    }
+    return normalized;
   } catch (err) {
     console.error("Failed to fetch bets:", err);
     throw new Error("Failed to load bets");
@@ -22,66 +36,62 @@ export async function getAllBets() {
 
 export async function addBet(bet) {
   try {
-    const { league, tabLabel } = bet;
-    if (!league || !tabLabel) throw new Error("Missing required fields");
+    const { sport, category } = bet;
+    if (!sport || !category) throw new Error("Missing required fields");
 
-    // Get current bets for this league and tab
-    const leagueRef = ref(db, `${BETS_REF}/${league}/${tabLabel}`);
+    const leagueRef = ref(db, `${BETS_REF}/${sport}/${category}`);
     const snapshot = await get(leagueRef);
     const currentBets = snapshot.val() || [];
 
-    // Add new bet to beginning of array
-    currentBets.unshift(bet);
+    const payload = {
+      sport,
+      category,
+      market: bet.market || "",
+      selection: bet.selection,
+      odds_american: bet.odds_american ?? "",
+      line: bet.line ?? null,
+      book: bet.book ?? "",
+      notes: bet.notes ?? "",
+      createdAt: bet.createdAt ?? Date.now(),
+    };
+    // TEMP legacy mirrors
+    payload.league = payload.sport;
+    payload.type = payload.category;
+    payload.subtype = payload.market;
+    payload.odds = payload.odds_american;
 
-    // Limit to 100 bets per category
+    currentBets.unshift(payload);
+
     if (currentBets.length > 100) {
       currentBets.length = 100;
     }
 
-    // Save updated array with origin metadata
     await set(leagueRef, currentBets, { headers: { origin: appOrigin } });
-    return bet;
+    return payload;
   } catch (err) {
     console.error("Failed to save bet:", err);
     throw new Error("Failed to save bet");
   }
 }
 
-export async function deleteBet({
-  league,
-  tabLabel,
-  date,
-  player,
-  team,
-  odds,
-  site,
-}) {
+export async function deleteBet({ sport, category, createdAt }) {
   try {
-    if (!league || !tabLabel || !date) {
+    if (!sport || !category || !createdAt) {
       throw new Error("Missing required fields");
     }
 
-    const leagueRef = ref(db, `${BETS_REF}/${league}/${tabLabel}`);
+    const leagueRef = ref(db, `${BETS_REF}/${sport}/${category}`);
     const snapshot = await get(leagueRef);
     const bets = snapshot.val() || [];
 
-    const normalize = (v) => (v === undefined || v === null ? "" : String(v));
     const filteredBets = bets.filter(
-      (b) =>
-        !(
-          String(b.date) === String(date) &&
-          normalize(b.player) === normalize(player) &&
-          normalize(b.team) === normalize(team) &&
-          normalize(b.odds) === normalize(odds) &&
-          normalize(b.site) === normalize(site)
-        )
+      (b) => String(b.createdAt) !== String(createdAt)
     );
 
     if (filteredBets.length === bets.length) {
       throw new Error("Bet not found");
     }
 
-    // Save with origin metadata
     await set(leagueRef, filteredBets, { headers: { origin: appOrigin } });
     return { removed: bets.length - filteredBets.length };
   } catch (err) {
