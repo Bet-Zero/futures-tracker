@@ -1,5 +1,6 @@
 // src/pages/FuturesPage.jsx
-import React, { useState, useEffect } from "react";
+
+import React, { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import FuturesModal from "../components/FuturesModal";
 import AddBetModal from "../components/AddBetModal";
@@ -10,38 +11,22 @@ const FuturesPage = () => {
   const [showAdd, setShowAdd] = useState(false);
   const [deleteMode, setDeleteMode] = useState(false);
 
-  // 🆕 Read all params from URL
-  const sportParam = params.get("sport") || "NFL";
-  const categoryParam = params.get("category") || "All";
-
-  const sport = sportParam;
-  const category = categoryParam;
+  // Read from URL
+  const sport = params.get("sport") || "NFL";
+  const category = params.get("category") || "All";
 
   const handleSportChange = (newSport) => {
     const newParams = new URLSearchParams(params);
     newParams.set("sport", newSport);
+    // when switching sports, default to All
     newParams.set("category", "All");
     navigate(`?${newParams.toString()}`);
   };
 
-  const handleCategoryChange = (newCategory) => {
-    const newParams = new URLSearchParams(params);
-    newParams.set("sport", sport);
-    newParams.set("category", newCategory);
-    navigate(`?${newParams.toString()}`);
-  };
-
-  // 🆕 Tag modal with current category for /api/snap sel waiting
-  useEffect(() => {
-    const el = document.getElementById("futures-modal");
-    if (el) {
-      el.setAttribute("data-active-category", category);
-    }
-  }, [category]);
-
   const handleShare = async () => {
     try {
       const currentUrl = window.location.href;
+      // Wait for the selected category
       const sel = `#futures-modal[data-active-category="${category}"]`;
 
       const response = await fetch(
@@ -49,14 +34,11 @@ const FuturesPage = () => {
           currentUrl
         )}&sel=${encodeURIComponent(sel)}`
       );
-
-      if (!response.ok) {
+      if (!response.ok)
         throw new Error(`Screenshot failed: ${response.statusText}`);
-      }
 
       const blob = await response.blob();
       const reader = new FileReader();
-
       const base64Image = await new Promise((resolve) => {
         reader.onloadend = () => resolve(reader.result);
         reader.readAsDataURL(blob);
@@ -73,14 +55,14 @@ const FuturesPage = () => {
     }
   };
 
-  const hasSportParam = Boolean(sportParam);
+  const hasSportParam = Boolean(params.get("sport"));
 
   return (
     <div
       id={!hasSportParam ? "home-screen" : undefined}
       className="space-y-4 relative"
     >
-      {/* Header */}
+      {/* Header: sport selection and add/remove buttons */}
       <div className="flex items-center justify-between max-w-2xl mx-auto px-4 mb-0 sm:mb-6 fixed top-0 left-0 right-0 z-30 bg-transparent sm:static sm:bg-transparent sm:z-auto sm:top-auto sm:left-auto sm:right-auto mt-6 sm:mt-0 h-[56px]">
         <div className="flex gap-1.5">
           {["NFL", "NBA", "MLB"].map((lg) => (
@@ -120,27 +102,10 @@ const FuturesPage = () => {
         </div>
       </div>
 
-      {/* Category Tabs */}
-      <div className="flex justify-center gap-2 mt-4">
-        {["All", "Awards", "Division", "Championship"].map((cat) => (
-          <button
-            key={cat}
-            onClick={() => handleCategoryChange(cat)}
-            className={`px-4 py-2 rounded-lg ${
-              category === cat
-                ? "bg-blue-500 text-white"
-                : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
-
       {/* Spacer for fixed header on mobile */}
       <div className="block sm:hidden" style={{ height: "32px" }} />
 
-      {/* Modal UI */}
+      {/* Modal UI — pass URL-driven props */}
       <div className="sm:mt-0 mt-0">
         <FuturesModal
           sport={sport}
@@ -151,7 +116,7 @@ const FuturesPage = () => {
 
       {showAdd && <AddBetModal onClose={() => setShowAdd(false)} />}
 
-      {/* Share Button */}
+      {/* Floating Share Button */}
       <button
         onClick={handleShare}
         className="fixed bottom-6 right-6 px-4 py-2 text-sm font-semibold rounded-full bg-neutral-700 hover:bg-neutral-500 shadow-lg text-white z-50"
