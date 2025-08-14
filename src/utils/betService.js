@@ -34,6 +34,11 @@ export async function getAllBets() {
   }
 }
 
+console.log(
+  "DEBUG — Payload being sent to Firebase:",
+  JSON.stringify(currentBets, null, 2)
+);
+
 export async function addBet(bet) {
   try {
     const { sport, category } = bet;
