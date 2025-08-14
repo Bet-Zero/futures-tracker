@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import FuturesModal from "../components/FuturesModal";
 import AddBetModal from "../components/AddBetModal";
+import { coerceSport, coerceCategory, coerceMarket } from "../utils/naming";
 
 const FuturesPage = () => {
   const [params] = useSearchParams();
@@ -12,14 +13,16 @@ const FuturesPage = () => {
   const [deleteMode, setDeleteMode] = useState(false);
 
   // Read from URL
-  const sport = params.get("sport") || "NFL";
-  const category = params.get("category") || "All";
+  const sport = coerceSport(params.get("sport"));
+  const category = coerceCategory(params);
+  const market = coerceMarket(params);
 
   const handleSportChange = (newSport) => {
     const newParams = new URLSearchParams(params);
     newParams.set("sport", newSport);
     // when switching sports, default to All
     newParams.set("category", "All");
+    newParams.delete("market");
     navigate(`?${newParams.toString()}`);
   };
 
@@ -110,6 +113,7 @@ const FuturesPage = () => {
         <FuturesModal
           sport={sport}
           category={category}
+          market={market}
           deleteMode={deleteMode}
         />
       </div>

@@ -4,48 +4,17 @@ import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import BetRow from "./BetRow";
 import { getAllBets } from "../utils/betService";
+import { displayCategoryLabel } from "../utils/naming";
 
-// Map UI tab names -> canonical labels used in data (bet.tabLabel)
-const TAB_TO_LABEL = {
-  All: "All",
-  "Player Awards": "Awards",
-  "Team Futures": "Team Futures",
-  "Stat Leaders": "Stat Leaders",
-  Props: "Props",
-};
-
-// Reverse map so URLs with ?category= work even without ?tab=
-const LABEL_TO_TAB = {
-  All: "All",
-  Awards: "Player Awards",
-  "Team Futures": "Team Futures",
-  "Stat Leaders": "Stat Leaders",
-  Props: "Props",
-};
-
-const toLabel = (tab) => TAB_TO_LABEL[tab] || tab || "All";
-const toTab = (label) => LABEL_TO_TAB[label] || label || "All";
-
-const FuturesModal = ({ sport, deleteMode }) => {
+const FuturesModal = ({ sport, category, market, deleteMode }) => {
   const [data, setData] = useState([]);
   const [params] = useSearchParams();
   const navigate = useNavigate();
 
-  // Initial tab can come from ?tab= (UI name) OR ?category= (canonical)
-  const urlTab = params.get("tab");
-  const urlCategory = params.get("category");
-  const initialTab = urlTab || toTab(urlCategory) || "All";
-
-  const [selectedTab, setSelectedTab] = useState(initialTab);
-
-  // Keep selectedTab synced if URL changes externally
+  const [activeCategory, setActiveCategory] = useState(category || "All");
   useEffect(() => {
-    const t = params.get("tab");
-    const c = params.get("category");
-    const next = t || toTab(c) || "All";
-    if (next !== selectedTab) setSelectedTab(next);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params]);
+    setActiveCategory(category || "All");
+  }, [category]);
 
   // Fetch bets for league
   useEffect(() => {
@@ -58,7 +27,15 @@ const FuturesModal = ({ sport, deleteMode }) => {
             leagueBets = leagueBets.concat(arr);
           });
         }
-        setData(leagueBets);
+        setData(
+          leagueBets.map((b) => ({
+            ...b,
+            sport: b.sport ?? b.league,
+            category: b.category ?? b.type ?? b.tabLabel ?? "All",
+            market: b.market ?? b.subtype ?? "",
+            odds_american: b.odds_american ?? b.odds ?? "",
+          }))
+        );
       } catch (error) {
         console.error("Error fetching bets:", error);
       }
@@ -70,31 +47,34 @@ const FuturesModal = ({ sport, deleteMode }) => {
     return () => window.removeEventListener("betsUpdated", updateListener);
   }, [sport]);
 
-  // Tag the modal so /api/snap can wait for the exact category
   useEffect(() => {
     const el = document.getElementById("futures-modal");
-    if (el) el.setAttribute("data-active-category", toLabel(selectedTab));
-  }, [selectedTab]);
+    if (el) {
+      el.setAttribute("data-active-category", activeCategory);
+      // legacy alias
+      el.setAttribute("data-active-group", activeCategory);
+    }
+  }, [activeCategory]);
 
-  const handleTabChange = (tab) => {
-    setSelectedTab(tab);
-
-    // Write both tab (UI name) and category (canonical) to URL
-    const nextParams = new URLSearchParams();
+  const handleTabChange = (cat) => {
+    setActiveCategory(cat);
+    const nextParams = new URLSearchParams(params);
     nextParams.set("sport", sport);
-    nextParams.set("tab", tab);
-    nextParams.set("category", toLabel(tab));
+    nextParams.set("category", cat);
+    nextParams.delete("market");
     navigate(`?${nextParams.toString()}`, { replace: true });
   };
 
-  // Filter by canonical label used in data
-  const activeLabel = toLabel(selectedTab);
-  const filtered =
-    activeLabel === "All"
-      ? data
-      : data.filter(
-          (b) => (b.tabLabel || "").toLowerCase() === activeLabel.toLowerCase()
-        );
+  const filtered = data.filter((b) => {
+    const catOk =
+      activeCategory === "All"
+        ? true
+        : String(b.category).toLowerCase() === activeCategory.toLowerCase();
+    const marketOk = !market
+      ? true
+      : String(b.market || "").toLowerCase() === String(market).toLowerCase();
+    return catOk && marketOk;
+  });
 
   return (
     <div
@@ -107,41 +87,12 @@ const FuturesModal = ({ sport, deleteMode }) => {
 
         {/* Tabs */}
         <div className="flex flex-wrap gap-1 sm:gap-2 mb-4">
-          {[
-            "All",
-            "Player Awards",
-            "Team Futures",
-            "Stat Leaders",
-            "Props",
-          ].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => handleTabChange(tab)}
-              className={`py-2 text-sm font-medium rounded-lg transition-colors px-2.5 sm:px-4 ${
-                selectedTab === tab
-                  ? "bg-neutral-500 text-neutral-900 shadow-lg text-white border-neutral-300"
-                  : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white"
-              }`}
-            >
-              {/* Short labels on mobile */}
-              {tab === "Player Awards" ? (
-                <>
-                  <span className="hidden sm:inline">Player Awards</span>
-                  <span className="sm:hidden">Awards</span>
-                </>
-              ) : tab === "Stat Leaders" ? (
-                <>
-                  <span className="hidden sm:inline">Stat Leaders</span>
-                  <span className="sm:hidden">Leaders</span>
-                </>
-              ) : tab === "Team Futures" ? (
-                <>
-                  <span className="hidden sm:inline">Team Futures</span>
-                  <span className="sm:hidden">Futures</span>
-                </>
-              ) : (
-                <span>{tab}</span>
-              )}
+          {["All","Awards","Team Futures","Stat Leaders","Props"].map((cat)=>(
+            <button key={cat} onClick={()=>handleTabChange(cat)}
+              className={`py-2 text-sm font-medium rounded-lg transition-colors px-2.5 sm:px-4 min-w-[116px] text-center ${
+                activeCategory===cat ? "bg-neutral-500 text-neutral-900 shadow-lg text-white border-neutral-300" : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white"
+              }`}>
+              <span>{displayCategoryLabel(cat)}</span>
             </button>
           ))}
         </div>
