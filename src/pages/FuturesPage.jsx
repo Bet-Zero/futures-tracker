@@ -1,6 +1,5 @@
 // src/pages/FuturesPage.jsx
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import FuturesModal from "../components/FuturesModal";
 import AddBetModal from "../components/AddBetModal";
@@ -11,41 +10,58 @@ const FuturesPage = () => {
   const [showAdd, setShowAdd] = useState(false);
   const [deleteMode, setDeleteMode] = useState(false);
 
-  const sportParam = params.get("sport");
-  const sport = sportParam || "NFL";
+  // 🆕 Read all params from URL
+  const sportParam = params.get("sport") || "NFL";
+  const categoryParam = params.get("category") || "All";
+
+  const sport = sportParam;
+  const category = categoryParam;
 
   const handleSportChange = (newSport) => {
     const newParams = new URLSearchParams(params);
     newParams.set("sport", newSport);
-    newParams.set("tab", "All");
+    newParams.set("category", "All");
     navigate(`?${newParams.toString()}`);
   };
 
+  const handleCategoryChange = (newCategory) => {
+    const newParams = new URLSearchParams(params);
+    newParams.set("sport", sport);
+    newParams.set("category", newCategory);
+    navigate(`?${newParams.toString()}`);
+  };
+
+  // 🆕 Tag modal with current category for /api/snap sel waiting
+  useEffect(() => {
+    const el = document.getElementById("futures-modal");
+    if (el) {
+      el.setAttribute("data-active-category", category);
+    }
+  }, [category]);
+
   const handleShare = async () => {
     try {
-      // Get current URL parameters to create a screenshot URL
       const currentUrl = window.location.href;
+      const sel = `#futures-modal[data-active-category="${category}"]`;
 
-      // Directly fetch the screenshot from our snap API
       const response = await fetch(
-        `/api/snap?url=${encodeURIComponent(currentUrl)}`
+        `/api/snap?url=${encodeURIComponent(
+          currentUrl
+        )}&sel=${encodeURIComponent(sel)}`
       );
 
       if (!response.ok) {
         throw new Error(`Screenshot failed: ${response.statusText}`);
       }
 
-      // Convert the response to a base64 string
       const blob = await response.blob();
       const reader = new FileReader();
 
-      // Use a promise to handle the async FileReader
       const base64Image = await new Promise((resolve) => {
         reader.onloadend = () => resolve(reader.result);
         reader.readAsDataURL(blob);
       });
 
-      // Upload the image to Discord
       const { uploadImageToDiscord } = await import(
         "../utils/uploadToDiscord.js"
       );
@@ -64,7 +80,7 @@ const FuturesPage = () => {
       id={!hasSportParam ? "home-screen" : undefined}
       className="space-y-4 relative"
     >
-      {/* Header: sport selection and add/remove buttons */}
+      {/* Header */}
       <div className="flex items-center justify-between max-w-2xl mx-auto px-4 mb-0 sm:mb-6 fixed top-0 left-0 right-0 z-30 bg-transparent sm:static sm:bg-transparent sm:z-auto sm:top-auto sm:left-auto sm:right-auto mt-6 sm:mt-0 h-[56px]">
         <div className="flex gap-1.5">
           {["NFL", "NBA", "MLB"].map((lg) => (
@@ -103,14 +119,39 @@ const FuturesPage = () => {
           </button>
         </div>
       </div>
+
+      {/* Category Tabs */}
+      <div className="flex justify-center gap-2 mt-4">
+        {["All", "Awards", "Division", "Championship"].map((cat) => (
+          <button
+            key={cat}
+            onClick={() => handleCategoryChange(cat)}
+            className={`px-4 py-2 rounded-lg ${
+              category === cat
+                ? "bg-blue-500 text-white"
+                : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+            }`}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
       {/* Spacer for fixed header on mobile */}
       <div className="block sm:hidden" style={{ height: "32px" }} />
+
       {/* Modal UI */}
       <div className="sm:mt-0 mt-0">
-        <FuturesModal sport={sport} deleteMode={deleteMode} />
+        <FuturesModal
+          sport={sport}
+          category={category}
+          deleteMode={deleteMode}
+        />
       </div>
+
       {showAdd && <AddBetModal onClose={() => setShowAdd(false)} />}
-      {/* Floating Share Button */}
+
+      {/* Share Button */}
       <button
         onClick={handleShare}
         className="fixed bottom-6 right-6 px-4 py-2 text-sm font-semibold rounded-full bg-neutral-700 hover:bg-neutral-500 shadow-lg text-white z-50"

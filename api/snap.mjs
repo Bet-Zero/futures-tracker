@@ -1,124 +1,124 @@
-// api/snap.mjs — Vercel-friendly screenshot route
-export const config = { runtime: "nodejs", memory: 1024, maxDuration: 30 };
+// src/pages/FuturesPage.jsx
 
-import chromium from "@sparticuz/chromium";
-import puppeteer from "puppeteer-core";
+import React, { useState } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import FuturesModal from "../components/FuturesModal";
+import AddBetModal from "../components/AddBetModal";
 
-function get(req, key, dflt = "") {
-  const u = new URL(req.url, "http://localhost");
-  return u.searchParams.get(key) ?? dflt;
-}
+const FuturesPage = () => {
+  const [params] = useSearchParams();
+  const navigate = useNavigate();
+  const [showAdd, setShowAdd] = useState(false);
+  const [deleteMode, setDeleteMode] = useState(false);
 
-export default async function handler(req, res) {
-  const target = get(req, "url", "");
-  const width = Number(get(req, "w", "1080"));
-  const height = Number(get(req, "h", "1350"));
-  const waitMs = Number(get(req, "wait", "1200"));
+  const sportParam = params.get("sport");
+  const sport = sportParam || "NFL";
 
-  if (!target) return res.status(400).json({ error: "missing_url" });
+  const handleSportChange = (newSport) => {
+    const newParams = new URLSearchParams(params);
+    newParams.set("sport", newSport);
+    newParams.set("tab", "All");
+    navigate(`?${newParams.toString()}`);
+  };
 
-  console.log(`📸 Taking screenshot of: ${target}`);
-
-  let browser;
-  try {
-    console.log("🚀 Launching browser...");
-    browser = await puppeteer.launch({
-      args: [
-        ...chromium.args,
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-accelerated-2d-canvas",
-        "--no-first-run",
-        "--no-zygote",
-        "--single-process",
-        "--disable-gpu",
-      ],
-      executablePath: await chromium.executablePath(),
-      headless: chromium.headless,
-      defaultViewport: { width, height, deviceScaleFactor: 2 },
-    });
-
+  const handleShare = async () => {
     try {
-      console.log("📄 Creating new page...");
-      const page = await browser.newPage();
+      // Get current URL parameters to create a screenshot URL
+      const currentUrl = window.location.href;
 
-      // Set a more generous timeout and wait strategy
-      console.log(`🌐 Navigating to: ${target}`);
-      await page.goto(target, {
-        waitUntil: "domcontentloaded",
-        timeout: 30000,
-      });
+      // Directly fetch the screenshot from our snap API
+      const response = await fetch(
+        `/api/snap?url=${encodeURIComponent(currentUrl)}`
+      );
 
-      console.log(`⏳ Waiting ${waitMs}ms for page to settle...`);
-      if (waitMs > 0) {
-        // Use the correct delay method for newer Puppeteer versions
-        await new Promise((resolve) => setTimeout(resolve, waitMs));
+      if (!response.ok) {
+        throw new Error(`Screenshot failed: ${response.statusText}`);
       }
 
-      // Wait for #futures-modal to be visible
-      try {
-        await page.waitForSelector("#futures-modal", {
-          visible: true,
-          timeout: 10000,
-        });
-        console.log("✅ Modal element found");
+      // Convert the response to a base64 string
+      const blob = await response.blob();
+      const reader = new FileReader();
 
-        // Get handle to the modal element
-        const modalHandle = await page.$("#futures-modal");
-
-        if (modalHandle) {
-          console.log("📸 Taking screenshot of modal only...");
-          const png = await modalHandle.screenshot({
-            type: "png",
-            omitBackground: false,
-          });
-
-          console.log(`✅ Modal screenshot successful: ${png.length} bytes`);
-          res.setHeader("Content-Type", "image/png");
-          res.setHeader("Cache-Control", "public, max-age=60");
-          return res.status(200).send(png);
-        } else {
-          console.log(
-            "⚠️ Modal element found but couldn't get handle, falling back to full screenshot"
-          );
-        }
-      } catch (err) {
-        console.log(
-          "⚠️ Modal selector not found, falling back to full screenshot:",
-          err.message
-        );
-      }
-
-      // Fallback to taking full viewport screenshot if modal not found
-      console.log("📸 Taking full viewport screenshot...");
-      const png = await page.screenshot({
-        type: "png",
-        fullPage: false,
+      // Use a promise to handle the async FileReader
+      const base64Image = await new Promise((resolve) => {
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
       });
 
-      console.log(`✅ Screenshot successful: ${png.length} bytes`);
-      res.setHeader("Content-Type", "image/png");
-      res.setHeader("Cache-Control", "public, max-age=60");
-      return res.status(200).send(png);
-    } catch (e) {
-      console.error("❌ SNAP ERR during goto/screenshot:", e.message);
-      console.error("Stack:", e.stack);
-      return res.status(500).json({
-        error: "goto_or_screenshot_failed",
-        details: e.message,
-        target: target,
-      });
-    } finally {
-      console.log("🔒 Closing browser...");
-      await browser.close().catch(() => {});
+      // Upload the image to Discord
+      const { uploadImageToDiscord } = await import(
+        "../utils/uploadToDiscord.js"
+      );
+      await uploadImageToDiscord(base64Image, "Futures");
+      alert("Shared to Discord");
+    } catch (error) {
+      console.error("Error sharing to Discord:", error);
+      alert("Failed to share to Discord");
     }
-  } catch (e) {
-    console.error("❌ SNAP ERR during launch:", e.message);
-    console.error("Stack:", e.stack);
-    return res.status(500).json({
-      error: "launch_failed",
-      details: e.message,
-    });
-  }
-}
+  };
+
+  const hasSportParam = Boolean(sportParam);
+
+  return (
+    <div
+      id={!hasSportParam ? "home-screen" : undefined}
+      className="space-y-4 relative"
+    >
+      {/* Header: sport selection and add/remove buttons */}
+      <div className="flex items-center justify-between max-w-2xl mx-auto px-4 mb-0 sm:mb-6 fixed top-0 left-0 right-0 z-30 bg-transparent sm:static sm:bg-transparent sm:z-auto sm:top-auto sm:left-auto sm:right-auto mt-6 sm:mt-0 h-[56px]">
+        <div className="flex gap-1.5">
+          {["NFL", "NBA", "MLB"].map((lg) => (
+            <button
+              key={lg}
+              onClick={() => handleSportChange(lg)}
+              className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                sport === lg
+                  ? "bg-neutral-200 text-neutral-900"
+                  : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white"
+              }`}
+            >
+              {lg}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-2 items-center">
+          <button
+            onClick={() => setShowAdd(true)}
+            className="text-2xl -mb-2 text-white w-8 h-8 flex items-center justify-center rounded-full bg-neutral-800 hover:bg-neutral-700"
+            aria-label="Add Bet"
+          >
+            +
+          </button>
+          <button
+            onClick={() => setDeleteMode((m) => !m)}
+            className={`text-2xl -mb-2 w-8 h-8 flex items-center justify-center rounded-full ${
+              deleteMode
+                ? "bg-red-700 text-white border border-red-400"
+                : "bg-neutral-800 text-neutral-300 hover:bg-red-700 hover:text-white"
+            }`}
+            aria-label="Remove Bets"
+            title={deleteMode ? "Done Removing" : "Remove Bets"}
+          >
+            -
+          </button>
+        </div>
+      </div>
+      {/* Spacer for fixed header on mobile */}
+      <div className="block sm:hidden" style={{ height: "32px" }} />
+      {/* Modal UI */}
+      <div className="sm:mt-0 mt-0">
+        <FuturesModal sport={sport} deleteMode={deleteMode} />
+      </div>
+      {showAdd && <AddBetModal onClose={() => setShowAdd(false)} />}
+      {/* Floating Share Button */}
+      <button
+        onClick={handleShare}
+        className="fixed bottom-6 right-6 px-4 py-2 text-sm font-semibold rounded-full bg-neutral-700 hover:bg-neutral-500 shadow-lg text-white z-50"
+      >
+        Share
+      </button>
+    </div>
+  );
+};
+
+export default FuturesPage;
