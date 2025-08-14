@@ -1,12 +1,8 @@
-// src/utils/betService.js
+// src/utils/firebaseBets.js
 
 // -------------------------------------------------------------
 // RTDB Bets Helpers — Option B (object-per-bet with auto-ID)
-// -------------------------------------------------------------
-// - addBet: uses push() to create /bets/{sport}/{category}/{betId}
-// - getAllBets: reads objects and normalizes to arrays (newest first)
-// - deleteBet: deletes by betId (preferred) or falls back to createdAt match
-// - migrateBetsToFirebase: optional bulk seeding into Option B structure
+// (with robust normalization so rows never show blank labels)
 // -------------------------------------------------------------
 
 import { ref, get, set, push, remove } from "firebase/database";
@@ -14,18 +10,68 @@ import { db } from "./firebase";
 
 const BETS_REF = "bets";
 
-// ----------------------------------------------
-// Helper: safe get child snapshot value as object
-// ----------------------------------------------
+// App origin (not required for RTDB SDK, but keeping in case you use it elsewhere)
+const appOrigin =
+  typeof window !== "undefined"
+    ? window.location.origin
+    : "http://localhost:5173";
+
+// -----------------------------
+// Small helpers
+// -----------------------------
 function asObj(val) {
   if (!val || typeof val !== "object") return {};
   return val;
 }
 
+function normalizeIn(doc, sportKey, catKey) {
+  // Normalize incoming DB doc -> UI shape
+  const sport = doc.sport ?? doc.league ?? sportKey ?? "";
+  const category = doc.category ?? doc.type ?? doc.tabLabel ?? catKey ?? "";
+  const market = doc.market ?? doc.subtype ?? "";
+  const selection = doc.selection ?? doc.player ?? doc.team ?? ""; // <<< key fix
+  const odds_american = doc.odds_american ?? doc.odds ?? "";
+  const book = doc.book ?? doc.site ?? "";
+
+  return {
+    ...doc,
+    sport,
+    category,
+    market,
+    selection,
+    odds_american,
+    book,
+  };
+}
+
+function buildPayloadOut(bet) {
+  // Normalize outbound payload -> DB
+  const sport = bet.sport;
+  const category = bet.category;
+  const market = bet.market || "";
+  const selection = bet.selection || bet.player || bet.team || ""; // <<< key fix
+  const odds_american = bet.odds_american ?? bet.odds ?? "";
+  const line = bet.line ?? null;
+  const book = bet.book ?? bet.site ?? "";
+  const notes = bet.notes ?? "";
+  const createdAt = bet.createdAt ?? Date.now();
+
+  return {
+    sport,
+    category,
+    market,
+    selection,
+    odds_american,
+    line,
+    book,
+    notes,
+    createdAt,
+  };
+}
+
 // ----------------------------------------------
 // GET ALL BETS (normalized)
-// Returns: { [sport]: { [category]: Bet[] } }
-// Each Bet array is newest-first (by createdAt)
+// Returns: { [sport]: { [category]: Bet[] } } (newest-first)
 // ----------------------------------------------
 export async function getAllBets() {
   try {
@@ -41,22 +87,12 @@ export async function getAllBets() {
       for (const [catKey, betMap] of Object.entries(asObj(categories))) {
         // betMap is { betId: betObject, ... }
         const arr = Object.entries(asObj(betMap)).map(([id, doc]) => {
-          const sport = doc.sport ?? doc.league ?? sportKey;
-          const category = doc.category ?? doc.type ?? doc.tabLabel ?? catKey;
-
-          return {
-            id, // include betId for easy deletes/edits
-            ...doc,
-            sport,
-            category,
-            market: doc.market ?? doc.subtype ?? "",
-            odds_american: doc.odds_american ?? doc.odds ?? "",
-          };
+          const n = normalizeIn(doc, sportKey, catKey);
+          return { id, ...n };
         });
 
-        // newest first by createdAt (number or stringified number)
+        // newest first
         arr.sort((a, b) => Number(b.createdAt ?? 0) - Number(a.createdAt ?? 0));
-
         normalized[sportKey][catKey] = arr;
       }
     }
@@ -70,7 +106,7 @@ export async function getAllBets() {
 
 // ----------------------------------------------
 // ADD BET (auto-ID under /bets/{sport}/{category})
-// Returns the full saved object with `id`
+// Returns the saved object with `id`
 // ----------------------------------------------
 export async function addBet(bet) {
   try {
@@ -79,30 +115,21 @@ export async function addBet(bet) {
 
     const listRef = ref(db, `${BETS_REF}/${sport}/${category}`);
 
-    const payload = {
-      sport,
-      category,
-      market: bet.market || "",
-      selection: bet.selection,
-      odds_american: bet.odds_american ?? "",
-      line: bet.line ?? null,
-      book: bet.book ?? "",
-      notes: bet.notes ?? "",
-      createdAt: bet.createdAt ?? Date.now(),
-    };
+    const payload = buildPayloadOut(bet);
 
     const newRef = push(listRef); // /bets/{sport}/{category}/{autoId}
     await set(newRef, payload);
 
     const saved = { id: newRef.key, ...payload };
 
-    // Debug visibility (safe to keep during dev)
+    // Debug
     console.log(
       "RTDB addBet →",
       JSON.stringify(
         {
           path: `${BETS_REF}/${sport}/${category}/${newRef.key}`,
           data: saved,
+          origin: appOrigin,
         },
         null,
         2
@@ -127,17 +154,15 @@ export async function deleteBet({ sport, category, betId, createdAt }) {
       throw new Error("Missing required fields (sport/category)");
     }
 
-    // If we have an explicit betId, delete directly
+    // Direct by ID
     if (betId) {
       const betRef = ref(db, `${BETS_REF}/${sport}/${category}/${betId}`);
       await remove(betRef);
       return { removed: 1, by: "betId" };
     }
 
-    // Fallback: find by createdAt (less reliable; recommended to pass betId)
-    if (!createdAt) {
-      throw new Error("Missing betId or createdAt");
-    }
+    // Fallback by createdAt
+    if (!createdAt) throw new Error("Missing betId or createdAt");
 
     const catRef = ref(db, `${BETS_REF}/${sport}/${category}`);
     const snap = await get(catRef);
@@ -146,7 +171,6 @@ export async function deleteBet({ sport, category, betId, createdAt }) {
     const match = Object.entries(betMap).find(
       ([, b]) => String(b?.createdAt) === String(createdAt)
     );
-
     if (!match) throw new Error("Bet not found");
 
     const [matchId] = match;
@@ -160,18 +184,7 @@ export async function deleteBet({ sport, category, betId, createdAt }) {
 
 // ----------------------------------------------
 // OPTIONAL: Bulk seeding into Option B structure
-// Input shape example:
-// {
-//   NFL: {
-//     Awards: [ { ...bet }, { ...bet } ],
-//     "Team Futures": [ { ...bet } ]
-//   },
-//   NBA: {
-//     Awards: [ { ...bet } ]
-//   }
-// }
-// (Arrays will be pushed under auto-IDs. If you pass an object with keys,
-// it will try to write those keys verbatim. Arrays are simplest.)
+// See earlier note; keeps same normalization
 // ----------------------------------------------
 export async function migrateBetsToFirebase(betsData) {
   try {
@@ -179,44 +192,21 @@ export async function migrateBetsToFirebase(betsData) {
       throw new Error("migrateBetsToFirebase expects an object");
     }
 
-    // For each sport/category, push each bet as its own child
     const tasks = [];
 
-    for (const [sport, categories] of Object.entries(betsData)) {
+    for (const [sport, categories] of Object.entries(betsData || {})) {
       for (const [category, items] of Object.entries(asObj(categories))) {
         const listRef = ref(db, `${BETS_REF}/${sport}/${category}`);
 
-        // If it's an array, push each; if it's an object, write exact keys.
         if (Array.isArray(items)) {
-          for (const bet of items) {
-            const payload = {
-              sport,
-              category,
-              market: bet.market || "",
-              selection: bet.selection,
-              odds_american: bet.odds_american ?? bet.odds ?? "",
-              line: bet.line ?? null,
-              book: bet.book ?? "",
-              notes: bet.notes ?? "",
-              createdAt: bet.createdAt ?? Date.now(),
-            };
+          for (const raw of items) {
+            const payload = buildPayloadOut({ ...raw, sport, category });
             const newRef = push(listRef);
             tasks.push(set(newRef, payload));
           }
         } else {
-          // object: { customId: bet, ... } — write verbatim keys
-          for (const [customId, bet] of Object.entries(items || {})) {
-            const payload = {
-              sport,
-              category,
-              market: bet.market || "",
-              selection: bet.selection,
-              odds_american: bet.odds_american ?? bet.odds ?? "",
-              line: bet.line ?? null,
-              book: bet.book ?? "",
-              notes: bet.notes ?? "",
-              createdAt: bet.createdAt ?? Date.now(),
-            };
+          for (const [customId, raw] of Object.entries(items || {})) {
+            const payload = buildPayloadOut({ ...raw, sport, category });
             tasks.push(
               set(
                 ref(db, `${BETS_REF}/${sport}/${category}/${customId}`),
