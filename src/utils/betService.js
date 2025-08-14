@@ -34,17 +34,14 @@ export async function getAllBets() {
   }
 }
 
-console.log(
-  "DEBUG — Payload being sent to Firebase:",
-  JSON.stringify(currentBets, null, 2)
-);
-
 export async function addBet(bet) {
   try {
     const { sport, category } = bet;
     if (!sport || !category) throw new Error("Missing required fields");
 
-    const sportRef = ref(db, `${BETS_REF}/${sport}/${category}`);
+    const path = `${BETS_REF}/${sport}/${category}`;
+    const sportRef = ref(db, path);
+
     const snapshot = await get(sportRef);
     const currentBets = snapshot.val() || [];
 
@@ -59,11 +56,26 @@ export async function addBet(bet) {
       notes: bet.notes ?? "",
       createdAt: bet.createdAt ?? Date.now(),
     };
+
+    // Put newest first
     currentBets.unshift(payload);
 
-    if (currentBets.length > 100) {
-      currentBets.length = 100;
-    }
+    // Cap list length
+    if (currentBets.length > 100) currentBets.length = 100;
+
+    // 🔎 EXACTLY what you're sending + where
+    console.log(
+      "DEBUG — RTDB write:",
+      JSON.stringify(
+        {
+          api: "set",
+          path,
+          data: currentBets,
+        },
+        null,
+        2
+      )
+    );
 
     await set(sportRef, currentBets, { headers: { origin: appOrigin } });
     return payload;
