@@ -94,12 +94,24 @@ function splitTeamName(team = "") {
 }
 
 const BetRow = ({ bet, deleteMode }) => {
-  const { category, player, team, image, odds_american, sport, details = {} } =
-    bet || {};
+  const {
+    category,
+    player: rawPlayer,
+    team: rawTeam,
+    selection,
+    image,
+    odds_american,
+    sport,
+    details = {},
+  } = bet || {};
+
+  const isTeamBet = category === "Team Futures";
+  const player = rawPlayer || (isTeamBet ? null : selection);
+  const team = rawTeam || (isTeamBet ? selection : "");
   const logoUrl = getTeamLogo(sport, team);
 
   // For Team Futures, use team logo as headshot
-  const isTeamLogo = category === "Team Futures";
+  const isTeamLogo = isTeamBet;
   const headshotSrc = isTeamLogo
     ? logoUrl
     : getHeadshotUrl(player, sport, image);

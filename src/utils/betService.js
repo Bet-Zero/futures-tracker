@@ -32,6 +32,12 @@ function normalizeIn(doc, sportKey, catKey) {
   const selection = doc.selection ?? doc.player ?? doc.team ?? ""; // <<< key fix
   const odds_american = doc.odds_american ?? doc.odds ?? "";
   const book = doc.book ?? doc.site ?? "";
+  // Ensure player/team/details fields exist for the UI
+  const isTeamBet = String(category).toLowerCase() === "team futures";
+  const player = doc.player ?? (isTeamBet ? null : selection);
+  const team = doc.team ?? (isTeamBet ? selection : doc.team ?? "");
+  const details = doc.details ?? {};
+  const image = doc.image ?? "";
 
   return {
     ...doc,
@@ -41,6 +47,10 @@ function normalizeIn(doc, sportKey, catKey) {
     selection,
     odds_american,
     book,
+    player,
+    team,
+    details,
+    image,
   };
 }
 
@@ -50,6 +60,10 @@ function buildPayloadOut(bet) {
   const category = bet.category;
   const market = bet.market || "";
   const selection = bet.selection || bet.player || bet.team || ""; // <<< key fix
+  const player = bet.player ?? (category === "Team Futures" ? null : selection);
+  const team = bet.team ?? (category === "Team Futures" ? selection : bet.team || "");
+  const details = bet.details ?? {};
+  const image = bet.image ?? "";
   const odds_american = bet.odds_american ?? bet.odds ?? "";
   const line = bet.line ?? null;
   const book = bet.book ?? bet.site ?? "";
@@ -61,6 +75,10 @@ function buildPayloadOut(bet) {
     category,
     market,
     selection,
+    player,
+    team,
+    details,
+    image,
     odds_american,
     line,
     book,
