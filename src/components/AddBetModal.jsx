@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import playerTeamMap from "../data/playerTeamMap";
 import { nflLogoMap, nbaLogoMap, mlbLogoMap } from "../utils/logoMap";
-import { addBet } from "../utils/betService";
+import * as betService from "../utils/betService";
 
 // Full team name maps
 const nflFullNames = {
@@ -189,7 +189,7 @@ const AddBetModal = ({ onClose }) => {
   const [isError, setIsError] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredPlayers, setFilteredPlayers] = useState([]);
-  const [showTeamSuggestions, setShowTeamSuggestions] = useState(false);
+  const [_showTeamSuggestions, _setShowTeamSuggestions] = useState(false);
   const [filteredTeams, setFilteredTeams] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -250,7 +250,7 @@ const AddBetModal = ({ onClose }) => {
           ? options.filter((t) => t.toLowerCase().includes(value.toLowerCase()))
           : options
       );
-      setShowTeamSuggestions(value.length > 0 && filteredTeams.length > 0);
+      _setShowTeamSuggestions(value.length > 0 && filteredTeams.length > 0);
     }
 
     setForm({ ...form, [name]: value });
@@ -261,9 +261,9 @@ const AddBetModal = ({ onClose }) => {
     setShowSuggestions(false);
   };
 
-  const handleTeamSuggestionClick = (team) => {
+  const _handleTeamSuggestionClick = (team) => {
     setForm({ ...form, team });
-    setShowTeamSuggestions(false);
+    _setShowTeamSuggestions(false);
   };
 
   const fetchHeadshot = async (player, league) => {
@@ -274,7 +274,7 @@ const AddBetModal = ({ onClose }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: player }),
       });
-    } catch (err) {
+    } catch {
       // Ignore errors for headshot fetch
     }
   };
@@ -291,37 +291,19 @@ const AddBetModal = ({ onClose }) => {
       form.team || playerTeamMap[playerKey] || ""
     );
 
-    const details = {};
-    if (form.type === "Player Award") details.award = form.award;
-    if (form.type === "Team Bet") {
-      details.bet = form.betSubtype;
-      if (form.betSubtype === "Win Total") {
-        details.value = form.value;
-        details.ou = form.ou;
-      }
-    }
-    if (form.type === "Stat Leader") details.stat = form.stat;
-    if (form.type === "Prop") {
-      details.stat = form.stat;
-      details.ou = form.ou;
-      details.line = form.line;
-    }
-
     try {
-      const newBet = {
-        type: form.type,
-        tabLabel: TAB_LABELS[form.type],
-        player: form.type === "Team Bet" ? null : form.player,
-        team: teamName,
-        image: "",
-        details,
-        odds: form.odds,
-        site: form.site,
-        league: form.league,
-        date: new Date().toISOString(),
+      const bet = {
+        sport: form.league,
+        category: TAB_LABELS[form.type],
+        market: form.betSubtype || form.stat || "",
+        selection: form.type === "Team Bet" ? teamName : form.player,
+        odds_american: form.odds,
+        line: form.type === "Prop" ? form.line || null : null,
+        book: form.site,
+        notes: "",
       };
 
-      await addBet(newBet);
+      await betService.addBet(bet);
 
       // Fetch headshot for NFL players
       await fetchHeadshot(form.player, form.league);
@@ -337,7 +319,7 @@ const AddBetModal = ({ onClose }) => {
       window.dispatchEvent(new Event("betsUpdated"));
       setIsSubmitting(false);
       if (typeof onClose === "function") onClose();
-    } catch (err) {
+    } catch {
       setIsError(true);
       setMessage("Error saving bet.");
       setIsSubmitting(false);
