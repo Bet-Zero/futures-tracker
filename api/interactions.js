@@ -1,3 +1,4 @@
+/* global process, Buffer */
 // api/interactions.js — defer -> POST file-only follow-up -> delete spinner
 import nacl from "tweetnacl";
 import { FormData, fetch } from "undici";
@@ -61,13 +62,16 @@ export default async function handler(req, res) {
       const sport = getStrOpt(i, "sport", "NFL");
       const category = getStrOpt(i, "category", "All");
       const market = getStrOpt(i, "market", "");
-      const base = (process.env.PUBLIC_BASE_URL || "").replace(/\/$/, "");
+      const proto = req.headers["x-forwarded-proto"] || "https";
+      const hostHeader =
+        process.env.PUBLIC_BASE_URL ||
+        (process.env.VERCEL_URL && `https://${process.env.VERCEL_URL}`) ||
+        `${proto}://${req.headers.host}`;
+      const base = hostHeader.replace(/\/$/, "");
       const editUrl = `https://discord.com/api/v10/webhooks/${i.application_id}/${i.token}/messages/@original`;
       const followUrl = `https://discord.com/api/v10/webhooks/${i.application_id}/${i.token}`;
 
       try {
-        if (!base) throw new Error("PUBLIC_BASE_URL not set");
-
         // 2) get the PNG from /api/snap
         const qs = new URLSearchParams();
         if (sport) qs.set("sport", sport);
@@ -118,6 +122,7 @@ export default async function handler(req, res) {
           }).catch(() => {});
         }
       } catch (err) {
+        console.error("interaction error", err);
         await fetch(editUrl, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
