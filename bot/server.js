@@ -73,20 +73,53 @@ client.on(Events.InteractionCreate, async (interaction) => {
       const fileName = path.basename(filePath);
       const file = new AttachmentBuilder(filePath, { name: fileName });
 
-      // First send the file to get a CDN URL
-      const sent = await interaction.editReply({ files: [file] });
-      const imageUrl = sent.attachments.first()?.url;
+      // First send the file to get a stable CDN URL
+      const tempMessage = await interaction.editReply({ files: [file] });
+      const imageUrl = tempMessage.attachments.first()?.url;
 
       if (imageUrl) {
-        const embed = new EmbedBuilder().setImage(imageUrl);
-        // Replace attachment with embed so no link shows
-        await interaction.editReply({ embeds: [embed], attachments: [] });
+        // Create an embed with the image and replace the attachment
+        const embed = new EmbedBuilder()
+          .setTitle(`📊 Futures Odds - ${sport}`)
+          .setDescription(
+            `Category: ${category || "All"}${
+              market ? ` | Market: ${market}` : ""
+            }`
+          )
+          .setImage(imageUrl)
+          .setColor(0x0099ff)
+          .setTimestamp();
+
+        // Replace with embed only (no attachment link)
+        await interaction.editReply({
+          embeds: [embed],
+          files: [], // Remove the attachment to hide the link
+        });
+      } else {
+        // Fallback if CDN URL fails
+        const embed = new EmbedBuilder()
+          .setTitle(`📊 Futures Odds - ${sport}`)
+          .setDescription(
+            `Category: ${category || "All"}${
+              market ? ` | Market: ${market}` : ""
+            }`
+          )
+          .setColor(0x0099ff)
+          .setTimestamp();
+
+        await interaction.editReply({
+          embeds: [embed],
+          files: [file],
+        });
       }
 
+      // Clean up the temporary file
       fs.unlinkSync(filePath);
     } catch (err) {
       console.error("❌ Slash command failed:", err);
-      await interaction.editReply("Something went wrong!");
+      await interaction.editReply(
+        "Something went wrong taking the screenshot!"
+      );
     }
   }
 });
