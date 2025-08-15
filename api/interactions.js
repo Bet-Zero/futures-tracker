@@ -66,7 +66,7 @@ export default async function handler(req, res) {
       const hostHeader =
         process.env.PUBLIC_BASE_URL ||
         (process.env.VERCEL_URL && `https://${process.env.VERCEL_URL}`) ||
-        `${proto}://${req.headers["x-forwarded-host"] || req.headers.host}`;
+        `${proto}://${req.headers.host}`;
       const base = hostHeader.replace(/\/$/, "");
       const editUrl = `https://discord.com/api/v10/webhooks/${i.application_id}/${i.token}/messages/@original`;
       const followUrl = `https://discord.com/api/v10/webhooks/${i.application_id}/${i.token}`;
