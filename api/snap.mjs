@@ -1,44 +1,68 @@
+// api/snap.mjs — robust screenshot endpoint (no waitForTimeout)
 import chromium from "@sparticuz/chromium";
 import puppeteer from "puppeteer-core";
 
+export const config = { runtime: "nodejs" };
+
+const delay = (ms) => new Promise((r) => setTimeout(r, ms));
+
 export default async function handler(req, res) {
-  const { url, w, h, wait = "0", sel = "" } = req.query || {};
-  if (!url) return res.status(400).json({ error: "Missing url" });
-
-  const width = parseInt(w || "1080", 10);
-  const height = parseInt(h || "1350", 10);
-  const waitMs = parseInt(wait, 10);
-
-  let browser;
   try {
-    const isServerless =
-      process.env.AWS_LAMBDA_FUNCTION_VERSION || process.env.VERCEL;
-    const launchOpts = isServerless
-      ? {
-          args: chromium.args,
-          defaultViewport: { width, height, deviceScaleFactor: 1 },
-          executablePath: await chromium.executablePath(),
-          headless: chromium.headless,
-        }
-      : {
-          headless: true,
-          defaultViewport: { width, height, deviceScaleFactor: 1 },
-        };
+    // Parse query params
+    const urlObj = new URL(req.url, "http://localhost");
+    const sp = urlObj.searchParams;
 
-    browser = await puppeteer.launch(launchOpts);
-    const page = await browser.newPage();
-    await page.goto(url, { waitUntil: "domcontentloaded" });
-    if (waitMs) await page.waitForTimeout(waitMs);
-    if (sel) {
-      await page.waitForSelector(sel, { visible: true, timeout: 10000 });
+    const target = sp.get("url");
+    if (!target) {
+      res.status(400).json({ error: "Missing url" });
+      return;
     }
-    const buf = await page.screenshot({ type: "png", fullPage: false });
+
+    const width = parseInt(sp.get("w") || "1080", 10);
+    const height = parseInt(sp.get("h") || "1350", 10);
+    const waitMs = parseInt(sp.get("wait") || "0", 10);
+    const sel = (sp.get("sel") || "").trim();
+    const full = sp.get("full") === "1";
+
+    const executablePath = await chromium.executablePath();
+
+    const browser = await puppeteer.launch({
+      args: chromium.args,
+      defaultViewport: { width, height, deviceScaleFactor: 2 },
+      executablePath,
+      headless: chromium.headless,
+    });
+
+    const page = await browser.newPage();
+
+    await page.goto(target, {
+      waitUntil: ["load", "domcontentloaded", "networkidle0"],
+      timeout: 45_000,
+    });
+
+    if (sel) {
+      await page.waitForSelector(sel, { timeout: 20_000 });
+    }
+
+    if (waitMs > 0) {
+      await delay(waitMs); // replacement for removed page.waitForTimeout
+    }
+
+    const png = await page.screenshot({
+      type: "png",
+      fullPage: !!full,
+    });
+
+    await browser.close();
+
     res.setHeader("Content-Type", "image/png");
-    res.status(200).end(buf, "binary");
+    res.status(200).send(png);
   } catch (err) {
     console.error("snap error", err);
-    res.status(500).json({ error: String(err.message || err) });
-  } finally {
-    if (browser) await browser.close();
+    try {
+      res.status(500).json({ error: String(err?.message || err) });
+    } catch {
+      /* noop */
+    }
   }
 }
