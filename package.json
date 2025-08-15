@@ -17,6 +17,7 @@
   "dependencies": {
     "@puppeteer/browsers": "^2.10.6",
     "@sparticuz/chromium": "^138.0.2",
+    "@vercel/functions": "^2.2.11",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "firebase": "^12.1.0",
