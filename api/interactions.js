@@ -1,20 +1,23 @@
-// api/interactions.js — defer, render PNG, hand off to helper (bot posts image), delete spinner
+// api/interactions.js — FINAL: defer -> POST follow-up with image -> delete spinner
+// Message result = image only (no link text)
+
 import nacl from "tweetnacl";
-import { fetch } from "undici";
+import { FormData, fetch } from "undici";
 
 export const config = { runtime: "nodejs" };
 
+// --- helpers ---
+async function readRaw(req) {
+  const chunks = [];
+  for await (const c of req) chunks.push(c);
+  return Buffer.concat(chunks);
+}
 function getStrOpt(i, name, def = "") {
   const opts = i?.data?.options || [];
   const o = opts.find(
     (x) => (x?.name || "").toLowerCase() === name.toLowerCase()
   );
   return o && typeof o.value !== "undefined" ? String(o.value) : def;
-}
-async function readRaw(req) {
-  const chunks = [];
-  for await (const c of req) chunks.push(c);
-  return Buffer.concat(chunks);
 }
 async function fetchWithTimeout(url, ms = 20000, init = {}) {
   const ctrl = new AbortController();
@@ -25,17 +28,35 @@ async function fetchWithTimeout(url, ms = 20000, init = {}) {
     clearTimeout(t);
   }
 }
+function buildImageFormFromBuffer(buf, filename = "futures.png") {
+  // Use Blob (works on Node 18+) and let undici set the multipart boundary
+  const blob = new Blob([buf], { type: "image/png" });
+  const form = new FormData();
+  form.append(
+    "payload_json",
+    JSON.stringify({
+      // no text; embed points at the attachment so the message is image-only
+      attachments: [{ id: 0, filename }],
+      embeds: [{ image: { url: `attachment://${filename}` } }],
+      allowed_mentions: { parse: [] },
+    })
+  );
+  form.append("files[0]", blob, filename);
+  return form;
+}
 
+// --- handler ---
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(200).json({ ok: true });
 
-  // --- verify Discord signature on RAW body ---
+  // verify signature using RAW body
   const raw = await readRaw(req);
   const sig = req.headers["x-signature-ed25519"];
   const ts = req.headers["x-signature-timestamp"];
   const pub = process.env.DISCORD_PUBLIC_KEY;
   if (!sig || !ts || !pub)
     return res.status(401).send("Missing signature headers/env");
+
   const ok = nacl.sign.detached.verify(
     Buffer.concat([Buffer.from(ts), raw]),
     Buffer.from(sig, "hex"),
@@ -57,17 +78,21 @@ export default async function handler(req, res) {
     }
 
     if (cmd === "futures") {
-      // 1) Defer immediately
-      res.status(200).json({ type: 5 });
+      // 1) defer immediately so Discord doesn't time out
+      res.status(200).json({ type: 5 }); // DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE
+
+      const sport = getStrOpt(i, "sport", "NFL");
+      const category = getStrOpt(i, "category", "All");
+      const market = getStrOpt(i, "market", "");
+      const base = (process.env.PUBLIC_BASE_URL || "").replace(/\/$/, "");
+
+      const editUrl = `https://discord.com/api/v10/webhooks/${i.application_id}/${i.token}/messages/@original`;
+      const followUrl = `https://discord.com/api/v10/webhooks/${i.application_id}/${i.token}`;
 
       try {
-        const sport = getStrOpt(i, "sport", "NFL");
-        const category = getStrOpt(i, "category", "All");
-        const market = getStrOpt(i, "market", "");
-        const base = (process.env.PUBLIC_BASE_URL || "").replace(/\/$/, "");
         if (!base) throw new Error("PUBLIC_BASE_URL not set");
 
-        // 2) Build target URL & selector
+        // Build the page to screenshot
         const qs = new URLSearchParams();
         if (sport) qs.set("sport", sport);
         if (category) qs.set("category", category);
@@ -77,7 +102,7 @@ export default async function handler(req, res) {
           category || "All"
         }"]`;
 
-        // 3) Render PNG via your /api/snap
+        // 2) render PNG via /api/snap (you just fixed this; logs show 200)
         const snapUrl = `${base}/api/snap?url=${encodeURIComponent(
           target
         )}&w=1080&h=1350&wait=500&sel=${encodeURIComponent(
@@ -85,32 +110,27 @@ export default async function handler(req, res) {
         )}&t=${Date.now()}`;
         const snapRes = await fetchWithTimeout(snapUrl, 20000);
         if (!snapRes.ok) throw new Error(`snap failed: ${snapRes.status}`);
-        const buf = Buffer.from(await snapRes.arrayBuffer());
-        const pngBase64 = buf.toString("base64");
+        const pngBuf = Buffer.from(await snapRes.arrayBuffer());
 
-        // 4) Hand off to helper (separate serverless invocation) to post image via Bot token
-        const helperRes = await fetch(`${base}/api/discord-followup`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            channel_id: i.channel_id,
-            application_id: i.application_id,
-            token: i.token,
-            pngBase64,
-          }),
-        });
+        // 3) POST a FOLLOW-UP with the image (simpler & more reliable than PATCH edit)
+        const form = buildImageFormFromBuffer(pngBuf, "futures.png");
+        const r = await fetch(followUrl, { method: "POST", body: form });
 
-        // 5) If helper failed, turn spinner into visible error
-        if (!helperRes.ok) {
-          const editUrl = `https://discord.com/api/v10/webhooks/${i.application_id}/${i.token}/messages/@original`;
+        if (r.ok) {
+          // 4) delete the original deferred message (removes spinner)
+          await fetch(editUrl, { method: "DELETE" }).catch(() => {});
+        } else {
+          // turn the spinner into a visible error
+          const txt = await r.text().catch(() => "");
           await fetch(editUrl, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ content: "❌ Failed to send image." }),
+            body: JSON.stringify({
+              content: `❌ Failed to attach image (${r.status}). ${txt}`,
+            }),
           }).catch(() => {});
         }
       } catch (err) {
-        const editUrl = `https://discord.com/api/v10/webhooks/${i.application_id}/${i.token}/messages/@original`;
         await fetch(editUrl, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
