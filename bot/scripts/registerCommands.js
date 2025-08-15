@@ -1,12 +1,16 @@
-/* global process */
-// scripts/registerCommands.js
+/* =========================
+   scripts/registerCommands.js
+   Exports: commands (array)
+   Optional CLI: node scripts/registerCommands.js  -> registers GLOBAL commands
+   ========================= */
 
+/* global process */
 import { REST, Routes } from "discord.js";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 
-// Load environment variables
+// Resolve .env from project root
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, "../.env"), override: true });
@@ -16,8 +20,8 @@ if (!DISCORD_TOKEN || !CLIENT_ID) {
   throw new Error("❌ Missing DISCORD_TOKEN or CLIENT_ID in .env");
 }
 
-// Slash command structure
-const commands = [
+// ===== Slash command definitions (exported) =====
+export const commands = [
   {
     name: "futures",
     description: "Get a screenshot of futures odds",
@@ -58,12 +62,25 @@ const commands = [
   },
 ];
 
-// Register command with Discord
-const rest = new REST({ version: "10" }).setToken(DISCORD_TOKEN);
+// ===== Optional: run this file directly to register GLOBAL commands =====
+if (import.meta.url === `file://${__filename}`) {
+  const rest = new REST({ version: "10" }).setToken(DISCORD_TOKEN);
 
-try {
-  await rest.put(Routes.applicationCommands(CLIENT_ID), { body: commands });
-  console.log("✅ Slash command registered successfully");
-} catch (err) {
-  console.error("❌ Failed to register slash command:", err);
+  (async () => {
+    try {
+      console.log("🌐 Registering GLOBAL slash commands…");
+      const result = await rest.put(Routes.applicationCommands(CLIENT_ID), {
+        body: commands,
+      });
+      console.log(
+        `✅ Registered ${
+          Array.isArray(result) ? result.length : 0
+        } global command(s).`
+      );
+      console.log("⏳ Note: global commands can take up to ~1 hour to appear.");
+    } catch (err) {
+      console.error("❌ Failed to register global slash commands:", err);
+      process.exit(1);
+    }
+  })();
 }
