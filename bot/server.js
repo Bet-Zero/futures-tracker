@@ -74,7 +74,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
       const file = new AttachmentBuilder(filePath, { name: fileName });
 
       // First send the file to get a stable CDN URL
-      const tempMessage = await interaction.editReply({ files: [file] });
+      await interaction.editReply({ files: [file] });
+      const tempMessage = await interaction.fetchReply();
       const imageUrl = tempMessage.attachments.first()?.url;
 
       if (imageUrl) {
@@ -93,7 +94,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
         // Replace with embed only (no attachment link)
         await interaction.editReply({
           embeds: [embed],
-          files: [], // Remove the attachment to hide the link
+          attachments: [], // Remove the attachment to hide the link
         });
       } else {
         // Fallback if CDN URL fails
@@ -162,10 +163,11 @@ async function takeScreenshot(url) {
 
     for (const chromePath of chromePaths) {
       try {
-        await fs.access(chromePath);
-        options.executablePath = chromePath;
-        console.log(`✅ Found Chrome at: ${chromePath}`);
-        break;
+        if (fs.existsSync(chromePath)) {
+          options.executablePath = chromePath;
+          console.log(`✅ Found Chrome at: ${chromePath}`);
+          break;
+        }
       } catch {
         // Continue trying other paths
       }
