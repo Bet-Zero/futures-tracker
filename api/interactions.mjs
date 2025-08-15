@@ -1,5 +1,6 @@
 // api/interactions.mjs — FULL FILE REPLACEMENT (image-only reply for /futures)
 import nacl from "tweetnacl";
+import { FormData, File, fetch } from "undici";
 
 // helper: pull a string option off the interaction
 function getStrOpt(interaction, name, def = "") {
