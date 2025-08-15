@@ -43,8 +43,8 @@ const commands = [
         choices: [
           { name: "All", value: "All" },
           { name: "Awards", value: "Awards" },
-          { name: "Team Futures", value: "Team Futures" },
-          { name: "Stat Leaders", value: "Stat Leaders" },
+          { name: "Futures", value: "Team Futures" },
+          { name: "Leaders", value: "Stat Leaders" },
           { name: "Props", value: "Props" },
         ],
       },

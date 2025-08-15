@@ -9,7 +9,7 @@ A clean, compact, screenshot-ready web app for tracking and sharing sports futur
 
 Built with **React**, **Tailwind**, and **Discord bot integration**, it supports:
 
-- Viewing and filtering NFL, NBA, and MLB bets
+- Viewing and filtering NFL, NBA, MLB, PGA, and CFL bets
 - Submitting new bets via a styled modal or standalone form
 - Exporting and sharing bet screenshots to Discord via Puppeteer
 - Organized for easy extension and automation
