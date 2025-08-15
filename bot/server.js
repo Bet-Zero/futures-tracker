@@ -72,46 +72,21 @@ client.on(Events.InteractionCreate, async (interaction) => {
       console.log(`✅ Screenshot saved to: ${filePath}`);
       const fileName = path.basename(filePath);
       const file = new AttachmentBuilder(filePath, { name: fileName });
+      const embed = new EmbedBuilder()
+        .setTitle(`📊 Futures Odds - ${sport}`)
+        .setDescription(
+          `Category: ${category || "All"}${
+            market ? ` | Market: ${market}` : ""
+          }`
+        )
+        .setImage(`attachment://${fileName}`)
+        .setColor(0x0099ff)
+        .setTimestamp();
 
-      // First send the file to get a stable CDN URL
-      const tempMessage = await interaction.editReply({ files: [file] });
-      const imageUrl = tempMessage.attachments.first()?.url;
-
-      if (imageUrl) {
-        // Create an embed with the image and replace the attachment
-        const embed = new EmbedBuilder()
-          .setTitle(`📊 Futures Odds - ${sport}`)
-          .setDescription(
-            `Category: ${category || "All"}${
-              market ? ` | Market: ${market}` : ""
-            }`
-          )
-          .setImage(imageUrl)
-          .setColor(0x0099ff)
-          .setTimestamp();
-
-        // Replace with embed only (no attachment link)
-        await interaction.editReply({
-          embeds: [embed],
-          files: [], // Remove the attachment to hide the link
-        });
-      } else {
-        // Fallback if CDN URL fails
-        const embed = new EmbedBuilder()
-          .setTitle(`📊 Futures Odds - ${sport}`)
-          .setDescription(
-            `Category: ${category || "All"}${
-              market ? ` | Market: ${market}` : ""
-            }`
-          )
-          .setColor(0x0099ff)
-          .setTimestamp();
-
-        await interaction.editReply({
-          embeds: [embed],
-          files: [file],
-        });
-      }
+      await interaction.editReply({
+        embeds: [embed],
+        files: [file],
+      });
 
       // Clean up the temporary file
       fs.unlinkSync(filePath);
@@ -162,10 +137,11 @@ async function takeScreenshot(url) {
 
     for (const chromePath of chromePaths) {
       try {
-        await fs.access(chromePath);
-        options.executablePath = chromePath;
-        console.log(`✅ Found Chrome at: ${chromePath}`);
-        break;
+        if (fs.existsSync(chromePath)) {
+          options.executablePath = chromePath;
+          console.log(`✅ Found Chrome at: ${chromePath}`);
+          break;
+        }
       } catch {
         // Continue trying other paths
       }
@@ -279,19 +255,11 @@ app.post("/upload-image", async (req, res) => {
         try {
           console.log(`📤 Sending image to channel: ${channelId}`);
           const channel = await client.channels.fetch(channelId);
-          // Create a fresh attachment for each channel
           const attachment = new AttachmentBuilder(tempFilePath, {
             name: fileName,
           });
-          // Send the file first to get CDN URL
-          const sentMessage = await channel.send({ files: [attachment] });
-          const imageUrl = sentMessage.attachments.first()?.url;
-
-          if (imageUrl) {
-            const embed = new EmbedBuilder().setImage(imageUrl);
-            // Replace attachment with embed to avoid showing link
-            await sentMessage.edit({ embeds: [embed], attachments: [] });
-          }
+          const embed = new EmbedBuilder().setImage(`attachment://${fileName}`);
+          await channel.send({ files: [attachment], embeds: [embed] });
           console.log(`✅ Successfully sent image to channel: ${channelId}`);
         } catch (err) {
           console.error(`⚠️ Failed to send to channel ${channelId}:`, err);
