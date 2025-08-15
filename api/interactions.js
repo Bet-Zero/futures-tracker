@@ -1,6 +1,7 @@
-// api/interactions.js — TEMP NO-VERIFY sanity check
-// Always defers within 3s and then edits with simple text.
+// api/interactions.js — TEMP: defer, then POST a follow-up text (no edit)
+// Goal: kill the spinner and prove follow-up works.
 
+import { fetch } from "undici";
 export const config = { runtime: "nodejs" };
 
 async function readRaw(req) {
@@ -10,9 +11,9 @@ async function readRaw(req) {
 }
 
 export default async function handler(req, res) {
-  // Browser check so you can verify the route
+  // Browser check (should return this JSON if route is live)
   if (req.method !== "POST") {
-    return res.status(200).json({ ok: true, note: "temp test live" });
+    return res.status(200).json({ ok: true, note: "temp-followup test live" });
   }
 
   const raw = await readRaw(req);
@@ -23,21 +24,30 @@ export default async function handler(req, res) {
     i = {};
   }
 
-  // Respond to Discord PINGs
-  if (i.type === 1) return res.status(200).json({ type: 1 });
+  // Respond to PING
+  if (i.type === 1) {
+    return res.status(200).json({ type: 1 });
+  }
 
-  // Any slash command: defer fast, then edit with text
   if (i.type === 2) {
+    // 1) Defer immediately so we don't time out
     res.status(200).json({ type: 5 }); // DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE
 
-    const url = `https://discord.com/api/v10/webhooks/${i.application_id}/${i.token}/messages/@original`;
-    await fetch(url, {
-      method: "PATCH",
+    // 2) Post a FOLLOW-UP (this creates a brand new message and clears the spinner)
+    const followUrl = `https://discord.com/api/v10/webhooks/${i.application_id}/${i.token}`;
+    const r = await fetch(followUrl, {
+      method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        content: "✅ interactions endpoint is wired up.",
+        content: "✅ follow-up posted (wiring confirmed).",
       }),
     });
+
+    // (Optional) if the POST succeeded, delete the original spinner
+    if (r.ok) {
+      const delUrl = `https://discord.com/api/v10/webhooks/${i.application_id}/${i.token}/messages/@original`;
+      await fetch(delUrl, { method: "DELETE" }).catch(() => {});
+    }
     return;
   }
 
