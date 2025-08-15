@@ -1,73 +1,133 @@
-// api/interactions.js — DEFERS then POSTS a 1x1 PNG attachment (no screenshot)
-// Goal: prove webhook upload works. If this still hangs, it's either undici missing or Vercel halting after defer.
+// api/interactions.js — defer, render PNG, hand off to helper (bot posts image), delete spinner
+import nacl from "tweetnacl";
+import { fetch } from "undici";
 
-import { FormData, fetch } from "undici"; // keep it simple: Blob + filename (avoid File on Node 18)
 export const config = { runtime: "nodejs" };
 
+function getStrOpt(i, name, def = "") {
+  const opts = i?.data?.options || [];
+  const o = opts.find(
+    (x) => (x?.name || "").toLowerCase() === name.toLowerCase()
+  );
+  return o && typeof o.value !== "undefined" ? String(o.value) : def;
+}
 async function readRaw(req) {
-  const bufs = [];
-  for await (const c of req) bufs.push(c);
-  return Buffer.concat(bufs);
+  const chunks = [];
+  for await (const c of req) chunks.push(c);
+  return Buffer.concat(chunks);
+}
+async function fetchWithTimeout(url, ms = 20000, init = {}) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), ms);
+  try {
+    return await fetch(url, { ...init, signal: ctrl.signal });
+  } finally {
+    clearTimeout(t);
+  }
 }
 
-// 1×1 transparent PNG bytes (tiny)
-const TINY_PNG = Buffer.from(
-  "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000a49444154789c6360000002000154a0b5c10000000049454e44ae426082",
-  "hex"
-);
-
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(200).json({ ok: true, note: "tiny-png test live" });
-  }
+  if (req.method !== "POST") return res.status(200).json({ ok: true });
 
-  // Parse the interaction (no signature verify on this tiny test)
+  // --- verify Discord signature on RAW body ---
   const raw = await readRaw(req);
-  let i = {};
-  try {
-    i = JSON.parse(raw.toString("utf8"));
-  } catch {}
+  const sig = req.headers["x-signature-ed25519"];
+  const ts = req.headers["x-signature-timestamp"];
+  const pub = process.env.DISCORD_PUBLIC_KEY;
+  if (!sig || !ts || !pub)
+    return res.status(401).send("Missing signature headers/env");
+  const ok = nacl.sign.detached.verify(
+    Buffer.concat([Buffer.from(ts), raw]),
+    Buffer.from(sig, "hex"),
+    Buffer.from(pub, "hex")
+  );
+  if (!ok) return res.status(401).send("Bad signature");
+
+  const i = JSON.parse(raw.toString("utf8"));
 
   // PING
   if (i.type === 1) return res.status(200).json({ type: 1 });
 
-  // Slash command
+  // Slash commands
   if (i.type === 2) {
-    // Defer immediately
-    res.status(200).json({ type: 5 });
+    const cmd = (i?.data?.name || "").toLowerCase();
 
-    // Build multipart with a real image attachment using Blob
-    const blob = new Blob([TINY_PNG], { type: "image/png" });
-    const form = new FormData();
-    form.append(
-      "payload_json",
-      JSON.stringify({
-        attachments: [{ id: 0, filename: "tiny.png" }],
-        embeds: [{ image: { url: "attachment://tiny.png" } }],
-        allowed_mentions: { parse: [] },
-      })
-    );
-    form.append("files[0]", blob, "tiny.png");
-
-    // Post as a follow-up (not edit) to guarantee a visible message
-    const followUrl = `https://discord.com/api/v10/webhooks/${i.application_id}/${i.token}`;
-    const r = await fetch(followUrl, { method: "POST", body: form });
-
-    // If follow-up succeeded, delete the spinner
-    if (r.ok) {
-      const delUrl = `https://discord.com/api/v10/webhooks/${i.application_id}/${i.token}/messages/@original`;
-      await fetch(delUrl, { method: "DELETE" }).catch(() => {});
-    } else {
-      // Last-resort: convert the spinner into a text error
-      const editUrl = `https://discord.com/api/v10/webhooks/${i.application_id}/${i.token}/messages/@original`;
-      await fetch(editUrl, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: "❌ follow-up upload failed." }),
-      }).catch(() => {});
+    if (cmd === "ping") {
+      return res.status(200).json({ type: 4, data: { content: "🏓 Pong" } });
     }
-    return;
+
+    if (cmd === "futures") {
+      // 1) Defer immediately
+      res.status(200).json({ type: 5 });
+
+      try {
+        const sport = getStrOpt(i, "sport", "NFL");
+        const category = getStrOpt(i, "category", "All");
+        const market = getStrOpt(i, "market", "");
+        const base = (process.env.PUBLIC_BASE_URL || "").replace(/\/$/, "");
+        if (!base) throw new Error("PUBLIC_BASE_URL not set");
+
+        // 2) Build target URL & selector
+        const qs = new URLSearchParams();
+        if (sport) qs.set("sport", sport);
+        if (category) qs.set("category", category);
+        if (market) qs.set("market", market);
+        const target = `${base}/futures?${qs.toString()}`;
+        const selector = `#futures-modal[data-active-category="${
+          category || "All"
+        }"]`;
+
+        // 3) Render PNG via your /api/snap
+        const snapUrl = `${base}/api/snap?url=${encodeURIComponent(
+          target
+        )}&w=1080&h=1350&wait=500&sel=${encodeURIComponent(
+          selector
+        )}&t=${Date.now()}`;
+        const snapRes = await fetchWithTimeout(snapUrl, 20000);
+        if (!snapRes.ok) throw new Error(`snap failed: ${snapRes.status}`);
+        const buf = Buffer.from(await snapRes.arrayBuffer());
+        const pngBase64 = buf.toString("base64");
+
+        // 4) Hand off to helper (separate serverless invocation) to post image via Bot token
+        const helperRes = await fetch(`${base}/api/discord-followup`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            channel_id: i.channel_id,
+            application_id: i.application_id,
+            token: i.token,
+            pngBase64,
+          }),
+        });
+
+        // 5) If helper failed, turn spinner into visible error
+        if (!helperRes.ok) {
+          const editUrl = `https://discord.com/api/v10/webhooks/${i.application_id}/${i.token}/messages/@original`;
+          await fetch(editUrl, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ content: "❌ Failed to send image." }),
+          }).catch(() => {});
+        }
+      } catch (err) {
+        const editUrl = `https://discord.com/api/v10/webhooks/${i.application_id}/${i.token}/messages/@original`;
+        await fetch(editUrl, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            content: "❌ Failed to generate screenshot.",
+          }),
+        }).catch(() => {});
+      }
+      return;
+    }
+
+    // Unknown command
+    return res
+      .status(200)
+      .json({ type: 4, data: { content: `🤔 Unknown command: \`${cmd}\`` } });
   }
 
+  // Fallback
   return res.status(200).json({ type: 4, data: { content: "Unhandled." } });
 }
