@@ -1,3 +1,4 @@
+/* global process, Buffer */
 // api/discord-followup.js — posts image to the channel using Bot token, then deletes spinner
 import { FormData, fetch } from "undici";
 
