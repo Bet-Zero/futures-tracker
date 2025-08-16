@@ -123,23 +123,12 @@ export default async function handler(req, res) {
             const pngBuf = Buffer.from(await snapRes.arrayBuffer());
 
             // PATCH the original message with the file (no follow-up, no delete)
-            const title = `📈 Futures Snapshot (${sport}${
-              category ? " • " + category : ""
-            }${
-              market
-                ? " • " + market
-                : type && type !== "All"
-                ? " • " + type
-                : ""
-            })`;
-
             const form = new FormData();
-            // Use an embed that references the attachment URL
+            // Send just the image without any embed or title
             const payload = {
-              content: "", // keep clean; add text if you want
+              content: "", // keep clean; no text
               embeds: [
                 {
-                  title,
                   image: { url: "attachment://futures.png" },
                 },
               ],
