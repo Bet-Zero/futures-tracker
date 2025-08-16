@@ -141,6 +141,9 @@ const TEAM_BET_SUBTYPES = [
   { value: "Playoffs", label: "Make Playoffs" },
 ];
 
+// NFL Award options to match Discord slash command
+const NFL_AWARDS = ["MVP", "DPOY", "OPOY", "DROY", "OROY", "CPOY"];
+
 const initialForm = {
   site: "FD",
   league: "NFL",
@@ -177,9 +180,12 @@ const NFL_STATS = [
   "Pass Yds",
   "Pass TD",
   "Rush Yds",
+  "Rush TD",
   "Rec Yds",
-  "Rec",
-  "Sk",
+  "Rec TD",
+  "Receptions",
+  "Sacks",
+  "Interceptions",
   "ATTD",
 ];
 
@@ -416,14 +422,31 @@ const AddBetModal = ({ onClose }) => {
                 <label className="block text-xs font-medium text-neutral-300 mb-1">
                   Award
                 </label>
-                <input
-                  type="text"
-                  name="award"
-                  value={form.award}
-                  onChange={handleChange}
-                  className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
-                  required
-                />
+                {form.league === "NFL" ? (
+                  <select
+                    name="award"
+                    value={form.award}
+                    onChange={handleChange}
+                    className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
+                    required
+                  >
+                    <option value="">Select award</option>
+                    {NFL_AWARDS.map((award) => (
+                      <option key={award} value={award}>
+                        {award}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    name="award"
+                    value={form.award}
+                    onChange={handleChange}
+                    className="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm"
+                    required
+                  />
+                )}
               </div>
               <div className="w-20">
                 <label className="block text-xs font-medium text-neutral-300 mb-1">

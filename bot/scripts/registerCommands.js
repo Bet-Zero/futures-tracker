@@ -47,7 +47,7 @@ export const commands = [
         choices: [
           { name: "All", value: "All" },
           { name: "Awards", value: "Awards" },
-          { name: "Futures", value: "Team Futures" },
+          { name: "Team Futures", value: "Team Futures" },
           { name: "Leaders", value: "Stat Leaders" },
           { name: "Props", value: "Props" },
         ],
@@ -55,8 +55,36 @@ export const commands = [
       {
         name: "market",
         type: 3, // STRING
-        description: "Optional: Market filter",
+        description: "Optional: Market filter (NFL focused)",
         required: false,
+        choices: [
+          // NFL Awards
+          { name: "MVP", value: "MVP" },
+          { name: "DPOY", value: "DPOY" },
+          { name: "OPOY", value: "OPOY" },
+          { name: "DROY", value: "DROY" },
+          { name: "OROY", value: "OROY" },
+          { name: "CPOY", value: "CPOY" },
+
+          // NFL Team Futures
+          { name: "Win Total", value: "Win Total" },
+          { name: "Super Bowl", value: "Super Bowl" },
+          { name: "Division Winner", value: "Division Winner" },
+          { name: "Conference Winner", value: "Conference Winner" },
+          { name: "Playoffs", value: "Playoffs" },
+
+          // NFL Stat Leaders & Props
+          { name: "Pass Yds", value: "Pass Yds" },
+          { name: "Pass TD", value: "Pass TD" },
+          { name: "Rush Yds", value: "Rush Yds" },
+          { name: "Rush TD", value: "Rush TD" },
+          { name: "Rec Yds", value: "Rec Yds" },
+          { name: "Rec TD", value: "Rec TD" },
+          { name: "Receptions", value: "Receptions" },
+          { name: "Sacks", value: "Sacks" },
+          { name: "Interceptions", value: "Interceptions" },
+          { name: "ATTD", value: "ATTD" },
+        ],
       },
     ],
   },
