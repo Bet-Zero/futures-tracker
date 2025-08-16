@@ -321,7 +321,10 @@ const AddBetModal = ({ onClose }) => {
       const bet = {
         sport: form.league,
         category: TAB_LABELS[form.type],
-        market: form.betSubtype || form.stat || "",
+        market:
+          form.type === "Player Award"
+            ? form.award
+            : form.betSubtype || form.stat || "",
         selection: form.type === "Team Bet" ? teamName : form.player,
         // Add the fields BetRow expects
         player: form.type === "Team Bet" ? null : form.player,

@@ -32,8 +32,29 @@ const FuturesModal = ({ sport, category, market, deleteMode }) => {
             // Extract market value from details for older bets that don't have market field
             let market = b.market ?? b.subtype ?? "";
             if (!market && b.details) {
-              // For older bets, extract market from details
-              market = b.details.bet || b.details.stat || b.details.award || "";
+              // For older bets, extract market from details based on category
+              if (
+                b.category === "Awards" ||
+                b.type === "Player Award" ||
+                b.tabLabel === "Player Awards"
+              ) {
+                market = b.details.award || "";
+              } else if (
+                b.category === "Team Futures" ||
+                b.type === "Team Bet" ||
+                b.tabLabel === "Team Bets"
+              ) {
+                market = b.details.bet || "";
+              } else if (
+                b.category === "Stat Leaders" ||
+                b.type === "Stat Leader" ||
+                b.tabLabel === "Stat Leaders"
+              ) {
+                market = b.details.stat || "";
+              } else {
+                market =
+                  b.details.bet || b.details.stat || b.details.award || "";
+              }
             }
 
             return {
