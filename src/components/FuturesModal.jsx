@@ -28,13 +28,22 @@ const FuturesModal = ({ sport, category, market, deleteMode }) => {
           });
         }
         setData(
-          sportBets.map((b) => ({
-            ...b,
-            sport: b.sport ?? b.league,
-            category: b.category ?? b.type ?? b.tabLabel ?? "All",
-            market: b.market ?? b.subtype ?? "",
-            odds_american: b.odds_american ?? b.odds ?? "",
-          }))
+          sportBets.map((b) => {
+            // Extract market value from details for older bets that don't have market field
+            let market = b.market ?? b.subtype ?? "";
+            if (!market && b.details) {
+              // For older bets, extract market from details
+              market = b.details.bet || b.details.stat || b.details.award || "";
+            }
+
+            return {
+              ...b,
+              sport: b.sport ?? b.league,
+              category: b.category ?? b.type ?? b.tabLabel ?? "All",
+              market: market,
+              odds_american: b.odds_american ?? b.odds ?? "",
+            };
+          })
         );
       } catch (error) {
         console.error("Error fetching bets:", error);
@@ -85,14 +94,21 @@ const FuturesModal = ({ sport, category, market, deleteMode }) => {
 
         {/* Tabs */}
         <div className="flex flex-wrap gap-1 sm:gap-2 mb-4">
-          {["All","Awards","Team Futures","Stat Leaders","Props"].map((cat)=>(
-            <button key={cat} onClick={()=>handleTabChange(cat)}
-              className={`py-2 text-sm font-medium rounded-lg transition-colors px-2.5 sm:px-4 min-w-[116px] text-center ${
-                activeCategory===cat ? "bg-neutral-500 text-neutral-900 shadow-lg text-white border-neutral-300" : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white"
-              }`}>
-              <span>{displayCategoryLabel(cat)}</span>
-            </button>
-          ))}
+          {["All", "Awards", "Team Futures", "Stat Leaders", "Props"].map(
+            (cat) => (
+              <button
+                key={cat}
+                onClick={() => handleTabChange(cat)}
+                className={`py-2 text-sm font-medium rounded-lg transition-colors px-2.5 sm:px-4 min-w-[116px] text-center ${
+                  activeCategory === cat
+                    ? "bg-neutral-500 text-neutral-900 shadow-lg text-white border-neutral-300"
+                    : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white"
+                }`}
+              >
+                <span>{displayCategoryLabel(cat)}</span>
+              </button>
+            )
+          )}
         </div>
       </div>
 
