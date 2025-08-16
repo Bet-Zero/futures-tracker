@@ -124,15 +124,10 @@ export default async function handler(req, res) {
 
             // PATCH the original message with the file (no follow-up, no delete)
             const form = new FormData();
-            // Send just the image without any embed or title
+            // Send just the image as a direct attachment without embed
             const payload = {
               content: "", // keep clean; no text
-              embeds: [
-                {
-                  image: { url: "attachment://futures.png" },
-                },
-              ],
-              // You MUST map attachments with correct id↔file index
+              // Remove embeds entirely to send as direct attachment
               attachments: [{ id: 0, filename: "futures.png" }],
               allowed_mentions: { parse: [] },
             };
