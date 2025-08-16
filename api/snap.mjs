@@ -45,13 +45,28 @@ export default async function handler(req, res) {
     }
 
     if (waitMs > 0) {
-      await delay(waitMs); // replacement for removed page.waitForTimeout
+      await delay(waitMs);
     }
 
-    const png = await page.screenshot({
-      type: "png",
-      fullPage: !!full,
-    });
+    let png;
+
+    // If a selector is provided, screenshot just that element
+    if (sel) {
+      const element = await page.$(sel);
+      if (element) {
+        png = await element.screenshot({
+          type: "png",
+        });
+      } else {
+        throw new Error(`Element with selector "${sel}" not found`);
+      }
+    } else {
+      // Otherwise, take a full page or viewport screenshot
+      png = await page.screenshot({
+        type: "png",
+        fullPage: !!full,
+      });
+    }
 
     await browser.close();
 
